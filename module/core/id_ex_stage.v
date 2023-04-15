@@ -44,16 +44,25 @@ module id_ex_stage
 // Ports
 //--------------------------------------------------------------------------
 (
-    // Inputs
+    // inputs
     input wire         clk,
     input wire         rst_n,
+    input wire [31:0]  id_pc,
 
-    // Outputs
+    // outputs
+    output reg [31:0]  pc_ex
 );
 
 //--------------------------------------------------------------------------
-// Design:
+// Design: pipeline test logic
 //--------------------------------------------------------------------------
+always @(posedge clk or negedge rst_n) begin
+    if (!rst_n) begin
+        pc_ex <= `DEF_START_PC; 
+    end else begin
+        pc_ex <= id_pc; 
+    end
+end
 
 endmodule
 //--------------------------------------------------------------------------

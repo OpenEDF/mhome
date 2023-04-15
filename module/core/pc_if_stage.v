@@ -44,16 +44,25 @@ module pc_if_stage
 // Ports
 //--------------------------------------------------------------------------
 (
-    // Inputs
+    // inputs
     input wire         clk,
     input wire         rst_n,
+    input wire [31:0]  pc_pc,
 
-    // Outputs
+    // outputs
+    output reg [31:0]  pc_if
 );
 
 //--------------------------------------------------------------------------
-// Design:
+// Design: pipeline test logic
 //--------------------------------------------------------------------------
+always @(posedge clk or negedge rst_n) begin
+    if (!rst_n) begin
+        pc_if <= `DEF_START_PC; 
+    end else begin
+        pc_if <= pc_pc; 
+    end
+end
 
 endmodule
 //--------------------------------------------------------------------------

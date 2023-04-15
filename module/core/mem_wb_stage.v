@@ -44,16 +44,25 @@ module mem_wb_stage
 // Ports
 //--------------------------------------------------------------------------
 (
-    // Inputs
+    // inputs
     input wire         clk,
     input wire         rst_n,
+    input wire [31:0]  mem_pc,
 
-    // Outputs
+    // outputs
+    output reg [31:0] pc_wb
 );
 
 //--------------------------------------------------------------------------
-// Design:
+// Design: pipeline test logic
 //--------------------------------------------------------------------------
+always @(posedge clk or negedge rst_n) begin
+    if (!rst_n) begin
+        pc_wb <= `DEF_START_PC; 
+    end else begin
+        pc_wb <= mem_pc; 
+    end
+end
 
 endmodule
 //--------------------------------------------------------------------------

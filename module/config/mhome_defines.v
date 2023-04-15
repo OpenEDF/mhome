@@ -34,7 +34,7 @@
 //--------------------------------------------------------------------------
 // config define
 //--------------------------------------------------------------------------
-`define DEF_START_MACAN_PC 32'h0000_0000
+`define DEF_START_PC       32'h0000_0000
 `define RV32I_NOP          32'h0000_0013      // ADDI x0, x0, 0
 
 // produce immediates by base instruction formats

@@ -44,16 +44,24 @@ module pc_gen
 // Ports
 //--------------------------------------------------------------------------
 (
-    // Inputs
+    // inputs
     input wire         clk,
     input wire         rst_n,
 
-    // Outputs
+    // outputs
+    output reg [31:0]  ori_pc
 );
 
 //--------------------------------------------------------------------------
-// Design:
+// Design: original pc add 4 every cycle
 //--------------------------------------------------------------------------
+always @(posedge clk or negedge rst_n) begin
+    if (!rst_n) begin
+        ori_pc <= `DEF_START_PC; 
+    end else begin
+        ori_pc <= ori_pc + 4; 
+    end
+end
 
 endmodule
 //--------------------------------------------------------------------------

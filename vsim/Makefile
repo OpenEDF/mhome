@@ -7,8 +7,8 @@
 ##
 ### ------------------------------------------------------------------------------------------
 # Project output target
-OUTPUT = macan
-TOP_MODULE = tb_top
+OUTPUT = mhome_soc_tb
+TOP_MODULE = mhome_soc_tb
 
 # Set the debug GUI (verdi or dve)
 DEBUG_GUI = verdi
@@ -49,7 +49,7 @@ VCS_FLAGS = -f $(MODULE_FLIES) -sverilog \
             $(VERDI_HOME)/share/PLI/VCS/LINUX64/pli.a -load libnovas.so:FSDBDumpCmd  \
             $(COV_FLAGS)                 \
             $(COV_DIR)                   \
-			+incdir+${PWD}/rtl           \
+			+incdir+${PWD}/src           \
             -Mupdate                     \
             -o $(OUTPUT)                 \
             -l $(COM_LOG_FILE).log
@@ -80,34 +80,26 @@ LINT_FLAGS = --lint-only        \
 
 # Design Compiler Flags
 
-# Synthesis Flags
-
 ### ------------------------------------------------------------------------------------------
 # all run
-all: com sim wave
+all: clean install com sim wave
 
 # install file
-VSIM_DIR = rtl
-STAGE = if
+VSIM_DIR = src
 
-install: install_$(STAGE) com_sim
-
-install_if:
-	mkdir -p ${PWD}/${VSIM_DIR}
-	cp ${PWD}/../rtl/core/*                 ${VSIM_DIR}/
-	cp ${PWD}/../rtl/config/*               ${VSIM_DIR}/
-	cp ${PWD}/../rtl/memory/*               ${VSIM_DIR}/
-	cp ${PWD}/../tb/stages_if_tb.v          ${VSIM_DIR}/testbench.v
-	cp ${PWD}/../tb/list/stages_if.list     module.list
-	cp ${PWD}/../tb/inst.hex                inst.hex
+install:
+	@mkdir -p ${PWD}/${VSIM_DIR}
+	@cp ${PWD}/../module/core/*                 ${VSIM_DIR}/
+	@cp ${PWD}/../module/config/*               ${VSIM_DIR}/
+	@cp ${PWD}/../module/soc/*                  ${VSIM_DIR}/
+#	@cp ${PWD}/../module/memory/*               ${VSIM_DIR}/
+	@cp ${PWD}/../tb/mhome_soc_tb.v             ${VSIM_DIR}/mhome_soc_tb.v
+	@cp ${PWD}/../tb/moduel_tb.list             module.list
+#	@cp ${PWD}/../tb/inst.hex                   mem.hex
+	@tree ${VSIM_DIR}
 
 # only com and sim
 com_sim: com sim
-
-# lint the verilog design code
-# verilator --lint-only -Wall [source_files.v]...
-lint:
-	verilator $(LINT_FLAGS)
 
 # compiler verilog module file
 com:
@@ -126,14 +118,13 @@ wave:
 	verdi $(DEBUG_FLAGS) &
 
 # show coverage by html
-html:
 	urg -dir $(OUTPUT).vdb -dbname merge &
 
 # clean the compiler-time file
-.PHONY: clean all com_sim lint com sim cov wave html install
+.PHONY: clean all com_sim com sim cov wave html install
 clean:
 	rm -rf csrc *simv *.daidir *.log *.key $(OUTPUT) *.vpd DVEfiles *.fsdb \
-	verdiLog novas.* *.vdb urgReport vdCovLog output \
+	verdiLog novas.* *.vdb urgReport vdCovLog output $(VSIM_DIR) \
 	build usage_statistics_webtalk.* *.jou *.log rtl module.list inst.hex
 
 ### ------------------------------------------------------------------------------------------
@@ -143,7 +134,7 @@ help:
 	@echo --------------------------------- Help  ---------------------------------
 	@echo "command     : descript"
 	@echo "make clean  : clean the temp file."
-	@echo "make install STAGE= [ID EX MEM WB]: install file for stage x simulator."
+	@echo "make install: install file for stage x simulator."
 	@echo "make lint   : lint the verilog format and pre-check."
 	@echo "make all    : execute the compile simluation and open verdi debug."
 	@echo "make com    : only execute compile the verilog module."

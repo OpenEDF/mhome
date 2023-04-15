@@ -1,0 +1,13 @@
+# design src file
+src/mhome_defines.v
+src/ex_mem_stage.v
+src/id_ex_stage.v
+src/if_id_stage.v
+src/mem_wb_stage.v
+src/mhome_soc_top.v
+src/pc_gen.v
+src/pc_if_stage.v
+src/riscv_pipeline.v
+
+# testbech file
+src/mhome_soc_tb.v

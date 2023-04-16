@@ -125,7 +125,8 @@ wave:
 clean:
 	rm -rf csrc *simv *.daidir *.log *.key $(OUTPUT) *.vpd DVEfiles *.fsdb \
 	verdiLog novas.* *.vdb urgReport vdCovLog output $(VSIM_DIR) \
-	build usage_statistics_webtalk.* *.jou *.log rtl module.list inst.hex
+	build usage_statistics_webtalk.* *.jou *.log rtl module.list inst.hex \
+	mhome_spy *.out xsim.dir *.pb
 
 ### ------------------------------------------------------------------------------------------
 # display the help information

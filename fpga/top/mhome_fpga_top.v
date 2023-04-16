@@ -27,7 +27,7 @@
 
 //--------------------------------------------------------------------------
 // Designer: macro
-// Brief:
+// Brief: fpga top file
 // Change Log:
 //--------------------------------------------------------------------------
 
@@ -44,16 +44,23 @@ module mhome_fpga_top
 // Ports
 //--------------------------------------------------------------------------
 (
-    // Inputs
-    input wire         clk,
-    input wire         rst_n,
+    // inputs
+    input wire         sys_clk,
+    input wire         sys_rst_n,
 
-    // Outputs
+    // outputs
+    output wire        sys_led
 );
 
 //--------------------------------------------------------------------------
-// Design:
+// Design: mhome riscv soc 
 //--------------------------------------------------------------------------
+mhome_soc_top mhome_soc_top_u(
+    .sys_clk        (sys_clk),
+    .sys_rst_n      (sys_rst_n),
+
+    .sys_led        (sys_led)
+);
 
 endmodule
 //--------------------------------------------------------------------------

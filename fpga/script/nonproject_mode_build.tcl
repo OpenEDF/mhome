@@ -3,66 +3,47 @@
 ### Author: Macro
 ### Resources: Vivado Design Suite User Guide Design Flows Overview
 ### 
+###-----------------------------------------------------------------
+# set design top file
+set top_module_name "mhome_fpga_top"
 
-puts "-------------------------- Start --------------------------"
-# Set the FPGA chip
+# set constrs file
+set constrs_name "kintex325t_mhome_soc"
+
+# set the FPGA chip
 set xilinx_fpga_chip xc7k325tffg676-2
 
-# Set the output path
-set  outputDir ./output
+# set the output path
+set outputDir ./output
 file mkdir $outputDir
 
-# Set bit file path
-set bit_output_path $outputDir/wujian100_open.bit
+# set the bitfile name
+set bitfilename "mhome_soc"
 
-# Setup design sources and constraints
+# set bit file path
+set bit_output_path $outputDir/$bitfilename.bit
+
+# setup design sources and constraints
 # add sources
-read_verilog top/wujian100_open_fpga_top.v
-read_verilog rtl/ahb_matrix_top.v
-read_verilog rtl/smu_top.v
-read_verilog rtl/sms.v
-read_verilog rtl/ls_sub_top.v
-read_verilog rtl/retu_top.v
-read_verilog rtl/tim5.v
-read_verilog rtl/tim.v
-read_verilog rtl/dmac.v
-read_verilog rtl/pdu_top.v
-read_verilog rtl/tim2.v
-read_verilog rtl/usi1.v
-read_verilog rtl/aou_top.v
-read_verilog rtl/matrix.v
-read_verilog rtl/dummy.v
-read_verilog rtl/pwm.v
-read_verilog rtl/usi0.v
-read_verilog rtl/apb0_sub_top.v
-read_verilog rtl/common.v
-read_verilog rtl/wdt.v
-read_verilog rtl/tim1.v
-read_verilog rtl/rtc.v
-read_verilog rtl/E902_20191018.v
-read_verilog rtl/tim7.v
-read_verilog rtl/apb0.v
-read_verilog rtl/apb1_sub_top.v
-read_verilog rtl/gpio0.v
-read_verilog rtl/tim4.v
-read_verilog rtl/tim3.v
-read_verilog rtl/clkgen.v
-read_verilog rtl/core_top.v
-read_verilog rtl/tim6.v
-read_verilog rtl/apb1.v
-read_verilog rtl/sim_lib/PAD_DIG_IO.v
-read_verilog rtl/sim_lib/PAD_OSC_IO.v
-read_verilog rtl/sim_lib/fpga_byte_spram.v
-read_verilog rtl/sim_lib/fpga_spram.v
+read_verilog src/mhome_defines.v
+read_verilog top/mhome_fpga_top.v
+read_verilog src/mhome_soc_top.v
+read_verilog src/riscv_pipeline.v
+read_verilog src/ex_mem_stage.v
+read_verilog src/id_ex_stage.v
+read_verilog src/if_id_stage.v
+read_verilog src/mem_wb_stage.v
+read_verilog src/pc_gen.v
+read_verilog src/pc_if_stage.v
 
 # add constrs 
-read_xdc constrs/kintex325t.xdc
+read_xdc constrs/$constrs_name.xdc
 
 # set thread number
 set_param general.maxThreads 2
 
 # Run synthesis, report utilization and timing estimates, write checkpoint design
-synth_design -top wujian100_open_top -part $xilinx_fpga_chip -include_dirs { rtl/params }
+synth_design -top $top_module_name -part $xilinx_fpga_chip -include_dirs { src/ }
 write_checkpoint -force $outputDir/post_synth
 report_timing_summary -file $outputDir/post_synth_timing_summary.rpt
 report_power -file $outputDir/post_synth_power.rpt

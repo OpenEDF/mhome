@@ -5,10 +5,11 @@
 ### 
 
 # 1. set the bit file and flash mcs file path, accroding the project setup
+set bit_file_name "mhome_soc"
 set cfgmem_path ./build
 file mkdir $cfgmem_path
-set bitfile_path  output/wujian100_open.bit
-set flashmcs_path $cfgmem_path/borad_flash.mcs
+set bitfile_path  output/$bit_file_name.bit
+set flashmcs_path $cfgmem_path/$bit_file_name.mcs
 
 # target device info
 set hw_fpga "xc7k325t_0"

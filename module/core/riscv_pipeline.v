@@ -69,7 +69,7 @@ wire [31:0] ex_pc_mem;          /* EX/MEM stage register to MEM/WB stage */
 
 // write back stage
 wire [31:0] mem_pc_wb;          /* MEM/WB to other  */
-reg  [31:0] mem_pc_wb_check;    /* MEM/WB output pc check */
+wire [31:0] mem_pc_wb_check;    /* MEM/WB output pc check */
 
 //--------------------------------------------------------------------------
 // Design: led test logic show core state

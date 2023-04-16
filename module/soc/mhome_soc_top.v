@@ -49,7 +49,7 @@ module mhome_soc_top
     input wire         sys_rst_n,
 
     // outputs
-    output reg         sys_led
+    output wire        sys_led
 );
 
 //--------------------------------------------------------------------------

@@ -76,7 +76,7 @@ end
 initial begin
     $display("[mhome OK]: start running...");
     #10
-    sys_rst_n = 1'b0;
+    sys_rst_n = 1'b1;
     #1000
     $display("[mhome OK]: end running...");
     if (sys_led == 1'b1) begin
@@ -108,7 +108,7 @@ end
 //--------------------------------------------------------------------------
 initial begin
     $fsdbDumpfile("mhome_soc_tb.fsdb");
-    $fsdbDumpfile(0, mhome_soc_tb);
+    $fsdbDumpvars(0, mhome_soc_tb);
     $fsdbDumpMDA;
 end
 

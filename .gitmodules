@@ -1,0 +1,4 @@
+[submodule "test/riscv-tests"]
+	path = test/riscv-tests
+	url = git@github.com:OpenEDF/riscv-tests.git
+	branch = master

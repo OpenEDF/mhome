@@ -9,6 +9,7 @@
 # Project output target
 OUTPUT = mhome_soc_tb
 TOP_MODULE = mhome_soc_tb
+SPYGLASS_PRJ = mhome_spy.prj
 
 # Set the debug GUI (verdi or dve)
 DEBUG_GUI = verdi
@@ -67,16 +68,12 @@ DEBUG_FLAGS = -f $(MODULE_FLIES)         \
               -ssf $(WAVEFORM)           \
               -nologo
 
-# Lint Flags
-LINT_FLAGS = --lint-only        \
-             -Wall              \
-             -f $(MODULE_FLIES)
-
 # Formality Flags
 
 # PeimrTime Flags
 
 # Spyglass Flags
+SPY_FLAGS = -project $(SPYGLASS_PRJ)
 
 # Design Compiler Flags
 
@@ -117,11 +114,16 @@ cov:
 wave:
 	verdi $(DEBUG_FLAGS) &
 
+# spyglass lint and check design
+spy:
+	spyglass $(SPY_FLAGS)
+
 # show coverage by html
+html:
 	urg -dir $(OUTPUT).vdb -dbname merge &
 
 # clean the compiler-time file
-.PHONY: clean all com_sim com sim cov wave html install
+.PHONY: clean all com_sim com sim cov wave html install spy
 clean:
 	rm -rf csrc *simv *.daidir *.log *.key $(OUTPUT) *.vpd DVEfiles *.fsdb \
 	verdiLog novas.* *.vdb urgReport vdCovLog output $(VSIM_DIR) \
@@ -136,7 +138,7 @@ help:
 	@echo "command     : descript"
 	@echo "make clean  : clean the temp file."
 	@echo "make install: install file for stage x simulator."
-	@echo "make lint   : lint the verilog format and pre-check."
+	@echo "make spy    : spyglass lint the verilog format and pre-check."
 	@echo "make all    : execute the compile simluation and open verdi debug."
 	@echo "make com    : only execute compile the verilog module."
 	@echo "make sim    : only execute simulation the model."

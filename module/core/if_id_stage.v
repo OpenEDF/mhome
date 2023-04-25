@@ -47,20 +47,20 @@ module if_id_stage
     // inputs
     input wire         clk,
     input wire         rst_n,
-    input wire [31:0]  if_pc,
+    input wire [31:0]  if_cycle_count_id,
 
     // outputs
-    output reg [31:0]  pc_id
+    output reg [31:0]  id_cycle_count_ex
 );
 
 //--------------------------------------------------------------------------
-// Design: pipeline test logic
+// Design: pipeline cycle couter logic
 //--------------------------------------------------------------------------
 always @(posedge clk or negedge rst_n) begin
     if (!rst_n) begin
-        pc_id <= `DEF_START_PC; 
+        id_cycle_count_ex <= `CYCLE_COUNT_RST;
     end else begin
-        pc_id <= if_pc; 
+        id_cycle_count_ex <= if_cycle_count_id;
     end
 end
 

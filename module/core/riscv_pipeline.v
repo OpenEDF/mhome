@@ -53,23 +53,25 @@ module riscv_pipeline
 );
 
 //--------------------------------------------------------------------------
-// Design: pipeline test signal
+// Design: pipeline five stage signal
 //--------------------------------------------------------------------------
+// pc generate stage
+wire [31:0] pc_gen_start_cycle_count_if_w; /* pc gen register to IF/ID stage*/
+
 // instruction fetch stage
-wire [31:0] pc_pc_if;           /* pc register to IF/ID stage*/
+wire [31:0] if_cycle_count_id_w;           /* IF/ID stage register to ID/EX stage */
 
 // decoder stage
-wire [31:0] if_pc_id;           /* IF/ID stage register to ID/EX stage */
+wire [31:0] id_cycle_count_ex_w;           /* ID/EX stage register to EX/MEM stage */
 
 // execute stage
-wire [31:0] id_pc_ex;           /* ID/EX stage register to EX/MEM stage */
+wire [31:0] ex_cycle_count_mem_w;          /* EX/MEM stage register to MEM/WB stage */
 
 // access memory stage
-wire [31:0] ex_pc_mem;          /* EX/MEM stage register to MEM/WB stage */
+wire [31:0] mem_cycle_count_wb_w;          /* MEM/WB to other  */
 
 // write back stage
-wire [31:0] mem_pc_wb;          /* MEM/WB to other  */
-wire [31:0] mem_pc_wb_check;    /* MEM/WB output pc check */
+wire [31:0] mem_cycle_count_end_check_w;   /* MEM/WB output pc check */
 
 //--------------------------------------------------------------------------
 // Design: led test logic show core state
@@ -83,68 +85,68 @@ always @(posedge sys_clk or negedge sys_rst_n) begin
 end
 
 //--------------------------------------------------------------------------
-// Design: generate program counter instaniate 
+// Design: generate program counter instaniate
 //--------------------------------------------------------------------------
 pc_gen pc_gen_u(
     .clk        (sys_clk),
     .rst_n      (sys_rst_n),
 
-    .ori_pc     (pc_pc_if)
+    .cycle_count_pc_gen_start     (pc_gen_start_cycle_count_if_w)
 );
 
 //--------------------------------------------------------------------------
-// Design: instruction fetch instaniate 
+// Design: instruction fetch instaniate
 //--------------------------------------------------------------------------
 pc_if_stage pc_if_stage_u(
     .clk        (sys_clk),
     .rst_n      (sys_rst_n),
-    .pc_pc      (pc_pc_if),
+    .pc_gen_start_cycle_count_if  (pc_gen_start_cycle_count_if_w),
 
-    .pc_if      (if_pc_id)
+    .if_cycle_count_id            (if_cycle_count_id_w)
 );
 
 //--------------------------------------------------------------------------
-// Design: instruction decoder instaniate 
+// Design: instruction decoder instaniate
 //--------------------------------------------------------------------------
 if_id_stage if_id_stage_u(
     .clk       (sys_clk),
     .rst_n     (sys_rst_n),
-    .if_pc     (if_pc_id),
+    .if_cycle_count_id     (if_cycle_count_id_w),
 
-    .pc_id     (id_pc_ex)
+    .id_cycle_count_ex     (id_cycle_count_ex_w)
 );
 
 //--------------------------------------------------------------------------
-// Design: execute instaniate 
+// Design: execute instaniate
 //--------------------------------------------------------------------------
 id_ex_stage id_ex_stage_u(
     .clk       (sys_clk),
     .rst_n     (sys_rst_n),
-    .id_pc     (id_pc_ex),    
+    .id_cycle_count_ex     (id_cycle_count_ex_w),
 
-    .pc_ex     (ex_pc_mem)
+    .ex_cycle_count_mem    (ex_cycle_count_mem_w)
 );
 
 //--------------------------------------------------------------------------
-// Design: access instaniate 
+// Design: access instaniate
 //--------------------------------------------------------------------------
 ex_mem_stage ex_mem_stage_u(
     .clk       (sys_clk),
     .rst_n     (sys_rst_n),
-    .ex_pc     (ex_pc_mem),
+    .ex_cycle_count_mem     (ex_cycle_count_mem_w),
 
-    .pc_mem    (mem_pc_wb)
+    .mem_cycle_count_wb     (mem_cycle_count_wb_w)
 );
 
 //--------------------------------------------------------------------------
-// Design: write back instaniate 
+// Design: write back instaniate
 //--------------------------------------------------------------------------
 mem_wb_stage mem_wb_stage_u(
     .clk       (sys_clk),
     .rst_n     (sys_rst_n),
-    .mem_pc    (mem_pc_wb),
+    .mem_cycle_count_wb     (mem_cycle_count_wb_w),
 
-    .pc_wb     (mem_pc_wb_check)
+    .wb_cycle_count_end     (mem_cycle_count_end_check_w)
 );
 
 endmodule

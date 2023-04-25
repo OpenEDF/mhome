@@ -47,20 +47,20 @@ module ex_mem_stage
     // inputs
     input wire         clk,
     input wire         rst_n,
-    input wire [31:0]  ex_pc,
+    input wire [31:0]  ex_cycle_count_mem,
 
     // outputs
-    output reg [31:0]  pc_mem
+    output reg [31:0]  mem_cycle_count_wb
 );
 
 //--------------------------------------------------------------------------
-// Design: pipeline test logic
+// Design: pipeline cycle counter logic
 //--------------------------------------------------------------------------
 always @(posedge clk or negedge rst_n) begin
     if (!rst_n) begin
-        pc_mem <= `DEF_START_PC; 
+        mem_cycle_count_wb <= `CYCLE_COUNT_RST;
     end else begin
-        pc_mem <= ex_pc; 
+        mem_cycle_count_wb <= ex_cycle_count_mem;
     end
 end
 

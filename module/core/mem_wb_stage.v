@@ -47,20 +47,20 @@ module mem_wb_stage
     // inputs
     input wire         clk,
     input wire         rst_n,
-    input wire [31:0]  mem_pc,
+    input wire [31:0]  mem_cycle_count_wb,
 
     // outputs
-    output reg [31:0] pc_wb
+    output reg [31:0]  wb_cycle_count_end
 );
 
 //--------------------------------------------------------------------------
-// Design: pipeline test logic
+// Design: pipeline cycle counter logic
 //--------------------------------------------------------------------------
 always @(posedge clk or negedge rst_n) begin
     if (!rst_n) begin
-        pc_wb <= `DEF_START_PC; 
+        wb_cycle_count_end <= `CYCLE_COUNT_RST;
     end else begin
-        pc_wb <= mem_pc; 
+        wb_cycle_count_end <= mem_cycle_count_wb;
     end
 end
 

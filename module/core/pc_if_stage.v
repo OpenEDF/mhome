@@ -39,7 +39,7 @@
 //--------------------------------------------------------------------------
 // Module
 //--------------------------------------------------------------------------
-module pc_if_stage 
+module pc_if_stage
 //--------------------------------------------------------------------------
 // Ports
 //--------------------------------------------------------------------------
@@ -47,20 +47,20 @@ module pc_if_stage
     // inputs
     input wire         clk,
     input wire         rst_n,
-    input wire [31:0]  pc_pc,
+    input wire [31:0]  pc_gen_start_cycle_count_if,
 
     // outputs
-    output reg [31:0]  pc_if
+    output reg [31:0]  if_cycle_count_id
 );
 
 //--------------------------------------------------------------------------
-// Design: pipeline test logic
+// Design: pipeline cycle counter logic
 //--------------------------------------------------------------------------
 always @(posedge clk or negedge rst_n) begin
     if (!rst_n) begin
-        pc_if <= `DEF_START_PC; 
+        if_cycle_count_id <= `CYCLE_COUNT_RST;
     end else begin
-        pc_if <= pc_pc; 
+        if_cycle_count_id <= pc_gen_start_cycle_count_if;
     end
 end
 

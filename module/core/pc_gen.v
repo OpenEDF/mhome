@@ -39,7 +39,7 @@
 //--------------------------------------------------------------------------
 // Module
 //--------------------------------------------------------------------------
-module pc_gen 
+module pc_gen
 //--------------------------------------------------------------------------
 // Ports
 //--------------------------------------------------------------------------
@@ -49,17 +49,17 @@ module pc_gen
     input wire         rst_n,
 
     // outputs
-    output reg [31:0]  ori_pc
+    output reg [31:0]  cycle_count_pc_gen_start
 );
 
 //--------------------------------------------------------------------------
-// Design: original pc add 4 every cycle
+// Design: pipeline cycle counter logic
 //--------------------------------------------------------------------------
 always @(posedge clk or negedge rst_n) begin
     if (!rst_n) begin
-        ori_pc <= `DEF_START_PC; 
+        cycle_count_pc_gen_start <= `CYCLE_COUNT_RST;
     end else begin
-        ori_pc <= ori_pc + 4; 
+        cycle_count_pc_gen_start <= cycle_count_pc_gen_start + 1;
     end
 end
 

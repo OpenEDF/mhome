@@ -36,6 +36,7 @@
 //--------------------------------------------------------------------------
 `define DEF_START_PC       32'h0000_0000
 `define RV32I_NOP          32'h0000_0013      // ADDI x0, x0, 0
+`define CYCLE_COUNT_RST    32'h0000_0000
 
 // produce immediates by base instruction formats
 `define I_FORMAT_INST      3'b000

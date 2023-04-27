@@ -14,9 +14,9 @@ ELF ?= $(TAR).elf
 RISCV_PREFIX ?= riscv64-unknown-elf-
 RISCV_GCC ?= $(RISCV_PREFIX)gcc
 RISCV_GCC_OPTS ?= -static -mcmodel=medany -fvisibility=hidden -nostdlib -nostartfiles
-RISCV_OBJDUMP ?= $(RISCV_PREFIX)objdump --disassemble-all --disassemble-zeroes --section=.text --section=.text.init --section=.data
+RISCV_OBJDUMP ?= $(RISCV_PREFIX)objdump -d --section=.text --section=.text.init --section=.data
 RISCV_OBJCOPY ?= $(RISCV_PREFIX)objcopy -O verilog
-RISCV_CFLASG ?= -march=rv32im -mabi=ilp32 -T env/link.ld
+RISCV_CFLAGS ?= -march=rv32im -mabi=ilp32 -T env/link.ld
 
 # build
 all:

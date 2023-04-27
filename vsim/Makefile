@@ -89,7 +89,7 @@ install:
 	@cp ${PWD}/../module/core/*                 ${VSIM_DIR}/
 	@cp ${PWD}/../module/config/*               ${VSIM_DIR}/
 	@cp ${PWD}/../module/soc/*                  ${VSIM_DIR}/
-#	@cp ${PWD}/../module/memory/*               ${VSIM_DIR}/
+	@cp ${PWD}/../module/memory/*               ${VSIM_DIR}/
 	@cp ${PWD}/../tb/mhome_soc_tb.v             ${VSIM_DIR}/mhome_soc_tb.v
 	@cp ${PWD}/../tb/moduel_tb.list             module.list
 #	@cp ${PWD}/../tb/inst.hex                   mem.hex

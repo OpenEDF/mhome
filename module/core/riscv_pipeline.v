@@ -56,10 +56,12 @@ module riscv_pipeline
 // Design: pipeline five stage signal
 //--------------------------------------------------------------------------
 // pc generate stage
-wire [31:0] pc_gen_start_cycle_count_if_w; /* pc gen register to IF/ID stage*/
+wire [31:0] pc_gen_start_cycle_count_if_w; /* pc gen register to IF/ID stage */
+wire [31:0] source_pc_gen_if_w;            /* source pc value */
 
 // instruction fetch stage
 wire [31:0] if_cycle_count_id_w;           /* IF/ID stage register to ID/EX stage */
+wire [31:0] if_instruction_id_w;           /* instruction */
 
 // decoder stage
 wire [31:0] id_cycle_count_ex_w;           /* ID/EX stage register to EX/MEM stage */
@@ -91,7 +93,8 @@ pc_gen pc_gen_u(
     .clk        (sys_clk),
     .rst_n      (sys_rst_n),
 
-    .cycle_count_pc_gen_start     (pc_gen_start_cycle_count_if_w)
+    .cycle_count_pc_gen_start     (pc_gen_start_cycle_count_if_w),
+    .source_pc_gen_if             (source_pc_gen_if_w)
 );
 
 //--------------------------------------------------------------------------
@@ -101,8 +104,10 @@ pc_if_stage pc_if_stage_u(
     .clk        (sys_clk),
     .rst_n      (sys_rst_n),
     .pc_gen_start_cycle_count_if  (pc_gen_start_cycle_count_if_w),
+    .pc_source_pc_gen_if          (source_pc_gen_if_w),
 
-    .if_cycle_count_id            (if_cycle_count_id_w)
+    .if_cycle_count_id            (if_cycle_count_id_w),
+    .if_instruction_id            (if_instruction_id_w)
 );
 
 //--------------------------------------------------------------------------

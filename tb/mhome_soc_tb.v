@@ -42,14 +42,14 @@
 //--------------------------------------------------------------------------
 module mhome_soc_tb();
 //--------------------------------------------------------------------------
-// Signal
+// Signal for soc top
 //--------------------------------------------------------------------------
 reg sys_clk;
 reg sys_rst_n;
-reg sys_led;
+wire sys_led;
 
 //--------------------------------------------------------------------------
-// Design: mhome soc instaniate 
+// Design: mhome soc instaniate
 //--------------------------------------------------------------------------
 mhome_soc_top mhome_soc_top_u(
     .sys_clk    (sys_clk),
@@ -69,9 +69,32 @@ end
 //--------------------------------------------------------------------------
 // Design: load hex file to memory
 //--------------------------------------------------------------------------
+`define RAM_SIZE 256
+initial begin
+    reg [31:0] temp_mem[`RAM_SIZE-1:0];
+    integer index;
+    integer row = 0;
+    $display("[mhome OK]: start loading hex file to memory...");
+    @(posedge sys_rst_n);
+    $readmemh("inst_test.verilog", mhome_soc_top_u.riscv_pipeline_u.pc_if_stage_u.single_port_ram_u.memory_model);
+    for (index = 0; index < `RAM_SIZE; index = index + 1) begin
+        temp_mem[index][7:0] = mhome_soc_top_u.riscv_pipeline_u.pc_if_stage_u.single_port_ram_u.memory_model[row];
+        temp_mem[index][15:8] = mhome_soc_top_u.riscv_pipeline_u.pc_if_stage_u.single_port_ram_u.memory_model[row+1];
+        temp_mem[index][23:16] = mhome_soc_top_u.riscv_pipeline_u.pc_if_stage_u.single_port_ram_u.memory_model[row+2];
+        temp_mem[index][31:24] = mhome_soc_top_u.riscv_pipeline_u.pc_if_stage_u.single_port_ram_u.memory_model[row+3];
+        row = row + 4;
+    end
+    /* dump the memory file */
+    for (index = 0; index < `RAM_SIZE; index = index + 8) begin
+        $display("0x%H: 0x%H 0x%H 0x%H 0x%H 0x%H 0x%H 0x%H 0x%H", index, temp_mem[index], temp_mem[index+1],
+                 temp_mem[index+2], temp_mem[index+3], temp_mem[index+4], temp_mem[index+5],temp_mem[index+6],
+                 temp_mem[index+7]);
+    end
+    $display("[mhome OK]: loading hex file to memory end...");
+end
 
 //--------------------------------------------------------------------------
-// Design: system run and check 
+// Design: system run and check
 //--------------------------------------------------------------------------
 initial begin
     $display("[mhome OK]: start running...");
@@ -100,17 +123,19 @@ initial begin
         $display("~~~~~~~~~~#       #    #     #    ######~~~~~~~~~~");
         $display("~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~");
     end
-    $finish(); 
+    $finish();
 end
 
 //--------------------------------------------------------------------------
 // Design: generate wave file, use verdi debug
 //--------------------------------------------------------------------------
-initial begin
-    $fsdbDumpfile("mhome_soc_tb.fsdb");
-    $fsdbDumpvars(0, mhome_soc_tb);
-    $fsdbDumpMDA;
-end
+`ifndef MHOME_SPYGLASS_RUN
+    initial begin
+        $fsdbDumpfile("mhome_soc_tb.fsdb");
+        $fsdbDumpvars(0, mhome_soc_tb);
+        $fsdbDumpMDA;
+    end
+`endif
 
 endmodule
 //--------------------------------------------------------------------------

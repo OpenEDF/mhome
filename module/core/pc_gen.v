@@ -47,10 +47,34 @@ module pc_gen
     // inputs
     input wire         clk,
     input wire         rst_n,
+    // input wire  branch_en
 
     // outputs
-    output reg [31:0]  cycle_count_pc_gen_start
+    output reg [31:0]  cycle_count_pc_gen_start,
+    output reg [31:0]  source_pc_gen_if
 );
+
+reg [31:0] tmp_pc_src;
+
+//--------------------------------------------------------------------------
+// Design: Multiplexer selects the source of PC
+//--------------------------------------------------------------------------
+always @(*) begin
+    /* TODO: branch/stall/jtag/interrupt and other, blocking assign */
+    // if () begin
+    //
+    // end
+    // else if () begin
+    //
+    // end
+    // else if () begin
+    //
+    // end ...
+    //
+    // else()
+    /* default */
+    tmp_pc_src = tmp_pc_src + 4;
+end
 
 //--------------------------------------------------------------------------
 // Design: pipeline cycle counter logic
@@ -60,6 +84,17 @@ always @(posedge clk or negedge rst_n) begin
         cycle_count_pc_gen_start <= `CYCLE_COUNT_RST;
     end else begin
         cycle_count_pc_gen_start <= cycle_count_pc_gen_start + 1;
+    end
+end
+
+//--------------------------------------------------------------------------
+// Design: pipeline program counter (PC) generate
+//--------------------------------------------------------------------------
+always @(posedge clk or negedge rst_n) begin
+    if (!rst_n) begin
+        source_pc_gen_if <= `MHOME_START_PC;
+    end else begin
+        source_pc_gen_if <= tmp_pc_src;
     end
 end
 

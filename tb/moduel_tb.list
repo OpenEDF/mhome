@@ -2,6 +2,7 @@
 src/mhome_defines.v
 src/ex_mem_stage.v
 src/id_ex_stage.v
+src/single_port_ram.v
 src/if_id_stage.v
 src/mem_wb_stage.v
 src/mhome_soc_top.v

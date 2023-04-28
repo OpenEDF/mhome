@@ -48,9 +48,12 @@ module if_id_stage
     input wire         clk,
     input wire         rst_n,
     input wire [31:0]  if_cycle_count_id,
+    input wire [31:0]  if_instruction_id,
+    input wire [31:0]  if_pc_plus4_id,
 
     // outputs
-    output reg [31:0]  id_cycle_count_ex
+    output reg [31:0]  id_cycle_count_ex,
+    output reg [31:0]  id_pc_plus4_ex
 );
 
 //--------------------------------------------------------------------------
@@ -64,5 +67,15 @@ always @(posedge clk or negedge rst_n) begin
     end
 end
 
+//--------------------------------------------------------------------------
+// Design: pipeline if id stage register update
+//--------------------------------------------------------------------------
+always @(posedge clk or negedge rst_n) begin
+    if (!rst_n) begin
+        id_pc_plus4_ex <= 32'h0000_0000;
+    end else begin
+        id_pc_plus4_ex <= if_pc_plus4_id;
+    end
+end
 endmodule
 //--------------------------------------------------------------------------

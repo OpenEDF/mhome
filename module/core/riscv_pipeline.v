@@ -67,6 +67,7 @@ wire [31:0] if_pc_plus4_id_w;              /* PC plus 4 to next stage */
 
 // decoder stage
 wire [31:0] id_cycle_count_ex_w;           /* ID/EX stage register to EX/MEM stage */
+wire [31:0] id_pc_plus4_ex_w;              /* pc plus 4 to next stage */
 
 // execute stage
 wire [31:0] ex_cycle_count_mem_w;          /* EX/MEM stage register to MEM/WB stage */
@@ -122,8 +123,11 @@ if_id_stage if_id_stage_u(
     .clk       (sys_clk),
     .rst_n     (sys_rst_n),
     .if_cycle_count_id     (if_cycle_count_id_w),
+    .if_instruction_id     (if_instruction_id_w),
+    .if_pc_plus4_id        (if_pc_plus4_id_w),
 
-    .id_cycle_count_ex     (id_cycle_count_ex_w)
+    .id_cycle_count_ex     (id_cycle_count_ex_w),
+    .id_pc_plus4_ex        (id_pc_plus4_ex_w)
 );
 
 //--------------------------------------------------------------------------

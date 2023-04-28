@@ -45,20 +45,25 @@ module pc_if_stage
 //--------------------------------------------------------------------------
 (
     // inputs
-    input wire         clk,
-    input wire         rst_n,
-    input wire [31:0]  pc_gen_start_cycle_count_if,
-    input wire [31:0]  pc_source_pc_gen_if,
+    input wire          clk,
+    input wire          rst_n,
+    input wire  [31:0]  pc_gen_start_cycle_count_if,
+    input wire  [31:0]  pc_source_pc_gen_if,
 
     // outputs
-    output reg [31:0]  if_cycle_count_id,
-    output reg [31:0]  if_instruction_id
+    output reg  [31:0]  if_cycle_count_id,
+    output reg  [31:0]  if_instruction_id,
+    output wire [31:0]  if_pc_plus4_pc_gen,
+    output reg  [31:0]  if_pc_plus4_id
 );
 
 //--------------------------------------------------------------------------
 // Design: instruction fetch signal
 //--------------------------------------------------------------------------
 wire [31:0] if_instruction_id_w;
+wire [31:0] if_pc_plus4_id_w;
+assign if_pc_plus4_id_w = pc_source_pc_gen_if + 4;
+assign if_pc_plus4_pc_gen = if_pc_plus4_id_w;
 
 //--------------------------------------------------------------------------
 // Design: pipeline cycle counter logic
@@ -80,7 +85,7 @@ single_port_ram #(.RAM_SIZE(1024)) single_port_ram_u (
     .rst_n (rst_n),
     .ram_addr_in     (pc_source_pc_gen_if),
     .ram_data_in     (),
-    .ram_write_en    (1'b1),  //high is writen, low rd
+    .ram_write_en    (1'b0),  //high is writen, low rd
     .read_write_size (2'b00),
 
     .ram_data_out    (if_instruction_id_w)
@@ -92,9 +97,11 @@ single_port_ram #(.RAM_SIZE(1024)) single_port_ram_u (
 always @(posedge clk or negedge rst_n) begin
     if (!rst_n) begin
         if_instruction_id <= `RV32I_NOP;
+        if_pc_plus4_id <= 32'h0000_0000;
     end
     else begin
         if_instruction_id <= if_instruction_id_w;
+        if_pc_plus4_id <= if_pc_plus4_id_w;
     end
 end
 

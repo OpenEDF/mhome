@@ -62,6 +62,8 @@ wire [31:0] source_pc_gen_if_w;            /* source pc value */
 // instruction fetch stage
 wire [31:0] if_cycle_count_id_w;           /* IF/ID stage register to ID/EX stage */
 wire [31:0] if_instruction_id_w;           /* instruction */
+wire [31:0] if_pc_plus4_pc_gen_w;          /* pc pluse 4 to pc gen*/
+wire [31:0] if_pc_plus4_id_w;              /* PC plus 4 to next stage */
 
 // decoder stage
 wire [31:0] id_cycle_count_ex_w;           /* ID/EX stage register to EX/MEM stage */
@@ -92,6 +94,7 @@ end
 pc_gen pc_gen_u(
     .clk        (sys_clk),
     .rst_n      (sys_rst_n),
+    .if_pc_plus4_pc_src           (if_pc_plus4_pc_gen_w),
 
     .cycle_count_pc_gen_start     (pc_gen_start_cycle_count_if_w),
     .source_pc_gen_if             (source_pc_gen_if_w)
@@ -107,7 +110,9 @@ pc_if_stage pc_if_stage_u(
     .pc_source_pc_gen_if          (source_pc_gen_if_w),
 
     .if_cycle_count_id            (if_cycle_count_id_w),
-    .if_instruction_id            (if_instruction_id_w)
+    .if_instruction_id            (if_instruction_id_w),
+    .if_pc_plus4_pc_gen           (if_pc_plus4_pc_gen_w),
+    .if_pc_plus4_id               (if_pc_plus4_id_w)
 );
 
 //--------------------------------------------------------------------------

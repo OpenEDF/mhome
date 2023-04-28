@@ -40,7 +40,7 @@
 // Module
 //--------------------------------------------------------------------------
 module single_port_ram #(
-    parameter RAM_SIZE  = 1024
+    parameter RAM_SIZE = 1024
 )
 //--------------------------------------------------------------------------
 // Ports
@@ -62,7 +62,6 @@ module single_port_ram #(
 // Design: memory model array
 //--------------------------------------------------------------------------
 reg [7:0] memory_model[0:RAM_SIZE-1];
-reg [31:0] index;
 
 //--------------------------------------------------------------------------
 // Design: memoory wirte operation, only clock rising edge
@@ -73,28 +72,22 @@ reg [31:0] index;
 //         11: invalid
 //--------------------------------------------------------------------------
 always @(posedge clk or negedge rst_n) begin: write
-    if (!rst_n) begin
-        for (index = 0; index < RAM_SIZE; index = index + 1)
-            memory_model[index] <= 8'b0000_0000;
-    end
-    else begin
-        case ({read_write_size, ram_write_en})
-            3'b001: begin
-                memory_model[ram_addr_in]   <= ram_data_in[7:0];
-                memory_model[ram_addr_in+1] <= ram_data_in[15:8];
-                memory_model[ram_addr_in+2] <= ram_data_in[23:16];
-                memory_model[ram_addr_in+3] <= ram_data_in[31:24];
-            end
-            3'b011: begin
-                memory_model[ram_addr_in]   <= ram_data_in[7:0];
-                memory_model[ram_addr_in+1] <= ram_data_in[15:8];
-            end
-            3'b101:
-                memory_model[ram_addr_in]   <= ram_data_in[7:0];
-            default:
-                memory_model[ram_addr_in]   <= memory_model[ram_addr_in];
-        endcase
-    end
+    case ({read_write_size, ram_write_en})
+        3'b001: begin
+            memory_model[ram_addr_in]   <= ram_data_in[7:0];
+            memory_model[ram_addr_in+1] <= ram_data_in[15:8];
+            memory_model[ram_addr_in+2] <= ram_data_in[23:16];
+            memory_model[ram_addr_in+3] <= ram_data_in[31:24];
+        end
+        3'b011: begin
+            memory_model[ram_addr_in]   <= ram_data_in[7:0];
+            memory_model[ram_addr_in+1] <= ram_data_in[15:8];
+        end
+        3'b101:
+            memory_model[ram_addr_in]   <= ram_data_in[7:0];
+        default:
+            memory_model[ram_addr_in]   <= memory_model[ram_addr_in];
+    endcase
 end
 
 //--------------------------------------------------------------------------
@@ -108,12 +101,12 @@ end
 always @(read_write_size or ram_addr_in or ram_write_en) begin: read
     case ({read_write_size, ram_write_en})
         3'b000:
-            ram_data_out <= {memory_model[ram_data_in+3], memory_model[ram_data_in+2],
-                            memory_model[ram_data_in+1], memory_model[ram_data_in]};
+            ram_data_out <= {memory_model[ram_addr_in+3], memory_model[ram_addr_in+2],
+                            memory_model[ram_addr_in+1], memory_model[ram_addr_in]};
         3'b010:
-            ram_data_out <= {16'b0, memory_model[ram_data_in+1], memory_model[ram_data_in]};
+            ram_data_out <= {16'b0, memory_model[ram_addr_in+1], memory_model[ram_addr_in]};
         3'b100:
-            ram_data_out <= {24'b0, memory_model[ram_data_in]};
+            ram_data_out <= {24'b0, memory_model[ram_addr_in]};
         default:
             ram_data_out <= 32'h0000_0000;
     endcase

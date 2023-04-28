@@ -92,7 +92,7 @@ install:
 	@cp ${PWD}/../module/memory/*               ${VSIM_DIR}/
 	@cp ${PWD}/../tb/mhome_soc_tb.v             ${VSIM_DIR}/mhome_soc_tb.v
 	@cp ${PWD}/../tb/moduel_tb.list             module.list
-#	@cp ${PWD}/../tb/inst.hex                   mem.hex
+	@cp ${PWD}/../test/inst_test/inst_test.verilog ${PWD}/inst_test.verilog
 	@tree ${VSIM_DIR}
 
 # only com and sim
@@ -128,7 +128,7 @@ clean:
 	rm -rf csrc *simv *.daidir *.log *.key $(OUTPUT) *.vpd DVEfiles *.fsdb \
 	verdiLog novas.* *.vdb urgReport vdCovLog output $(VSIM_DIR) \
 	build usage_statistics_webtalk.* *.jou *.log rtl module.list inst.hex \
-	mhome_spy *.out xsim.dir *.pb
+	mhome_spy *.out xsim.dir *.pb *.verilog
 
 ### ------------------------------------------------------------------------------------------
 # display the help information

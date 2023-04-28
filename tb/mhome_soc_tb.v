@@ -75,7 +75,6 @@ initial begin
     integer index;
     integer row = 0;
     $display("[mhome OK]: start loading hex file to memory...");
-    @(posedge sys_rst_n);
     $readmemh("inst_test.verilog", mhome_soc_top_u.riscv_pipeline_u.pc_if_stage_u.single_port_ram_u.memory_model);
     for (index = 0; index < `RAM_SIZE; index = index + 1) begin
         temp_mem[index][7:0] = mhome_soc_top_u.riscv_pipeline_u.pc_if_stage_u.single_port_ram_u.memory_model[row];

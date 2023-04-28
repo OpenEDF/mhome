@@ -47,6 +47,7 @@ module pc_gen
     // inputs
     input wire         clk,
     input wire         rst_n,
+    input wire [31:0]  if_pc_plus4_pc_src,
     // input wire  branch_en
 
     // outputs
@@ -61,8 +62,8 @@ reg [31:0] tmp_pc_src;
 //--------------------------------------------------------------------------
 always @(*) begin
     /* TODO: branch/stall/jtag/interrupt and other, blocking assign */
-    // if () begin
-    //
+    //if () begin
+    //end
     // end
     // else if () begin
     //
@@ -71,9 +72,9 @@ always @(*) begin
     //
     // end ...
     //
-    // else()
-    /* default */
-    tmp_pc_src = tmp_pc_src + 4;
+    //else begin
+    tmp_pc_src = if_pc_plus4_pc_src;
+    //end
 end
 
 //--------------------------------------------------------------------------

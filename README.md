@@ -12,4 +12,4 @@ $ make sim
 $ make wave
 ```
 ### debug:
-![ifidstage](https://github.com/OpenEDF/mhome/blob/main/doc/pic/ifidstage.jpg)
+![ifidstage](https://github.com/OpenEDF/mhome/blob/main/doc/pic/ifidstage.png)

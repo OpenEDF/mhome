@@ -86,7 +86,13 @@ wire [31:0]  ex_write_rs2_data_mem_w;              /* data will be write to memo
 wire [8*3:1] ex_inst_debug_str_mem_w;              /* riscv instruction debug string name */
 
 // access memory stage
-wire [31:0] mem_cycle_count_wb_w;          /* MEM/WB to other  */
+wire [31:0]  mem_cycle_count_wb_w;          /* MEM/WB to other  */
+wire [31:0]  mem_pc_plus4_wb_w;             /* pc plus 4 to next stage */
+wire [4:0]   mem_write_dest_register_index_wb_w; /* write register file index */
+wire         mem_write_register_en_wb_w;         /* write register enable */
+wire [31:0]  mem_read_mem_data_wb_w;             /* access memory read data to write back */
+wire [31:0]  mem_alu_result_direct_wb_w;         /* excute stage direct send data to wb stage */
+wire [8*3:1] mem_inst_debug_str_wb_w;            /* riscv instruction debug string nane */
 
 // write back stage
 wire [31:0] mem_cycle_count_end_check_w;   /* MEM/WB output pc check */
@@ -184,8 +190,20 @@ ex_mem_stage ex_mem_stage_u(
     .clk       (sys_clk),
     .rst_n     (sys_rst_n),
     .ex_cycle_count_mem     (ex_cycle_count_mem_w),
+    .ex_pc_plus4_mem        (ex_pc_plus4_mem_w),
+    .ex_write_dest_register_index_mem  (ex_write_dest_register_index_mem_w),
+    .ex_write_register_en_mem          (ex_write_register_en_mem_w),
+    .ex_alu_addr_calcul_result_mem     (ex_alu_addr_calcul_result_mem_w),
+    .ex_write_rs2_data_mem             (ex_write_rs2_data_mem_w),
+    .ex_inst_debug_str_mem             (ex_inst_debug_str_mem_w),
 
-    .mem_cycle_count_wb     (mem_cycle_count_wb_w)
+    .mem_cycle_count_wb     (mem_cycle_count_wb_w),
+    .mem_pc_plus4_wb        (mem_pc_plus4_wb_w),
+    .mem_write_dest_register_index_wb    (mem_write_dest_register_index_wb_w),
+    .mem_write_register_en_wb         (mem_write_register_en_wb_w),
+    .mem_read_mem_data_wb             (mem_read_mem_data_wb_w),
+    .mem_alu_result_direct_wb         (mem_alu_result_direct_wb_w),
+    .mem_inst_debug_str_wb            (mem_inst_debug_str_wb_w)
 );
 
 //--------------------------------------------------------------------------

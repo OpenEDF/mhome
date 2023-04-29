@@ -66,8 +66,15 @@ wire [31:0] if_pc_plus4_pc_gen_w;          /* pc pluse 4 to pc gen*/
 wire [31:0] if_pc_plus4_id_w;              /* PC plus 4 to next stage */
 
 // decoder stage
-wire [31:0] id_cycle_count_ex_w;           /* ID/EX stage register to EX/MEM stage */
-wire [31:0] id_pc_plus4_ex_w;              /* pc plus 4 to next stage */
+wire [31:0]  id_cycle_count_ex_w;           /* ID/EX stage register to EX/MEM stage */
+wire [31:0]  id_pc_plus4_ex_w;              /* pc plus 4 to next stage */
+wire [31:0]  id_read_rs1_data_ex_w;         /* register rs1 data */
+wire [31:0]  id_read_rs2_data_ex_w;         /* register rs2 data */
+wire [31:0]  id_imm_exten_data_ex_w;        /* immediate exten data */
+wire [4:0]   id_write_dest_register_index_ex_w; /* write register index */
+wire         id_write_register_en_ex_w;     /* write register enable */
+wire [7:0]   id_inst_encoding_ex_w;         /* riscv instruction */
+wire [8*3:1] id_inst_debug_str_w;           /* riscv instruction debug string */
 
 // execute stage
 wire [31:0] ex_cycle_count_mem_w;          /* EX/MEM stage register to MEM/WB stage */
@@ -127,7 +134,14 @@ if_id_stage if_id_stage_u(
     .if_pc_plus4_id        (if_pc_plus4_id_w),
 
     .id_cycle_count_ex     (id_cycle_count_ex_w),
-    .id_pc_plus4_ex        (id_pc_plus4_ex_w)
+    .id_pc_plus4_ex        (id_pc_plus4_ex_w),
+    .id_read_rs1_data_ex   (id_read_rs1_data_ex_w),
+    .id_read_rs2_data_ex   (id_read_rs2_data_ex_w),
+    .id_imm_exten_data_ex  (id_imm_exten_data_ex_w),
+    .id_write_dest_register_index_ex (id_write_dest_register_index_ex_w),
+    .id_write_register_en_ex (id_write_register_en_ex_w),
+    .id_inst_encoding_ex     (id_inst_encoding_ex_w),
+    .id_inst_debug_str       (id_inst_debug_str_w)
 );
 
 //--------------------------------------------------------------------------

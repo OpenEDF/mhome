@@ -24,6 +24,7 @@ COV_LOG_FILE = coverage_log
 
 # fsdb dump file for verdi
 WAVEFORM = $(OUTPUT).fsdb
+nWave_SIGNAL = mhome_debug_signal.rc
 
 # Coverage command and flags
 COV_FLAGS = -cm line+cond+fsm+tgl+branch+assert
@@ -66,6 +67,7 @@ DEBUG_FLAGS = -f $(MODULE_FLIES)         \
 		      +incdir+${PWD}/src         \
               -top $(TOP_MODULE)         \
               -ssf $(WAVEFORM)           \
+			  -sswr $(nWave_SIGNAL)      \
               -nologo
 
 # Formality Flags
@@ -128,7 +130,7 @@ clean:
 	rm -rf csrc *simv *.daidir *.log *.key $(OUTPUT) *.vpd DVEfiles *.fsdb \
 	verdiLog novas.* *.vdb urgReport vdCovLog output $(VSIM_DIR) \
 	build usage_statistics_webtalk.* *.jou *.log rtl module.list inst.hex \
-	mhome_spy *.out xsim.dir *.pb *.verilog
+	mhome_spy *.out xsim.dir *.pb *.verilog spyglass-1
 
 ### ------------------------------------------------------------------------------------------
 # display the help information

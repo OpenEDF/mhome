@@ -39,67 +39,75 @@
 `define CYCLE_COUNT_RST    32'h0000_0000
 
 // produce immediates by base instruction formats
-`define I_FORMAT_INST      3'b000
-`define S_FORMAT_INST      3'b001
-`define B_FORMAT_INST      3'b010
-`define U_FORMAT_INST      3'b011
-`define J_FORMAT_INST      3'b100
-`define NOSUP_FORMAT_INST  3'b111
+`define R_TYPE_INST      3'b000
+`define I_TYPE_INST      3'b001
+`define S_TYPE_INST      3'b010
+`define B_TYPE_INST      3'b011
+`define U_TYPE_INST      3'b100
+`define J_TYPE_INST      3'b101
 
-// RISC-V instruction opcode
-`define OPCODE_LUI         7'b0110111
-`define OPCODE_AUIPC       7'b0010111
-`define OPCODE_JAL         7'b1101111
-`define OPCODE_JALR        7'b1100111
-`define OPCODE_BRANCH      7'b1100011
-`define OPCODE_LOAD        7'b0000011
-`define OPCODE_STORE       7'b0100011
-`define OPCODE_ALUI        7'b0010011
-`define OPCODE_ALU         7'b0110011
-`define OPCODE_FENCE       7'b0001111
-`define OPCODE_EXTEN       7'b1110011    // ECALL EBREAK CSRRXX
+// RISC-V instruction opcode, inst[1:0] = 2'b11
+`define OPCODE_LUI_U         7'b0110111
+`define OPCODE_AUIPC_U       7'b0010111
+`define OPCODE_JAL_J         7'b1101111
+`define OPCODE_JALR_I        7'b1100111
+`define OPCODE_BRANCH_B      7'b1100011
+`define OPCODE_LOAD_I        7'b0000011
+`define OPCODE_STORE_S       7'b0100011
+`define OPCODE_ALU_I         7'b0010011
+`define OPCODE_ALU_R         7'b0110011
+`define OPCODE_FENCE_I       7'b0001111
+`define OPCODE_EXTEN_I       7'b1110011    // ECALL EBREAK CSRRXX
 
-// RV32I Base Instruction Set  {funct7, funct3} or {funct3}
-`define RV32_BASE_INST_LUI        3'0000 // NO NEED
-`define RV32_BASE_INST_AUIPC      3'b000 // NO NEED
-`define RV32_BASE_INST_JAL        3'b000 // NO NEED
-`define RV32_BASE_INST_JALR       3'b000
-`define RV32_BASE_INST_BEQ        3'b000
-`define RV32_BASE_INST_BNE        3'b001
-`define RV32_BASE_INST_BLT        3'b100
-`define RV32_BASE_INST_BGE        3'b101
-`define RV32_BASE_INST_BLTU       3'b110
-`define RV32_BASE_INST_BGEU       3'b111
-`define RV32_BASE_INST_LB         3'b000
-`define RV32_BASE_INST_LH         3'b001
-`define RV32_BASE_INST_LW         3'b010
-`define RV32_BASE_INST_LBU        3'b100
-`define RV32_BASE_INST_LHU        3'b101
-`define RV32_BASE_INST_SB         3'b000
-`define RV32_BASE_INST_SH         3'b001
-`define RV32_BASE_INST_SW         3'b010
-`define RV32_BASE_INST_ADDI       3'b000
-`define RV32_BASE_INST_SLTI       3'b010
-`define RV32_BASE_INST_SLTIU      3'b011
-`define RV32_BASE_INST_XORI       3'b100
-`define RV32_BASE_INST_ORI        3'b110
-`define RV32_BASE_INST_ANDI       3'b111
-`define RV32_BASE_INST_SLLI       10'b0000000001
-`define RV32_BASE_INST_SRLI       10'b0000000101
-`define RV32_BASE_INST_SRAI       10'b0100000101
-`define RV32_BASE_INST_ADD        10'b0000000000
-`define RV32_BASE_INST_SUB        10'b0100000000
-`define RV32_BASE_INST_SLL        10'b0000000001
-`define RV32_BASE_INST_SLT        10'b0000000010
-`define RV32_BASE_INST_SLTU       10'b0000000011
-`define RV32_BASE_INST_XOR        10'b0000000100
-`define RV32_BASE_INST_SRL        10'b0000000101
-`define RV32_BASE_INST_SRA        10'b0100000101
-`define RV32_BASE_INST_OR         10'b0000000110
-`define RV32_BASE_INST_AND        10'b0000000111
-`define RV32_BASE_INST_FENCE      3'b000 // NO NEED
-`define RV32_BASE_INST_ECALL      12'b0000_0000_0000   // 12'b0000_0000_0000
-`define RV32_BASE_INST_EBREAK     12'b0000_0000_0001   // 12'b0000_0000_0001
+// RV32I Base Instruction Set, Reserve 256 instruction
+`define RV32_BASE_INST_LUI               8'h01
+`define RV32_BASE_INST_AUIPC             8'h02
+`define RV32_BASE_INST_JAL               8'h03
+`define RV32_BASE_INST_JALR              8'h04
+`define RV32_BASE_INST_BEQ               8'h05
+`define RV32_BASE_INST_BNE               8'h06
+`define RV32_BASE_INST_BLT               8'h07
+`define RV32_BASE_INST_BGE               8'h08
+`define RV32_BASE_INST_BLTU              8'h09
+`define RV32_BASE_INST_BGEU              8'h0A
+`define RV32_BASE_INST_LB                8'h0B
+`define RV32_BASE_INST_LH                8'h0C
+`define RV32_BASE_INST_LW                8'h0D
+`define RV32_BASE_INST_LBU               8'h0E
+`define RV32_BASE_INST_LHU               8'h0F
+`define RV32_BASE_INST_SB                8'h10
+`define RV32_BASE_INST_SH                8'h11
+`define RV32_BASE_INST_SW                8'h12
+`define RV32_BASE_INST_ADDI              8'h13
+`define RV32_BASE_INST_SLTI              8'h14
+`define RV32_BASE_INST_SLTIU             8'h15
+`define RV32_BASE_INST_XORI              8'h16
+`define RV32_BASE_INST_ORI               8'h17
+`define RV32_BASE_INST_ANDI              8'h18
+`define RV32_BASE_INST_SLLI              8'h19
+`define RV32_BASE_INST_SRLI              8'h1A
+`define RV32_BASE_INST_SRAI              8'h1B
+`define RV32_BASE_INST_ADD               8'h1C
+`define RV32_BASE_INST_SUB               8'h1D
+`define RV32_BASE_INST_SLL               8'h1E
+`define RV32_BASE_INST_SLT               8'h1F
+`define RV32_BASE_INST_SLTU              8'h20
+`define RV32_BASE_INST_XOR               8'h21
+`define RV32_BASE_INST_SRL               8'h22
+`define RV32_BASE_INST_SRA               8'h23
+`define RV32_BASE_INST_OR                8'h24
+`define RV32_BASE_INST_AND               8'h25
+`define RV32_BASE_INST_FENCE             8'h26
+`define RV32_BASE_INST_ECALL             8'h27
+`define RV32_BASE_INST_EBREAK            8'h28
+`define RV32_ZIFEN_STAND_INST_FENCE_I    8'h28
+`define RV32_ZICSR_STAND_INST_CSRRW      8'h29
+`define RV32_ZICSR_STAND_INST_CSRRS      8'h2A
+`define RV32_ZICSR_STAND_INST_CSRRC      8'h2B
+`define RV32_ZICSR_STAND_INST_CSRRWI     8'h2C
+`define RV32_ZICSR_STAND_INST_CSRRSI     8'h2D
+`define RV32_ZICSR_STAND_INST_CSRRCI     8'h2E
+`define RV32_ILLEGAL_INST                8'hFF
 
 //RV32/RV64 Zicsr Standard Extension
 `define RV32_ZICSR_INST_CSRRW     3'b001

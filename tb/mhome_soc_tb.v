@@ -70,12 +70,14 @@ end
 // Design: load hex file to memory
 //--------------------------------------------------------------------------
 `define RAM_SIZE 256
-initial begin
+task load_hex_to_mem;
+begin: load_hex
     reg [31:0] temp_mem[`RAM_SIZE-1:0];
     integer index;
-    integer row = 0;
+    integer row;
     $display("[mhome OK]: start loading hex file to memory...");
     $readmemh("inst_test.verilog", mhome_soc_top_u.riscv_pipeline_u.pc_if_stage_u.single_port_ram_u.memory_model);
+    row = 0;
     for (index = 0; index < `RAM_SIZE; index = index + 1) begin
         temp_mem[index][7:0] = mhome_soc_top_u.riscv_pipeline_u.pc_if_stage_u.single_port_ram_u.memory_model[row];
         temp_mem[index][15:8] = mhome_soc_top_u.riscv_pipeline_u.pc_if_stage_u.single_port_ram_u.memory_model[row+1];
@@ -91,11 +93,14 @@ initial begin
     end
     $display("[mhome OK]: loading hex file to memory end...");
 end
+endtask
 
 //--------------------------------------------------------------------------
 // Design: system run and check
 //--------------------------------------------------------------------------
 initial begin
+    /* load memory */
+    load_hex_to_mem();
     $display("[mhome OK]: start running...");
     #10
     sys_rst_n = 1'b1;
@@ -122,8 +127,23 @@ initial begin
         $display("~~~~~~~~~~#       #    #     #    ######~~~~~~~~~~");
         $display("~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~");
     end
+    /* dump rv32 register file */
+    rv32_dump_register_file();
     $finish();
 end
+
+//--------------------------------------------------------------------------
+// Design: dump riscv register file
+//--------------------------------------------------------------------------
+task rv32_dump_register_file;
+begin: dump_register
+    integer index;
+    $display("[mhome OK]: rv32 dump register file...");
+    for (index = 0; index < 32; index = index + 1) begin
+        $display("rv32 register[%02d]: 0x%H", index, mhome_soc_top_u.riscv_pipeline_u.if_id_stage_u.register_file_u.rv32_register[index]);
+    end
+end
+endtask
 
 //--------------------------------------------------------------------------
 // Design: generate wave file, use verdi debug

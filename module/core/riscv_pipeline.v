@@ -74,10 +74,16 @@ wire [31:0]  id_imm_exten_data_ex_w;        /* immediate exten data */
 wire [4:0]   id_write_dest_register_index_ex_w; /* write register index */
 wire         id_write_register_en_ex_w;     /* write register enable */
 wire [7:0]   id_inst_encoding_ex_w;         /* riscv instruction */
-wire [8*3:1] id_inst_debug_str_w;           /* riscv instruction debug string */
+wire [8*3:1] id_inst_debug_str_ex_w;        /* riscv instruction debug string name */
 
 // execute stage
-wire [31:0] ex_cycle_count_mem_w;          /* EX/MEM stage register to MEM/WB stage */
+wire [31:0]  ex_cycle_count_mem_w;          /* EX/MEM stage register to MEM/WB stage */
+wire [31:0]  ex_pc_plus4_mem_w;             /* pc plus 4 to next stage */
+wire [4:0]   ex_write_dest_register_index_mem_w; /* write register file index */
+wire         ex_write_register_en_mem_w;           /* write register enable */
+wire [31:0]  ex_alu_addr_calcul_result_mem_w;      /* alu result or read or write memory address to mem stage */
+wire [31:0]  ex_write_rs2_data_mem_w;              /* data will be write to memory */
+wire [8*3:1] ex_inst_debug_str_mem_w;              /* riscv instruction debug string name */
 
 // access memory stage
 wire [31:0] mem_cycle_count_wb_w;          /* MEM/WB to other  */
@@ -141,7 +147,7 @@ if_id_stage if_id_stage_u(
     .id_write_dest_register_index_ex (id_write_dest_register_index_ex_w),
     .id_write_register_en_ex (id_write_register_en_ex_w),
     .id_inst_encoding_ex     (id_inst_encoding_ex_w),
-    .id_inst_debug_str       (id_inst_debug_str_w)
+    .id_inst_debug_str_ex    (id_inst_debug_str_ex_w)
 );
 
 //--------------------------------------------------------------------------
@@ -151,8 +157,24 @@ id_ex_stage id_ex_stage_u(
     .clk       (sys_clk),
     .rst_n     (sys_rst_n),
     .id_cycle_count_ex     (id_cycle_count_ex_w),
+    .id_pc_plus4_ex        (id_pc_plus4_ex_w),
+    .id_read_rs1_data_ex   (id_read_rs1_data_ex_w),
+    .id_read_rs2_data_ex   (id_read_rs2_data_ex_w),
+    .id_imm_exten_data_ex  (id_imm_exten_data_ex_w),
+    .id_write_dest_register_index_ex  (id_write_dest_register_index_ex_w),
+    .id_write_register_en_ex  (id_write_register_en_ex_w),
+    .id_inst_encoding_ex      (id_inst_encoding_ex_w),
+    .id_inst_debug_str_ex     (id_inst_debug_str_ex_w),
 
-    .ex_cycle_count_mem    (ex_cycle_count_mem_w)
+    .ex_cycle_count_mem    (ex_cycle_count_mem_w),
+    .ex_pc_plus4_mem       (ex_pc_plus4_mem_w),
+    .ex_write_dest_register_index_mem    (ex_write_dest_register_index_mem_w),
+    .ex_write_register_en_mem            (ex_write_register_en_mem_w),
+    .ex_alu_addr_calcul_result_mem       (ex_alu_addr_calcul_result_mem_w),
+    .ex_write_rs2_data_mem               (ex_write_rs2_data_mem_w),
+
+    .ex_inst_debug_str_mem               (ex_inst_debug_str_mem_w)
+
 );
 
 //--------------------------------------------------------------------------

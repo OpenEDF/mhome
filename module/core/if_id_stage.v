@@ -61,7 +61,7 @@ module if_id_stage
     output reg         id_write_register_en_ex,
     output reg [7:0]   id_inst_encoding_ex,
 
-    output reg [8*3:1] id_inst_debug_str
+    output reg [8*3:1] id_inst_debug_str_ex
 );
 
 //--------------------------------------------------------------------------
@@ -178,7 +178,7 @@ always @(posedge clk or negedge rst_n) begin
         id_inst_encoding_ex  <= 8'h00;
         id_write_register_en_ex <= 1'b0;
         id_write_dest_register_index_ex <= 5'b00000;
-        id_inst_debug_str <= "nop";
+        id_inst_debug_str_ex <= "nop";
     end else begin
         id_pc_plus4_ex <= if_pc_plus4_id;
         id_read_rs1_data_ex  <= id_read_rs1_data_ex_w;
@@ -187,7 +187,7 @@ always @(posedge clk or negedge rst_n) begin
         id_inst_encoding_ex  <= id_inst_encoding_ex_w;
         id_write_register_en_ex <= id_write_register_en_ex_w;
         id_write_dest_register_index_ex <= id_write_dest_register_index_ex_w;
-        id_inst_debug_str <= id_inst_debug_str_r;
+        id_inst_debug_str_ex <= id_inst_debug_str_r;
     end
 end
 endmodule

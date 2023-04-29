@@ -39,7 +39,7 @@
 //--------------------------------------------------------------------------
 // Module
 //--------------------------------------------------------------------------
-module id_ex_stage 
+module id_ex_stage
 //--------------------------------------------------------------------------
 // Ports
 //--------------------------------------------------------------------------
@@ -48,10 +48,31 @@ module id_ex_stage
     input wire         clk,
     input wire         rst_n,
     input wire [31:0]  id_cycle_count_ex,
+    input wire [31:0]  id_pc_plus4_ex,
+    input wire [31:0]  id_read_rs1_data_ex,
+    input wire [31:0]  id_read_rs2_data_ex,
+    input wire [31:0]  id_imm_exten_data_ex,
+    input wire [4:0]   id_write_dest_register_index_ex,
+    input wire         id_write_register_en_ex,
+    input wire [7:0]   id_inst_encoding_ex,
+    input wire [8*3:1] id_inst_debug_str_ex,
 
     // outputs
-    output reg [31:0]  ex_cycle_count_mem
+    output reg [31:0]  ex_cycle_count_mem,
+    output reg [31:0]  ex_pc_plus4_mem,
+    output reg [4:0]   ex_write_dest_register_index_mem,
+    output reg         ex_write_register_en_mem,
+    output reg [31:0]  ex_alu_addr_calcul_result_mem,
+    output reg [31:0]  ex_write_rs2_data_mem,
+
+    output reg [8*3:1] ex_inst_debug_str_mem
 );
+
+//--------------------------------------------------------------------------
+// Design: pipeline instruction execution unit internal signal
+//--------------------------------------------------------------------------
+reg [31:0] ex_alu_addr_calcul_result_mem_r;
+//reg [31:0] ex_alu_oper_src2_data;
 
 //--------------------------------------------------------------------------
 // Design: pipeline cycle counter logic
@@ -61,6 +82,50 @@ always @(posedge clk or negedge rst_n) begin
         ex_cycle_count_mem <= `CYCLE_COUNT_RST;
     end else begin
         ex_cycle_count_mem <= id_cycle_count_ex;
+    end
+end
+
+//--------------------------------------------------------------------------
+// Design: ALU operational data source control
+//--------------------------------------------------------------------------
+//always @() begin
+//    if (xxx) begin
+//        ex_alu_oper_src2_data <= id_read_rs2_data_ex;
+//    end else begin
+//        ex_alu_oper_src2_data <= id_imm_exten_data_ex;
+//    end
+//end
+
+//--------------------------------------------------------------------------
+// Design: riscv pipeline execution arithmetic and instruction processing
+//--------------------------------------------------------------------------
+always @(id_inst_encoding_ex or id_imm_exten_data_ex or id_read_rs1_data_ex) begin
+    case (id_inst_encoding_ex)
+        `RV32_BASE_INST_LUI:
+            ex_alu_addr_calcul_result_mem_r <= id_imm_exten_data_ex;
+        default:
+            ex_alu_addr_calcul_result_mem_r <= 32'h0000_0000;
+    endcase
+end
+
+//--------------------------------------------------------------------------
+// Design: pipeline update the ex_mem stage register
+//--------------------------------------------------------------------------
+always @(posedge clk or negedge rst_n) begin
+    if (!rst_n) begin
+        ex_pc_plus4_mem <= 32'h0000_0000;
+        ex_write_dest_register_index_mem <= 5'b00000;
+        ex_write_register_en_mem <= 1'b0;
+        ex_write_rs2_data_mem <= 32'h0000_0000;
+        ex_alu_addr_calcul_result_mem <= 32'h0000_0000;
+        ex_inst_debug_str_mem <= "nop";
+    end else begin
+        ex_pc_plus4_mem <= id_pc_plus4_ex;
+        ex_write_dest_register_index_mem <= id_write_dest_register_index_ex;
+        ex_write_register_en_mem <= id_write_register_en_ex;
+        ex_write_rs2_data_mem <= id_read_rs2_data_ex;
+        ex_alu_addr_calcul_result_mem <= ex_alu_addr_calcul_result_mem_r;
+        ex_inst_debug_str_mem <= id_inst_debug_str_ex;
     end
 end
 

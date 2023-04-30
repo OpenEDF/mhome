@@ -62,7 +62,8 @@ module single_port_ram #(
 // Design: memory model array
 //--------------------------------------------------------------------------
 reg [7:0] memory_model[0:RAM_SIZE-1];
-
+wire rst_n_w;
+assign rst_n_w = rst_n; //Lint-[UI] Unused input
 //--------------------------------------------------------------------------
 // Design: memoory wirte operation, only clock rising edge
 //         resove the address, analysis operation is BYTE/HALFWORLD/WORD

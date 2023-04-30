@@ -50,11 +50,13 @@ module pipeline_ctrl
     // outputs
     output reg [2:0]   id_imm_src_ctrl,
     output reg         id_write_register_en,
-    output reg [7:0]   id_inst_encoding
+    output reg [7:0]   id_inst_encoding,
+    output reg         id_mem_write_en,
+    output reg [1:0]   id_mem_oper_size
 );
 
 //--------------------------------------------------------------------------
-// Design: internal signal
+// Design: instruction feild internal signal
 //--------------------------------------------------------------------------
 wire [6:0] inst_opcode;
 wire [4:0] inst_rd;
@@ -77,6 +79,12 @@ assign inst_30bit = id_instruction_ctrl[30];
 //         insstruction
 //--------------------------------------------------------------------------
 always @(id_instruction_ctrl or inst_funct3 or inst_opcode or inst_30bit) begin
+        /* default value */
+        id_imm_src_ctrl <= `R_TYPE_INST;
+        id_write_register_en <= 1'b0;
+        id_inst_encoding <= `RV32_ILLEGAL_INST;
+        id_mem_write_en <= `MEM_READ;
+        id_mem_oper_size <= `MEM_OPER_WORD;
     case (inst_opcode)
         `OPCODE_LUI_U: begin
             id_imm_src_ctrl <= `U_TYPE_INST;
@@ -119,6 +127,8 @@ always @(id_instruction_ctrl or inst_funct3 or inst_opcode or inst_30bit) begin
             id_imm_src_ctrl <= `R_TYPE_INST;
             id_write_register_en <= 1'b0;
             id_inst_encoding <= `RV32_ILLEGAL_INST;
+            id_mem_write_en <= `MEM_READ;
+            id_mem_oper_size <= `MEM_OPER_WORD;
         end
     endcase
 end

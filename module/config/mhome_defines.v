@@ -38,6 +38,13 @@
 `define RV32I_NOP          32'h0000_0013      // ADDI x0, x0, 0
 `define CYCLE_COUNT_RST    32'h0000_0000
 
+// pipeline memory read and write operation size
+`define MEM_OPER_WORD      2'b00
+`define MEM_OPER_HALFWORD  2'b01
+`define MEM_OPER_BYTE      2'b00
+`define MEM_READ           1'b0
+`define MEM_WRITE          1'b1
+
 // produce immediates by base instruction formats
 `define R_TYPE_INST      3'b000
 `define I_TYPE_INST      3'b001

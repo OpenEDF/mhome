@@ -55,6 +55,8 @@ module id_ex_stage
     input wire [4:0]   id_write_dest_register_index_ex,
     input wire         id_write_register_en_ex,
     input wire [7:0]   id_inst_encoding_ex,
+    input wire         id_mem_write_en_ex,
+    input wire [1:0]   id_mem_oper_size_ex,
     input wire [8*3:1] id_inst_debug_str_ex,
 
     // outputs
@@ -64,6 +66,8 @@ module id_ex_stage
     output reg         ex_write_register_en_mem,
     output reg [31:0]  ex_alu_addr_calcul_result_mem,
     output reg [31:0]  ex_write_rs2_data_mem,
+    output reg         ex_mem_write_en_mem,
+    output reg [1:0]   ex_mem_oper_size_mem,
 
     output reg [8*3:1] ex_inst_debug_str_mem
 );
@@ -118,6 +122,8 @@ always @(posedge clk or negedge rst_n) begin
         ex_write_register_en_mem <= 1'b0;
         ex_write_rs2_data_mem <= 32'h0000_0000;
         ex_alu_addr_calcul_result_mem <= 32'h0000_0000;
+        ex_mem_write_en_mem <= `MEM_READ;
+        ex_mem_oper_size_mem <= `MEM_OPER_WORD;
         ex_inst_debug_str_mem <= "nop";
     end else begin
         ex_pc_plus4_mem <= id_pc_plus4_ex;
@@ -125,6 +131,8 @@ always @(posedge clk or negedge rst_n) begin
         ex_write_register_en_mem <= id_write_register_en_ex;
         ex_write_rs2_data_mem <= id_read_rs2_data_ex;
         ex_alu_addr_calcul_result_mem <= ex_alu_addr_calcul_result_mem_r;
+        ex_mem_write_en_mem <= id_mem_write_en_ex;
+        ex_mem_oper_size_mem <= id_mem_oper_size_ex;
         ex_inst_debug_str_mem <= id_inst_debug_str_ex;
     end
 end

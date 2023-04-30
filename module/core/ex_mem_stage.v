@@ -53,6 +53,8 @@ module ex_mem_stage
     input wire         ex_write_register_en_mem,
     input wire [31:0]  ex_alu_addr_calcul_result_mem,
     input wire [31:0]  ex_write_rs2_data_mem,
+    input wire         ex_mem_write_en_mem,
+    input wire [1:0]   ex_mem_oper_size_mem,
     input wire [8*3:1] ex_inst_debug_str_mem,
 
     // outputs
@@ -69,7 +71,7 @@ module ex_mem_stage
 // Design: pipeline access memory internal signal
 //--------------------------------------------------------------------------
 wire [31:0] mem_read_mem_data_wb_w;
-assign mem_read_mem_data_wb_w = ex_write_rs2_data_mem;  /* TODO: delete*/
+
 //--------------------------------------------------------------------------
 // Design: pipeline cycle counter logic
 //--------------------------------------------------------------------------
@@ -80,6 +82,21 @@ always @(posedge clk or negedge rst_n) begin
         mem_cycle_count_wb <= ex_cycle_count_mem;
     end
 end
+
+//--------------------------------------------------------------------------
+// Design: pipeline instance data memory, 4K
+//         TODO: fpga design use xilinx ip
+//--------------------------------------------------------------------------
+single_port_ram #(.RAM_SIZE(4096)) single_port_ram_u1 (
+    .clk   (clk),
+    .rst_n (rst_n),
+    .ram_addr_in     (ex_alu_addr_calcul_result_mem),
+    .ram_data_in     (ex_write_rs2_data_mem),
+    .ram_write_en    (ex_mem_write_en_mem),  //high is writen, low read
+    .read_write_size (ex_mem_oper_size_mem),
+
+    .ram_data_out    (mem_read_mem_data_wb_w)
+);
 
 //--------------------------------------------------------------------------
 // Design: riscv pipeline access memory update register to write back stage

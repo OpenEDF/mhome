@@ -64,6 +64,8 @@ module if_id_stage
     output reg [4:0]   id_write_dest_register_index_ex,
     output reg         id_write_register_en_ex,
     output reg [7:0]   id_inst_encoding_ex,
+    output reg         id_mem_write_en_ex,
+    output reg [1:0]   id_mem_oper_size_ex,
 
     output reg [8*3:1] id_inst_debug_str_ex
 );
@@ -81,6 +83,8 @@ wire [31:0] inst;
 wire [7:0]  id_inst_encoding_ex_w;
 wire        id_write_register_en_ex_w;
 wire [4:0]  id_write_dest_register_index_ex_w;
+wire        id_mem_write_en_ex_w;
+wire [1:0]  id_mem_oper_size_ex_w;
 reg  [8*3:1] id_inst_debug_str_r;
 
 assign id_inst_rs1_w = if_instruction_id[19:15];
@@ -167,7 +171,9 @@ pipeline_ctrl pipeline_ctrl_u(
 
     .id_imm_src_ctrl        (id_imm_exten_src_w),
     .id_write_register_en   (id_write_register_en_ex_w),
-    .id_inst_encoding       (id_inst_encoding_ex_w)
+    .id_inst_encoding       (id_inst_encoding_ex_w),
+    .id_mem_write_en        (id_mem_write_en_ex_w),
+    .id_mem_oper_size       (id_mem_oper_size_ex_w)
 );
 
 //--------------------------------------------------------------------------
@@ -191,6 +197,8 @@ always @(posedge clk or negedge rst_n) begin
         id_inst_encoding_ex  <= id_inst_encoding_ex_w;
         id_write_register_en_ex <= id_write_register_en_ex_w;
         id_write_dest_register_index_ex <= id_write_dest_register_index_ex_w;
+        id_mem_write_en_ex <= id_mem_write_en_ex_w;
+        id_mem_oper_size_ex <= id_mem_oper_size_ex_w;
         id_inst_debug_str_ex <= id_inst_debug_str_r;
     end
 end

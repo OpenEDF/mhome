@@ -4,7 +4,7 @@
 #  This is a software generated project file. Manual edits to this file could be lost during the next save operation
 #  Copyright Synopsys Inc.
 #  Last Updated By: SpyGlass SpyGlass_vL-2016.06
-#  Last Updated On Sun Apr 30 11:13:28 2023
+#  Last Updated On Sun Apr 30 12:41:46 2023
 #
 #  -------------------------------------------------------------------
 
@@ -34,7 +34,7 @@ set_option active_methodology $SPYGLASS_HOME/GuideWare/latest/block/rtl_handoff
 set_option top mhome_soc_top
 set_option incdir { /home/macro/github/mhome/vsim/src }
 set_option 87 no
-set_option mthresh 8192
+set_option mthresh 32768
 
 
 ##Goal Setup Section

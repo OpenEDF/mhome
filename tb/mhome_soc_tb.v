@@ -67,6 +67,20 @@ initial begin
 end
 
 //--------------------------------------------------------------------------
+// Design: init the data memory
+//--------------------------------------------------------------------------
+`define DATA_MEM_SIZE 4096
+task init_data_mem;
+begin: init_mem
+    integer index;
+    $display("[mhome OK]: inital the data memory...");
+    for (index = 0; index < `DATA_MEM_SIZE; index = index + 1) begin
+        mhome_soc_top_u.riscv_pipeline_u.ex_mem_stage_u.single_port_ram_u1.memory_model[index] = 8'h55;
+    end
+end
+endtask
+
+//--------------------------------------------------------------------------
 // Design: load hex file to memory
 //--------------------------------------------------------------------------
 `define RAM_SIZE 256
@@ -99,6 +113,8 @@ endtask
 // Design: system run and check
 //--------------------------------------------------------------------------
 initial begin
+    /* init data memory */
+    init_data_mem();
     /* load memory */
     load_hex_to_mem();
     $display("[mhome OK]: start running...");

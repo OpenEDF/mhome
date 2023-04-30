@@ -64,6 +64,7 @@ wire [31:0] if_cycle_count_id_w;           /* IF/ID stage register to ID/EX stag
 wire [31:0] if_instruction_id_w;           /* instruction */
 wire [31:0] if_pc_plus4_pc_gen_w;          /* pc pluse 4 to pc gen*/
 wire [31:0] if_pc_plus4_id_w;              /* PC plus 4 to next stage */
+wire [31:0] if_current_pc_id_w;            /* current stage PC */
 
 // decoder stage
 wire [31:0]  id_cycle_count_ex_w;           /* ID/EX stage register to EX/MEM stage */
@@ -76,6 +77,7 @@ wire         id_write_register_en_ex_w;     /* write register enable */
 wire [7:0]   id_inst_encoding_ex_w;         /* riscv instruction */
 wire         id_mem_write_en_ex_w;          /* memory operation read and wirte */
 wire [1:0]   id_mem_oper_size_ex_w;         /* memory opearation size word/halfword/byte */
+wire [31:0]  id_current_pc_ex_w;            /* current stage PC */
 wire [8*3:1] id_inst_debug_str_ex_w;        /* riscv instruction debug string name */
 
 // execute stage
@@ -141,7 +143,8 @@ pc_if_stage pc_if_stage_u(
     .if_cycle_count_id            (if_cycle_count_id_w),
     .if_instruction_id            (if_instruction_id_w),
     .if_pc_plus4_pc_gen           (if_pc_plus4_pc_gen_w),
-    .if_pc_plus4_id               (if_pc_plus4_id_w)
+    .if_pc_plus4_id               (if_pc_plus4_id_w),
+    .if_current_pc_id             (if_current_pc_id_w)
 );
 
 //--------------------------------------------------------------------------
@@ -157,6 +160,7 @@ if_id_stage if_id_stage_u(
     .wb_write_register_data_id   (wb_select_data_write_register_id_w),
     .wb_write_reginster_en_id    (wb_write_register_en_id_w),
     .wb_write_pc_plus4_id        (wb_write_pc_plus4_id_w),
+    .if_current_pc_id            (if_current_pc_id_w),
 
     .id_cycle_count_ex     (id_cycle_count_ex_w),
     .id_pc_plus4_ex        (id_pc_plus4_ex_w),
@@ -168,6 +172,7 @@ if_id_stage if_id_stage_u(
     .id_inst_encoding_ex     (id_inst_encoding_ex_w),
     .id_mem_write_en_ex      (id_mem_write_en_ex_w),
     .id_mem_oper_size_ex     (id_mem_oper_size_ex_w),
+    .id_current_pc_ex        (id_current_pc_ex_w),
 
     .id_inst_debug_str_ex    (id_inst_debug_str_ex_w)
 );
@@ -188,6 +193,7 @@ id_ex_stage id_ex_stage_u(
     .id_inst_encoding_ex      (id_inst_encoding_ex_w),
     .id_mem_write_en_ex       (id_mem_write_en_ex_w),
     .id_mem_oper_size_ex      (id_mem_oper_size_ex_w),
+    .id_current_pc_ex         (id_current_pc_ex_w),
     .id_inst_debug_str_ex     (id_inst_debug_str_ex_w),
 
     .ex_cycle_count_mem    (ex_cycle_count_mem_w),

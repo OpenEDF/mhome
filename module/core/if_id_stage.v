@@ -54,6 +54,7 @@ module if_id_stage
     input wire [31:0]  wb_write_register_data_id,
     input wire         wb_write_reginster_en_id,
     input wire [31:0]  wb_write_pc_plus4_id,
+    input wire [31:0]  if_current_pc_id,
 
     // outputs
     output reg [31:0]  id_cycle_count_ex,
@@ -66,7 +67,7 @@ module if_id_stage
     output reg [7:0]   id_inst_encoding_ex,
     output reg         id_mem_write_en_ex,
     output reg [1:0]   id_mem_oper_size_ex,
-
+    output reg [31:0]  id_current_pc_ex,
     output reg [8*3:1] id_inst_debug_str_ex
 );
 
@@ -188,6 +189,7 @@ always @(posedge clk or negedge rst_n) begin
         id_inst_encoding_ex  <= 8'h00;
         id_write_register_en_ex <= 1'b0;
         id_write_dest_register_index_ex <= 5'b00000;
+        id_current_pc_ex <= `MHOME_START_PC;
         id_inst_debug_str_ex <= "nop";
     end else begin
         id_pc_plus4_ex <= if_pc_plus4_id;
@@ -199,6 +201,7 @@ always @(posedge clk or negedge rst_n) begin
         id_write_dest_register_index_ex <= id_write_dest_register_index_ex_w;
         id_mem_write_en_ex <= id_mem_write_en_ex_w;
         id_mem_oper_size_ex <= id_mem_oper_size_ex_w;
+        id_current_pc_ex <= if_current_pc_id;
         id_inst_debug_str_ex <= id_inst_debug_str_r;
     end
 end

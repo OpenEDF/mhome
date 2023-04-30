@@ -57,6 +57,7 @@ module id_ex_stage
     input wire [7:0]   id_inst_encoding_ex,
     input wire         id_mem_write_en_ex,
     input wire [1:0]   id_mem_oper_size_ex,
+    input wire [31:0]  id_current_pc_ex,
     input wire [8*3:1] id_inst_debug_str_ex,
 
     // outputs
@@ -107,6 +108,8 @@ always @(id_inst_encoding_ex or id_imm_exten_data_ex or id_read_rs1_data_ex) beg
     case (id_inst_encoding_ex)
         `RV32_BASE_INST_LUI:
             ex_alu_addr_calcul_result_mem_r <= id_imm_exten_data_ex;
+        `RV32_BASE_INST_AUIPC:
+            ex_alu_addr_calcul_result_mem_r <= id_imm_exten_data_ex + id_current_pc_ex;
         default:
             ex_alu_addr_calcul_result_mem_r <= 32'h0000_0000;
     endcase

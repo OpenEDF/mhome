@@ -54,7 +54,8 @@ module pc_if_stage
     output reg  [31:0]  if_cycle_count_id,
     output reg  [31:0]  if_instruction_id,
     output wire [31:0]  if_pc_plus4_pc_gen,
-    output reg  [31:0]  if_pc_plus4_id
+    output reg  [31:0]  if_pc_plus4_id,
+    output reg  [31:0]  if_current_pc_id
 );
 
 //--------------------------------------------------------------------------
@@ -98,10 +99,12 @@ always @(posedge clk or negedge rst_n) begin
     if (!rst_n) begin
         if_instruction_id <= `RV32I_NOP;
         if_pc_plus4_id <= 32'h0000_0000;
+        if_current_pc_id <= `MHOME_START_PC;
     end
     else begin
         if_instruction_id <= if_instruction_id_w;
         if_pc_plus4_id <= if_pc_plus4_id_w;
+        if_current_pc_id <= pc_source_pc_gen_if;
     end
 end
 

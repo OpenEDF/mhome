@@ -136,15 +136,54 @@ end
 // Design: riscv instruction debug module
 //--------------------------------------------------------------------------
 always @(id_inst_encoding_ex_w) begin
+    id_inst_debug_str_r = "ieg";
     case (id_inst_encoding_ex_w)
-        `RV32_BASE_INST_LUI:
-            id_inst_debug_str_r = "lui";
-        `RV32_BASE_INST_AUIPC:
-            id_inst_debug_str_r = "aui";
-        `RV32_BASE_INST_ADDI:
-            id_inst_debug_str_r = "adi";
-        default:
-            id_inst_debug_str_r = "nop";
+        `RV32_BASE_INST_LUI:                id_inst_debug_str_r = "lui";
+        `RV32_BASE_INST_AUIPC:              id_inst_debug_str_r = "aui";
+        `RV32_BASE_INST_BEQ:                id_inst_debug_str_r = "beq";
+        `RV32_BASE_INST_BNE:                id_inst_debug_str_r = "bne";
+        `RV32_BASE_INST_BLT:                id_inst_debug_str_r = "blt";
+        `RV32_BASE_INST_BGE:                id_inst_debug_str_r = "bge";
+        `RV32_BASE_INST_BLTU:               id_inst_debug_str_r = "btu";
+        `RV32_BASE_INST_BGEU:               id_inst_debug_str_r = "bgu";
+        `RV32_BASE_INST_LB:                 id_inst_debug_str_r = "l_b";
+        `RV32_BASE_INST_LH:                 id_inst_debug_str_r = "l_h";
+        `RV32_BASE_INST_LW:                 id_inst_debug_str_r = "l_w";
+        `RV32_BASE_INST_LBU:                id_inst_debug_str_r = "lbu";
+        `RV32_BASE_INST_LHU:                id_inst_debug_str_r = "lhu";
+        `RV32_BASE_INST_SB:                 id_inst_debug_str_r = "s_b";
+        `RV32_BASE_INST_SH:                 id_inst_debug_str_r = "s_h";
+        `RV32_BASE_INST_SW:                 id_inst_debug_str_r = "s_w";
+        `RV32_BASE_INST_ADDI:               id_inst_debug_str_r = "adi";
+        `RV32_BASE_INST_SLTI:               id_inst_debug_str_r = "sli";
+        `RV32_BASE_INST_SLTIU:              id_inst_debug_str_r = "slu";
+        `RV32_BASE_INST_XORI:               id_inst_debug_str_r = "xoi";
+        `RV32_BASE_INST_ORI:                id_inst_debug_str_r = "ori";
+        `RV32_BASE_INST_ANDI:               id_inst_debug_str_r = "ani";
+        `RV32_BASE_INST_SLLI:               id_inst_debug_str_r = "sli";
+        `RV32_BASE_INST_SRLI:               id_inst_debug_str_r = "sri";
+        `RV32_BASE_INST_SRAI:               id_inst_debug_str_r = "sai";
+        `RV32_BASE_INST_ADD:                id_inst_debug_str_r = "add";
+        `RV32_BASE_INST_SUB:                id_inst_debug_str_r = "sub";
+        // `RV32_BASE_INST_SLL:             id_inst_debug_str_r = "sll";
+        `RV32_BASE_INST_SLT:                id_inst_debug_str_r = "slt";
+        `RV32_BASE_INST_SLTU:               id_inst_debug_str_r = "slu";
+        `RV32_BASE_INST_XOR:                id_inst_debug_str_r = "xor";
+        //`RV32_BASE_INST_SRL:              id_inst_debug_str_r = "srl";
+        `RV32_BASE_INST_SRA:                id_inst_debug_str_r = "sra";
+        `RV32_BASE_INST_OR:                 id_inst_debug_str_r = "o_r";
+        `RV32_BASE_INST_AND:                id_inst_debug_str_r = "and";
+        `RV32_BASE_INST_FENCE:              id_inst_debug_str_r = "fee";
+        `RV32_BASE_INST_ECALL:              id_inst_debug_str_r = "eca";
+        `RV32_BASE_INST_EBREAK:             id_inst_debug_str_r = "ebr";
+        `RV32_ZIFEN_STAND_INST_FENCE_I:     id_inst_debug_str_r = "fei";
+        `RV32_ZICSR_STAND_INST_CSRRW:       id_inst_debug_str_r = "crw";
+        `RV32_ZICSR_STAND_INST_CSRRS:       id_inst_debug_str_r = "crs";
+        `RV32_ZICSR_STAND_INST_CSRRC:       id_inst_debug_str_r = "crc";
+        `RV32_ZICSR_STAND_INST_CSRRWI:      id_inst_debug_str_r = "cwi";
+        `RV32_ZICSR_STAND_INST_CSRRSI:      id_inst_debug_str_r = "csi";
+        `RV32_ZICSR_STAND_INST_CSRRCI:      id_inst_debug_str_r = "cci";
+        default:                            id_inst_debug_str_r = "nop";
     endcase
 end
 //--------------------------------------------------------------------------

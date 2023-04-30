@@ -104,7 +104,7 @@ end
 //--------------------------------------------------------------------------
 // Design: riscv pipeline execution arithmetic and instruction processing
 //--------------------------------------------------------------------------
-always @(id_inst_encoding_ex or id_imm_exten_data_ex or id_read_rs1_data_ex) begin
+always @(id_inst_encoding_ex or id_imm_exten_data_ex or id_read_rs1_data_ex or id_current_pc_ex) begin
     case (id_inst_encoding_ex)
         `RV32_BASE_INST_LUI:
             ex_alu_addr_calcul_result_mem_r <= id_imm_exten_data_ex;

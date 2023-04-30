@@ -65,6 +65,7 @@ wire [4:0] inst_rs1;
 wire [4:0] inst_rs2;
 wire [6:0] inst_funct7;
 wire       inst_30bit;
+wire       inst_20bit_exten;
 
 assign inst_opcode = id_instruction_ctrl[6:0];
 assign inst_rd = id_instruction_ctrl[11:7];
@@ -73,12 +74,13 @@ assign inst_rs1 = id_instruction_ctrl[19:15];
 assign inst_rs2 = id_instruction_ctrl[24:20];
 assign inst_funct7 = id_instruction_ctrl[31:25];
 assign inst_30bit = id_instruction_ctrl[30];
+assign inst_20bit_exten = id_instruction_ctrl[20];
 
 //--------------------------------------------------------------------------
 // Design: Anslyze the corresponding control signal according to each
 //         insstruction
 //--------------------------------------------------------------------------
-always @(id_instruction_ctrl or inst_funct3 or inst_opcode or inst_30bit) begin
+always @(id_instruction_ctrl or inst_funct3 or inst_opcode or inst_30bit or inst_20bit_exten) begin
         /* default value */
         id_imm_src_ctrl <= `R_TYPE_INST;
         id_write_register_en <= 1'b0;
@@ -106,10 +108,18 @@ always @(id_instruction_ctrl or inst_funct3 or inst_opcode or inst_30bit) begin
             id_write_register_en <= 1'b1;
             id_inst_encoding <= `RV32_BASE_INST_JALR;
         end
-        `OPCODE_ALU_I: begin
-            id_imm_src_ctrl <= `I_TYPE_INST;
-            id_write_register_en <= 1'b1;
-            id_inst_encoding <= `RV32_BASE_INST_ADDI;
+        `OPCODE_BRANCH_B: begin
+            id_imm_src_ctrl <= `B_TYPE_INST;
+            id_write_register_en <= 1'b0;
+            case (inst_funct3)
+                3'b000: id_inst_encoding <= `RV32_BASE_INST_BEQ;
+                3'b001: id_inst_encoding <= `RV32_BASE_INST_BNE;
+                3'b100: id_inst_encoding <= `RV32_BASE_INST_BLT;
+                3'b101: id_inst_encoding <= `RV32_BASE_INST_BGE;
+                3'b110: id_inst_encoding <= `RV32_BASE_INST_BLTU;
+                3'b111: id_inst_encoding <= `RV32_BASE_INST_BGEU;
+                default: id_inst_encoding <= `RV32_ILLEGAL_INST;
+            endcase
         end
         `OPCODE_LOAD_I: begin
             id_imm_src_ctrl <= `I_TYPE_INST;
@@ -122,6 +132,62 @@ always @(id_instruction_ctrl or inst_funct3 or inst_opcode or inst_30bit) begin
                 3'b101: id_inst_encoding <= `RV32_BASE_INST_LHU;
                 default: id_inst_encoding <= `RV32_ILLEGAL_INST;
             endcase
+         end
+        `OPCODE_STORE_S: begin
+            id_imm_src_ctrl <= `S_TYPE_INST;
+            id_write_register_en <= 1'b0;
+            case (inst_funct3)
+                3'b000: id_inst_encoding <= `RV32_BASE_INST_SB;
+                3'b001: id_inst_encoding <= `RV32_BASE_INST_SH;
+                3'b010: id_inst_encoding <= `RV32_BASE_INST_SW;
+                default: id_inst_encoding <= `RV32_ILLEGAL_INST;
+            endcase
+         end
+        `OPCODE_ALU_I: begin
+            id_imm_src_ctrl <= `I_TYPE_INST;
+            id_write_register_en <= 1'b1;
+            case (inst_funct3)
+                3'b000: id_inst_encoding <= `RV32_BASE_INST_ADDI;
+                3'b010: id_inst_encoding <= `RV32_BASE_INST_SLTI;
+                3'b011: id_inst_encoding <= `RV32_BASE_INST_SLTIU;
+                3'b100: id_inst_encoding <= `RV32_BASE_INST_XORI;
+                3'b110: id_inst_encoding <= `RV32_BASE_INST_ORI;
+                3'b111: id_inst_encoding <= `RV32_BASE_INST_ANDI;
+                default: id_inst_encoding <= `RV32_ILLEGAL_INST;
+            endcase
+        end
+        `OPCODE_ALU_R: begin
+            id_imm_src_ctrl <= `R_TYPE_INST;
+            id_write_register_en <= 1'b1;
+            case ({inst_30bit, inst_funct3})
+                4'b0001: id_inst_encoding <= `RV32_BASE_INST_SLLI;
+                4'b0101: id_inst_encoding <= `RV32_BASE_INST_SRLI;
+                4'b1011: id_inst_encoding <= `RV32_BASE_INST_SRAI;
+                4'b0000: id_inst_encoding <= `RV32_BASE_INST_ADD;
+                4'b1000: id_inst_encoding <= `RV32_BASE_INST_SUB;
+                //4'b0001: id_inst_encoding <= `RV32_BASE_INST_SLL; SLLI
+                4'b0010: id_inst_encoding <= `RV32_BASE_INST_SLT;
+                4'b0011: id_inst_encoding <= `RV32_BASE_INST_SLTU;
+                4'b0100: id_inst_encoding <= `RV32_BASE_INST_XOR;
+                //4'b0101: id_inst_encoding <= `RV32_BASE_INST_SRL; SRLI
+                4'b1101: id_inst_encoding <= `RV32_BASE_INST_SRA;
+                4'b0110: id_inst_encoding <= `RV32_BASE_INST_OR;
+                4'b0111: id_inst_encoding <= `RV32_BASE_INST_AND;
+                default: id_inst_encoding <= `RV32_ILLEGAL_INST;
+            endcase
+        end
+        `OPCODE_FENCE_I: begin
+            id_imm_src_ctrl <= `I_TYPE_INST;
+            id_write_register_en <= 1'b1;
+            id_inst_encoding <= `RV32_BASE_INST_FENCE;
+        end
+        `OPCODE_EXTEN_I: begin
+            id_imm_src_ctrl <= `I_TYPE_INST;
+            id_write_register_en <= 1'b1;
+            if (inst_20bit_exten)
+                id_inst_encoding <= `RV32_BASE_INST_FENCE;
+            else
+                id_inst_encoding <= `RV32_BASE_INST_EBREAK;
         end
         default: begin
             id_imm_src_ctrl <= `R_TYPE_INST;

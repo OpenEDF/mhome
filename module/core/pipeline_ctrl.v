@@ -76,7 +76,7 @@ assign inst_30bit = id_instruction_ctrl[30];
 // Design: Anslyze the corresponding control signal according to each
 //         insstruction
 //--------------------------------------------------------------------------
-always @(id_instruction_ctrl) begin
+always @(id_instruction_ctrl or inst_funct3 or inst_opcode or inst_30bit) begin
     case (inst_opcode)
         `OPCODE_LUI_U: begin
             id_imm_src_ctrl <= `U_TYPE_INST;

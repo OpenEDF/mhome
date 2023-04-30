@@ -118,7 +118,7 @@ wave:
 
 # spyglass lint and check design
 spy:
-	spyglass $(SPY_FLAGS)
+	spyglass $(SPY_FLAGS) &
 
 # show coverage by html
 html:

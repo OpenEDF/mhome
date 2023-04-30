@@ -71,7 +71,8 @@ reg [7:0] memory_model[0:RAM_SIZE-1];
 //         10: byte
 //         11: invalid
 //--------------------------------------------------------------------------
-always @(posedge clk or negedge rst_n) begin: write
+//always @(posedge clk or negedge rst_n) begin: write //TODO: deleted rst_n
+always @(posedge clk) begin: write
     case ({read_write_size, ram_write_en})
         3'b001: begin
             memory_model[ram_addr_in]   <= ram_data_in[7:0];

@@ -4,7 +4,7 @@
 #  This is a software generated project file. Manual edits to this file could be lost during the next save operation
 #  Copyright Synopsys Inc.
 #  Last Updated By: SpyGlass SpyGlass_vL-2016.06
-#  Last Updated On Mon Apr 17 00:35:37 2023
+#  Last Updated On Sun Apr 30 11:13:28 2023
 #
 #  -------------------------------------------------------------------
 
@@ -15,11 +15,13 @@ read_file -type verilog src/id_ex_stage.v
 read_file -type verilog src/if_id_stage.v
 read_file -type verilog src/mem_wb_stage.v
 read_file -type verilog src/mhome_defines.v
-read_file -type verilog src/mhome_soc_tb.v
 read_file -type verilog src/mhome_soc_top.v
 read_file -type verilog src/pc_gen.v
 read_file -type verilog src/pc_if_stage.v
 read_file -type verilog src/riscv_pipeline.v
+read_file -type verilog src/single_port_ram.v
+read_file -type verilog src/register_file.v
+read_file -type verilog src/pipeline_ctrl.v
 
 ##Common Options Section
 
@@ -29,9 +31,10 @@ set_option designread_enable_synthesis yes
 set_option designread_disable_flatten no
 set_option report_incr_messages yes
 set_option active_methodology $SPYGLASS_HOME/GuideWare/latest/block/rtl_handoff
-set_option top mhome_soc_tb
+set_option top mhome_soc_top
 set_option incdir { /home/macro/github/mhome/vsim/src }
 set_option 87 no
+set_option mthresh 8192
 
 
 ##Goal Setup Section

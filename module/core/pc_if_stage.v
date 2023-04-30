@@ -84,7 +84,7 @@ single_port_ram #(.RAM_SIZE(1024)) single_port_ram_u (
     .clk   (clk),
     .rst_n (rst_n),
     .ram_addr_in     (pc_source_pc_gen_if),
-    .ram_data_in     (),
+    .ram_data_in     (32'h0000_0000),
     .ram_write_en    (1'b0),  //high is writen, low rd
     .read_write_size (2'b00),
 

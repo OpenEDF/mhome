@@ -2,7 +2,7 @@ Magic 271485
 Revision Verdi_O-2018.09-SP2
 
 ; Window Layout <x> <y> <width> <height> <signalwidth> <valuewidth>
-viewPort 0 27 1278 408 273 116
+viewPort 0 27 1278 572 273 116
 
 ; File list:
 ; openDirFile [-d delimiter] [-s time_offset] [-rf auto_bus_rule_file] path_name file_name
@@ -16,8 +16,8 @@ signalSpacing 5
 
 ; windowTimeUnit is used for zoom, cursor & marker
 ; waveform viewport range
-zoom 0.000000 89.143006
-cursor 30.000000
+zoom 0.000000 1020.100000
+cursor 69.74032444959
 marker 0.000000
 
 ; user define markers
@@ -25,7 +25,18 @@ marker 0.000000
 ; visible top row signal index
 top 0
 ; marker line index
-markerPos 29
+markerPos 39
+
+; counter signal list
+; addCounterSig -Rising|-Falling|-AnyChange signal
+activeDirFile "" "/home/macro/github/mhome/vsim/mhome_soc_tb.fsdb"
+
+addCounterSig -AnyChange "/mhome_soc_tb/mhome_soc_top_u/riscv_pipeline_u/if_id_stage_u/register_file_u/rv32_register[1][31:0]"
+
+; counter signal list
+; addCounterSig -Rising|-Falling|-AnyChange signal
+
+addCounterSig -Rising "/mhome_soc_tb/mhome_soc_top_u/riscv_pipeline_u/if_id_stage_u/register_file_u/clk"
 
 ; event list
 ; addEvent event_name event_expression
@@ -74,14 +85,53 @@ addSignal -h 15 -holdScope ex_write_dest_register_index_mem_w[4:0]
 addSignal -h 15 -holdScope ex_write_register_en_mem_w
 addSignal -c ID_GREEN7 -ls solid -lw 1 -h 15 -holdScope ex_alu_addr_calcul_result_mem_w[31:0]
 addSignal -h 15 -holdScope ex_write_rs2_data_mem_w[31:0]
-addGroup "ex_mem_stage"
+addGroup "ex_mem_stage" -e FALSE
 addSignal -h 15 -UNSIGNED -ASC /mhome_soc_tb/mhome_soc_top_u/riscv_pipeline_u/mem_inst_debug_str_wb_w[24:1]
 addSignal -h 15 -holdScope mem_pc_plus4_wb_w[31:0]
 addSignal -h 15 -holdScope mem_write_dest_register_index_wb_w[4:0]
 addSignal -h 15 -holdScope mem_write_register_en_wb_w
 addSignal -h 15 -holdScope mem_read_mem_data_wb_w[31:0]
 addSignal -h 15 -holdScope mem_alu_result_direct_wb_w[31:0]
-addGroup "G7"
+addGroup "mem_wb_stage" -e FALSE
+addSignal -h 15 /mhome_soc_tb/mhome_soc_top_u/riscv_pipeline_u/wb_write_dest_register_index_id_w[4:0]
+addSignal -h 15 -holdScope wb_write_register_en_id_w
+addSignal -c ID_YELLOW5 -ls solid -lw 1 -h 15 -holdScope wb_select_data_write_register_id_w[31:0]
+addGroup "register_file" -e FALSE
+addSignal -c ID_GREEN5 -ls solid -lw 1 -h 15 /mhome_soc_tb/mhome_soc_top_u/riscv_pipeline_u/if_id_stage_u/register_file_u/clk
+addSignal -c ID_YELLOW5 -ls solid -lw 1 -h 15 -UNSIGNED -HEX -holdScope RisingCounter_clk[63:0]
+addSignal -h 15 -UNSIGNED -HEX -holdScope rv32_register[0][31:0]
+addSignal -c ID_CYAN5 -ls solid -lw 1 -h 15 -UNSIGNED -HEX -holdScope rv32_register[1][31:0]
+addSignal -h 15 -holdScope rv32_register[2][31:0]
+addSignal -h 15 -holdScope rv32_register[3][31:0]
+addSignal -h 15 -holdScope rv32_register[4][31:0]
+addSignal -h 15 -holdScope rv32_register[5][31:0]
+addSignal -h 15 -holdScope rv32_register[6][31:0]
+addSignal -h 15 -holdScope rv32_register[7][31:0]
+addSignal -h 15 -holdScope rv32_register[8][31:0]
+addSignal -h 15 -holdScope rv32_register[9][31:0]
+addSignal -h 15 -holdScope rv32_register[10][31:0]
+addSignal -h 15 -holdScope rv32_register[11][31:0]
+addSignal -h 15 -holdScope rv32_register[12][31:0]
+addSignal -h 15 -holdScope rv32_register[13][31:0]
+addSignal -h 15 -holdScope rv32_register[14][31:0]
+addSignal -h 15 -holdScope rv32_register[15][31:0]
+addSignal -h 15 -holdScope rv32_register[16][31:0]
+addSignal -h 15 -holdScope rv32_register[17][31:0]
+addSignal -h 15 -holdScope rv32_register[18][31:0]
+addSignal -h 15 -holdScope rv32_register[19][31:0]
+addSignal -h 15 -holdScope rv32_register[20][31:0]
+addSignal -h 15 -holdScope rv32_register[21][31:0]
+addSignal -h 15 -holdScope rv32_register[22][31:0]
+addSignal -h 15 -holdScope rv32_register[23][31:0]
+addSignal -h 15 -holdScope rv32_register[24][31:0]
+addSignal -h 15 -holdScope rv32_register[25][31:0]
+addSignal -h 15 -holdScope rv32_register[26][31:0]
+addSignal -h 15 -holdScope rv32_register[27][31:0]
+addSignal -h 15 -holdScope rv32_register[28][31:0]
+addSignal -h 15 -holdScope rv32_register[29][31:0]
+addSignal -h 15 -holdScope rv32_register[30][31:0]
+addSignal -h 15 -holdScope rv32_register[31][31:0]
+addGroup "G9"
 
 ; getSignalForm Scope Hierarchy Status
 ; active file of getSignalForm

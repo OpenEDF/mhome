@@ -95,7 +95,12 @@ wire [31:0]  mem_alu_result_direct_wb_w;         /* excute stage direct send dat
 wire [8*3:1] mem_inst_debug_str_wb_w;            /* riscv instruction debug string nane */
 
 // write back stage
-wire [31:0] mem_cycle_count_end_check_w;   /* MEM/WB output pc check */
+wire [31:0]  mem_cycle_count_end_check_w;   /* MEM/WB output pc check */
+wire [8*3:1] mem_instruction_name_check_w;  /* MEM/WB output inst name check */
+wire [31:0]  wb_write_pc_plus4_id_w;        /* write the pc plus4 to register */
+wire [4:0]   wb_write_dest_register_index_id_w;  /* write register file index */
+wire         wb_write_register_en_id_w;          /* enable write register file */
+wire [31:0]  wb_select_data_write_register_id_w; /* write data to register file */
 
 //--------------------------------------------------------------------------
 // Design: led test logic show core state
@@ -144,6 +149,10 @@ if_id_stage if_id_stage_u(
     .if_cycle_count_id     (if_cycle_count_id_w),
     .if_instruction_id     (if_instruction_id_w),
     .if_pc_plus4_id        (if_pc_plus4_id_w),
+    .wb_write_register_dest_id   (wb_write_dest_register_index_id_w),
+    .wb_write_register_data_id   (wb_select_data_write_register_id_w),
+    .wb_write_reginster_en_id    (wb_write_register_en_id_w),
+    .wb_write_pc_plus4_id        (wb_write_pc_plus4_id_w),
 
     .id_cycle_count_ex     (id_cycle_count_ex_w),
     .id_pc_plus4_ex        (id_pc_plus4_ex_w),
@@ -213,8 +222,19 @@ mem_wb_stage mem_wb_stage_u(
     .clk       (sys_clk),
     .rst_n     (sys_rst_n),
     .mem_cycle_count_wb     (mem_cycle_count_wb_w),
+    .mem_pc_plus4_wb        (mem_pc_plus4_wb_w),
+    .mem_write_dest_register_index_wb    (mem_write_dest_register_index_wb_w),
+    .mem_write_register_en_wb            (mem_write_register_en_wb_w),
+    .mem_read_mem_data_wb                (mem_read_mem_data_wb_w),
+    .mem_alu_result_direct_wb            (mem_alu_result_direct_wb_w),
+    .mem_inst_debug_str_wb               (mem_inst_debug_str_wb_w),
 
-    .wb_cycle_count_end     (mem_cycle_count_end_check_w)
+    .wb_cycle_count_end     (mem_cycle_count_end_check_w),
+    .wb_write_pc_plus4_id   (wb_write_pc_plus4_id_w),
+    .wb_write_dest_register_index_id     (wb_write_dest_register_index_id_w),
+    .wb_write_register_en_id             (wb_write_register_en_id_w),
+    .wb_select_data_write_register_id    (wb_select_data_write_register_id_w),
+    .wb_inst_debug_str_finish            (mem_instruction_name_check_w)
 );
 
 endmodule

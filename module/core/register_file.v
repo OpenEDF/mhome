@@ -144,10 +144,12 @@ always @(posedge clk or negedge rst_n) begin
             6'b100100:
                 rv32_register[4] <= wb_inst_write_data;
             6'b100101:
-                rv32_register[6] <= wb_inst_write_data;
+                rv32_register[5] <= wb_inst_write_data;
             6'b100110:
-                rv32_register[7] <= wb_inst_write_data;
+                rv32_register[6] <= wb_inst_write_data;
             6'b100111:
+                rv32_register[7] <= wb_inst_write_data;
+            6'b101000:
                 rv32_register[8] <= wb_inst_write_data;
             6'b101001:
                 rv32_register[9] <= wb_inst_write_data;

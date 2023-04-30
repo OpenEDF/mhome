@@ -50,6 +50,10 @@ module if_id_stage
     input wire [31:0]  if_cycle_count_id,
     input wire [31:0]  if_instruction_id,
     input wire [31:0]  if_pc_plus4_id,
+    input wire [4:0]   wb_write_register_dest_id,
+    input wire [31:0]  wb_write_register_data_id,
+    input wire         wb_write_reginster_en_id,
+    input wire [31:0]  wb_write_pc_plus4_id,
 
     // outputs
     output reg [31:0]  id_cycle_count_ex,
@@ -146,10 +150,10 @@ register_file register_file_u(
     .rst_n  (rst_n),
     .id_inst_read_1_src     (id_inst_rs1_w),
     .id_inst_read_2_src     (id_inst_rs2_w),
-    .wb_inst_write_dest     (), // TODO wb
-    .wb_inst_write_data     (), // TODO wb
-    .wb_inst_write_en       (), // TODO wb
-    .wb_comp_pc_plus4_id    (), // TODO wb
+    .wb_inst_write_dest     (wb_write_register_dest_id),
+    .wb_inst_write_data     (wb_write_register_data_id),
+    .wb_inst_write_en       (wb_write_reginster_en_id),
+    .wb_comp_pc_plus4_id    (wb_write_pc_plus4_id),
 
     .id_inst_read_1_data    (id_read_rs1_data_ex_w),
     .id_inst_read_2_data    (id_read_rs2_data_ex_w)

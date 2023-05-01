@@ -11,5 +11,12 @@ $ make com
 $ make sim
 $ make wave
 ```
+### inst:
+| Inst   | Description | State | asm |
+|  ---   | --- | --- | --- |
+| lui    | load u-imm 20bit to rd  |✔ |  rv32mi_lui.s   |
+| auipc  | place pc add u-imm 20bit to rd |✔ |  rv32mi_auipc.s |
+| auipc  | Text        |❌|                 |
+
 ### debug:
 ![ifidstage](https://github.com/OpenEDF/mhome/blob/main/doc/pic/ifidstage.png)

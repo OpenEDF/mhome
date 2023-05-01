@@ -53,7 +53,6 @@ module if_id_stage
     input wire [4:0]   wb_write_register_dest_id,
     input wire [31:0]  wb_write_register_data_id,
     input wire         wb_write_reginster_en_id,
-    input wire [31:0]  wb_write_pc_plus4_id,
     input wire [31:0]  if_current_pc_id,
 
     // outputs
@@ -68,6 +67,9 @@ module if_id_stage
     output reg         id_mem_write_en_ex,
     output reg [1:0]   id_mem_oper_size_ex,
     output reg [31:0]  id_current_pc_ex,
+    output reg [4:0]   id_rs2_shamt_ex,
+    output reg [1:0]   id_wb_result_src_ex,
+    output reg         id_sel_imm_rs2data_alu_ex,
     output reg [8*3:1] id_inst_debug_str_ex
 );
 
@@ -86,6 +88,10 @@ wire        id_write_register_en_ex_w;
 wire [4:0]  id_write_dest_register_index_ex_w;
 wire        id_mem_write_en_ex_w;
 wire [1:0]  id_mem_oper_size_ex_w;
+reg  [4:0]  id_rs2_shamt_ex_r;
+wire        id_rs2_shamt_en_w;
+wire [1:0]  id_wb_result_src_w;
+wire        id_sel_imm_rs2data_alu_w;
 reg  [8*3:1] id_inst_debug_str_r;
 
 assign id_inst_rs1_w = if_instruction_id[19:15];
@@ -186,6 +192,17 @@ always @(id_inst_encoding_ex_w) begin
         default:                            id_inst_debug_str_r = "nop";
     endcase
 end
+
+//--------------------------------------------------------------------------
+// Design: output the shamt for SLLI/SRLI/SRAI
+//--------------------------------------------------------------------------
+always @(id_rs2_shamt_en_w or id_inst_rs2_w) begin
+    if (id_rs2_shamt_en_w)
+        id_rs2_shamt_ex_r <= id_inst_rs2_w;
+    else
+        id_rs2_shamt_ex_r <= 5'b00000;
+end
+
 //--------------------------------------------------------------------------
 // Design: instantiate riscv register file
 //--------------------------------------------------------------------------
@@ -197,7 +214,6 @@ register_file register_file_u(
     .wb_inst_write_dest     (wb_write_register_dest_id),
     .wb_inst_write_data     (wb_write_register_data_id),
     .wb_inst_write_en       (wb_write_reginster_en_id),
-    .wb_comp_pc_plus4_id    (wb_write_pc_plus4_id),
 
     .id_inst_read_1_data    (id_read_rs1_data_ex_w),
     .id_inst_read_2_data    (id_read_rs2_data_ex_w)
@@ -213,7 +229,10 @@ pipeline_ctrl pipeline_ctrl_u(
     .id_write_register_en   (id_write_register_en_ex_w),
     .id_inst_encoding       (id_inst_encoding_ex_w),
     .id_mem_write_en        (id_mem_write_en_ex_w),
-    .id_mem_oper_size       (id_mem_oper_size_ex_w)
+    .id_mem_oper_size       (id_mem_oper_size_ex_w),
+    .id_rs2_shamt_en        (id_rs2_shamt_en_w),
+    .id_wb_result_src       (id_wb_result_src_w),
+    .id_sel_imm_rs2data_alu (id_sel_imm_rs2data_alu_w)
 );
 
 //--------------------------------------------------------------------------
@@ -229,6 +248,9 @@ always @(posedge clk or negedge rst_n) begin
         id_write_register_en_ex <= 1'b0;
         id_write_dest_register_index_ex <= 5'b00000;
         id_current_pc_ex <= `MHOME_START_PC;
+        id_rs2_shamt_ex <= 5'b00000;
+        id_wb_result_src_ex <= `WB_SEL_ALU_RESULT;
+        id_sel_imm_rs2data_alu_ex <= `ALU_SEL_RS2DATA_INPUT;
         id_inst_debug_str_ex <= "nop";
     end else begin
         id_pc_plus4_ex <= if_pc_plus4_id;
@@ -241,6 +263,9 @@ always @(posedge clk or negedge rst_n) begin
         id_mem_write_en_ex <= id_mem_write_en_ex_w;
         id_mem_oper_size_ex <= id_mem_oper_size_ex_w;
         id_current_pc_ex <= if_current_pc_id;
+        id_rs2_shamt_ex <= id_rs2_shamt_ex_r;
+        id_wb_result_src_ex <= id_wb_result_src_w;
+        id_sel_imm_rs2data_alu_ex <= id_sel_imm_rs2data_alu_w;
         id_inst_debug_str_ex <= id_inst_debug_str_r;
     end
 end

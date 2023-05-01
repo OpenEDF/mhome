@@ -45,6 +45,15 @@
 `define MEM_READ           1'b0
 `define MEM_WRITE          1'b1
 
+// pipeline write back data select source
+`define WB_SEL_ALU_RESULT   2'b00
+`define WB_SEL_MEM_RESULT   2'b01
+`define WB_SEL_PCP4_RESULT  2'b10
+
+// pipeline execute select immediate or rs2 data as alu module input 2
+`define ALU_SEL_RS2DATA_INPUT  1'b0
+`define ALU_SEL_IMM_INPUT      1'b1
+
 // produce immediates by base instruction formats
 `define R_TYPE_INST      3'b000
 `define I_TYPE_INST      3'b001

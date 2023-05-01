@@ -52,7 +52,6 @@ module register_file
     input wire [4:0]   wb_inst_write_dest,
     input wire [31:0]  wb_inst_write_data,
     input wire         wb_inst_write_en,
-    input wire [31:0]  wb_comp_pc_plus4_id,
 
     // outputs
     output wire [31:0] id_inst_read_1_data,
@@ -85,7 +84,6 @@ module register_file
 //| f28–31  | ft8–11  | FP temporaries                     | Caller
 //--------------------------------------------------------------------------
 reg [31:0] rv32_register[0:31];
-reg [31:0] wb_comp_pc_plus4_id_r;
 
 //--------------------------------------------------------------------------
 // Design: register file read opeartion
@@ -130,7 +128,6 @@ always @(posedge clk or negedge rst_n) begin
         rv32_register[29] <= 32'h0000_0000;
         rv32_register[30] <= 32'h0000_0000;
         rv32_register[31] <= 32'h0000_0000;
-        wb_comp_pc_plus4_id_r <= 32'h0000_0000;
     end else begin
         case ({wb_inst_write_en, wb_inst_write_dest})
             6'b100000:
@@ -200,8 +197,6 @@ always @(posedge clk or negedge rst_n) begin
             default:
                 rv32_register[0] <= 32'h0000_0000;
         endcase
-        // next pc plus 4
-        wb_comp_pc_plus4_id_r <= wb_comp_pc_plus4_id;
     end
 end
 endmodule

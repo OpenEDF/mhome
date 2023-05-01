@@ -78,6 +78,9 @@ wire [7:0]   id_inst_encoding_ex_w;         /* riscv instruction */
 wire         id_mem_write_en_ex_w;          /* memory operation read and wirte */
 wire [1:0]   id_mem_oper_size_ex_w;         /* memory opearation size word/halfword/byte */
 wire [31:0]  id_current_pc_ex_w;            /* current stage PC */
+wire [4:0]   id_rs2_shamt_ex_w;             /* SLLI/SRLI/SALI shamt data */
+wire [1:0]   id_wb_result_src_ex_w;         /* wb stage select data write to register */
+wire         id_sel_imm_rs2data_alu_ex_w;   /* execute alu select immidate or rs2 data an input2 */
 wire [8*3:1] id_inst_debug_str_ex_w;        /* riscv instruction debug string name */
 
 // execute stage
@@ -89,6 +92,7 @@ wire [31:0]  ex_alu_addr_calcul_result_mem_w;      /* alu result or read or writ
 wire [31:0]  ex_write_rs2_data_mem_w;              /* data will be write to memory */
 wire         ex_mem_write_en_mem_w;                /* memory operation read and wirte */
 wire [1:0]   ex_mem_oper_size_mem_w;               /* memory opearation size word/halfword/byte */
+wire [1:0]   ex_wb_result_src_mem_w;               /* wb stage select data write to register */
 wire [8*3:1] ex_inst_debug_str_mem_w;              /* riscv instruction debug string name */
 
 // access memory stage
@@ -98,15 +102,15 @@ wire [4:0]   mem_write_dest_register_index_wb_w; /* write register file index */
 wire         mem_write_register_en_wb_w;         /* write register enable */
 wire [31:0]  mem_read_mem_data_wb_w;             /* access memory read data to write back */
 wire [31:0]  mem_alu_result_direct_wb_w;         /* excute stage direct send data to wb stage */
+wire [1:0]   mem_wb_result_src_wb_w;               /* wb stage select data write to register */
 wire [8*3:1] mem_inst_debug_str_wb_w;            /* riscv instruction debug string nane */
 
 // write back stage
 wire [31:0]  mem_cycle_count_end_check_w;   /* MEM/WB output pc check */
 wire [8*3:1] mem_instruction_name_check_w;  /* MEM/WB output inst name check */
-wire [31:0]  wb_write_pc_plus4_id_w;        /* write the pc plus4 to register */
 wire [4:0]   wb_write_dest_register_index_id_w;  /* write register file index */
 wire         wb_write_register_en_id_w;          /* enable write register file */
-wire [31:0]  wb_select_data_write_register_id_w; /* write data to register file */
+wire [31:0]  wb_sel_result_to_register_id_w;     /* write the data to register file*/
 
 //--------------------------------------------------------------------------
 // Design: led test logic show core state
@@ -157,9 +161,8 @@ if_id_stage if_id_stage_u(
     .if_instruction_id     (if_instruction_id_w),
     .if_pc_plus4_id        (if_pc_plus4_id_w),
     .wb_write_register_dest_id   (wb_write_dest_register_index_id_w),
-    .wb_write_register_data_id   (wb_select_data_write_register_id_w),
+    .wb_write_register_data_id   (wb_sel_result_to_register_id_w),
     .wb_write_reginster_en_id    (wb_write_register_en_id_w),
-    .wb_write_pc_plus4_id        (wb_write_pc_plus4_id_w),
     .if_current_pc_id            (if_current_pc_id_w),
 
     .id_cycle_count_ex     (id_cycle_count_ex_w),
@@ -168,11 +171,14 @@ if_id_stage if_id_stage_u(
     .id_read_rs2_data_ex   (id_read_rs2_data_ex_w),
     .id_imm_exten_data_ex  (id_imm_exten_data_ex_w),
     .id_write_dest_register_index_ex (id_write_dest_register_index_ex_w),
-    .id_write_register_en_ex (id_write_register_en_ex_w),
-    .id_inst_encoding_ex     (id_inst_encoding_ex_w),
-    .id_mem_write_en_ex      (id_mem_write_en_ex_w),
-    .id_mem_oper_size_ex     (id_mem_oper_size_ex_w),
-    .id_current_pc_ex        (id_current_pc_ex_w),
+    .id_write_register_en_ex   (id_write_register_en_ex_w),
+    .id_inst_encoding_ex       (id_inst_encoding_ex_w),
+    .id_mem_write_en_ex        (id_mem_write_en_ex_w),
+    .id_mem_oper_size_ex       (id_mem_oper_size_ex_w),
+    .id_current_pc_ex          (id_current_pc_ex_w),
+    .id_rs2_shamt_ex           (id_rs2_shamt_ex_w),
+    .id_wb_result_src_ex       (id_wb_result_src_ex_w),
+    .id_sel_imm_rs2data_alu_ex (id_sel_imm_rs2data_alu_ex_w),
 
     .id_inst_debug_str_ex    (id_inst_debug_str_ex_w)
 );
@@ -189,12 +195,15 @@ id_ex_stage id_ex_stage_u(
     .id_read_rs2_data_ex   (id_read_rs2_data_ex_w),
     .id_imm_exten_data_ex  (id_imm_exten_data_ex_w),
     .id_write_dest_register_index_ex  (id_write_dest_register_index_ex_w),
-    .id_write_register_en_ex  (id_write_register_en_ex_w),
-    .id_inst_encoding_ex      (id_inst_encoding_ex_w),
-    .id_mem_write_en_ex       (id_mem_write_en_ex_w),
-    .id_mem_oper_size_ex      (id_mem_oper_size_ex_w),
-    .id_current_pc_ex         (id_current_pc_ex_w),
-    .id_inst_debug_str_ex     (id_inst_debug_str_ex_w),
+    .id_write_register_en_ex   (id_write_register_en_ex_w),
+    .id_inst_encoding_ex       (id_inst_encoding_ex_w),
+    .id_mem_write_en_ex        (id_mem_write_en_ex_w),
+    .id_mem_oper_size_ex       (id_mem_oper_size_ex_w),
+    .id_current_pc_ex          (id_current_pc_ex_w),
+    .id_rs2_shamt_ex           (id_rs2_shamt_ex_w),
+    .id_wb_result_src_ex       (id_wb_result_src_ex_w),
+    .id_sel_imm_rs2data_alu_ex (id_sel_imm_rs2data_alu_ex_w),
+    .id_inst_debug_str_ex      (id_inst_debug_str_ex_w),
 
     .ex_cycle_count_mem    (ex_cycle_count_mem_w),
     .ex_pc_plus4_mem       (ex_pc_plus4_mem_w),
@@ -204,6 +213,7 @@ id_ex_stage id_ex_stage_u(
     .ex_write_rs2_data_mem               (ex_write_rs2_data_mem_w),
     .ex_mem_write_en_mem                 (ex_mem_write_en_mem_w),
     .ex_mem_oper_size_mem                (ex_mem_oper_size_mem_w),
+    .ex_wb_result_src_mem                (ex_wb_result_src_mem_w),
 
     .ex_inst_debug_str_mem               (ex_inst_debug_str_mem_w)
 
@@ -223,6 +233,8 @@ ex_mem_stage ex_mem_stage_u(
     .ex_write_rs2_data_mem             (ex_write_rs2_data_mem_w),
     .ex_mem_write_en_mem               (ex_mem_write_en_mem_w),
     .ex_mem_oper_size_mem              (ex_mem_oper_size_mem_w),
+    .ex_wb_result_src_mem              (ex_wb_result_src_mem_w),
+
     .ex_inst_debug_str_mem             (ex_inst_debug_str_mem_w),
 
     .mem_cycle_count_wb     (mem_cycle_count_wb_w),
@@ -231,6 +243,7 @@ ex_mem_stage ex_mem_stage_u(
     .mem_write_register_en_wb         (mem_write_register_en_wb_w),
     .mem_read_mem_data_wb             (mem_read_mem_data_wb_w),
     .mem_alu_result_direct_wb         (mem_alu_result_direct_wb_w),
+    .mem_wb_result_src_wb             (mem_wb_result_src_wb_w),
     .mem_inst_debug_str_wb            (mem_inst_debug_str_wb_w)
 );
 
@@ -246,13 +259,13 @@ mem_wb_stage mem_wb_stage_u(
     .mem_write_register_en_wb            (mem_write_register_en_wb_w),
     .mem_read_mem_data_wb                (mem_read_mem_data_wb_w),
     .mem_alu_result_direct_wb            (mem_alu_result_direct_wb_w),
+    .mem_wb_result_src_wb                (mem_wb_result_src_wb_w),
     .mem_inst_debug_str_wb               (mem_inst_debug_str_wb_w),
 
     .wb_cycle_count_end     (mem_cycle_count_end_check_w),
-    .wb_write_pc_plus4_id   (wb_write_pc_plus4_id_w),
     .wb_write_dest_register_index_id     (wb_write_dest_register_index_id_w),
     .wb_write_register_en_id             (wb_write_register_en_id_w),
-    .wb_select_data_write_register_id    (wb_select_data_write_register_id_w),
+    .wb_sel_result_to_register_id        (wb_sel_result_to_register_id_w),
     .wb_inst_debug_str_finish            (mem_instruction_name_check_w)
 );
 

@@ -59,3 +59,7 @@ simv*
 *.fsdb
 *.vdb
 
+# inst assmeby
+*.dump
+*.elf
+*.verilog

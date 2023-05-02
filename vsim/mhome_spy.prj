@@ -4,7 +4,7 @@
 #  This is a software generated project file. Manual edits to this file could be lost during the next save operation
 #  Copyright Synopsys Inc.
 #  Last Updated By: SpyGlass SpyGlass_vL-2016.06
-#  Last Updated On Mon May  1 00:44:03 2023
+#  Last Updated On Tue May  2 11:35:52 2023
 #
 #  -------------------------------------------------------------------
 
@@ -22,6 +22,7 @@ read_file -type verilog src/riscv_pipeline.v
 read_file -type verilog src/single_port_ram.v
 read_file -type verilog src/register_file.v
 read_file -type verilog src/pipeline_ctrl.v
+read_file -type verilog src/hazard_unit.v
 
 ##Common Options Section
 

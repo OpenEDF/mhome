@@ -90,7 +90,9 @@ reg [31:0] ex_alu_oper_src2_data;
 // Design: pipeline jump new pc
 //--------------------------------------------------------------------------
 wire [31:0] ex_jump_new_pc_auipc_inst_w;
+wire [31:0] ex_jump_rs1data_imm_pc_w;
 assign ex_jump_new_pc_auipc_inst_w = id_imm_exten_data_ex + id_current_pc_ex;
+assign ex_jump_rs1data_imm_pc_w = id_imm_exten_data_ex + id_read_rs1_data_ex;
 assign ex_pc_jump_en_pc_mux = id_pc_jump_en_ex;
 
 // TODO: UNUSED WARNING
@@ -139,6 +141,10 @@ always @(id_inst_encoding_ex or id_imm_exten_data_ex or id_read_rs1_data_ex or i
         `RV32_BASE_INST_JAL: begin
             ex_alu_addr_calcul_result_mem_r <= 32'h0000_0000;
             ex_jump_new_pc_pc_mux <= ex_jump_new_pc_auipc_inst_w;
+        end
+        `RV32_BASE_INST_JALR: begin
+            ex_alu_addr_calcul_result_mem_r <= 32'h0000_0000;
+            ex_jump_new_pc_pc_mux <= ex_jump_rs1data_imm_pc_w;
         end
         default: begin
             ex_alu_addr_calcul_result_mem_r <= 32'h0000_0000;

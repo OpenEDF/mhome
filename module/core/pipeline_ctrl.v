@@ -118,6 +118,8 @@ always @(id_instruction_ctrl or inst_funct3 or inst_opcode or inst_30bit or inst
         `OPCODE_JALR_I: begin
             id_imm_src_ctrl <= `I_TYPE_INST;
             id_write_register_en <= `PP_WRITE_DEST_REG_ENABLE;
+            id_pc_jump_en <= `PP_JUMP_ENABLE;
+            id_wb_result_src <= `WB_SEL_PCP4_RESULT;
             id_inst_encoding <= `RV32_BASE_INST_JALR;
         end
         `OPCODE_BRANCH_B: begin

@@ -153,11 +153,40 @@ end
 //--------------------------------------------------------------------------
 task rv32_dump_register_file;
 begin: dump_register
-    integer index;
     $display("[mhome OK]: rv32 dump register file...");
-    for (index = 0; index < 32; index = index + 1) begin
-        $display("rv32 register[%02d]: 0x%H", index, mhome_soc_top_u.riscv_pipeline_u.if_id_stage_u.register_file_u.rv32_register[index]);
-    end
+    $display("rv32 register[00] zero: 0x%H", mhome_soc_top_u.riscv_pipeline_u.if_id_stage_u.register_file_u.rv32_register[0]);
+    $display("rv32 register[01] ra  : 0x%H", mhome_soc_top_u.riscv_pipeline_u.if_id_stage_u.register_file_u.rv32_register[1]);
+    $display("rv32 register[02] sp  : 0x%H", mhome_soc_top_u.riscv_pipeline_u.if_id_stage_u.register_file_u.rv32_register[2]);
+    $display("rv32 register[03] gp  : 0x%H", mhome_soc_top_u.riscv_pipeline_u.if_id_stage_u.register_file_u.rv32_register[3]);
+    $display("rv32 register[04] tp  : 0x%H", mhome_soc_top_u.riscv_pipeline_u.if_id_stage_u.register_file_u.rv32_register[4]);
+    $display("rv32 register[05] t0  : 0x%H", mhome_soc_top_u.riscv_pipeline_u.if_id_stage_u.register_file_u.rv32_register[5]);
+    $display("rv32 register[06] t1  : 0x%H", mhome_soc_top_u.riscv_pipeline_u.if_id_stage_u.register_file_u.rv32_register[6]);
+    $display("rv32 register[07] t2  : 0x%H", mhome_soc_top_u.riscv_pipeline_u.if_id_stage_u.register_file_u.rv32_register[7]);
+    $display("rv32 register[08] s0  : 0x%H", mhome_soc_top_u.riscv_pipeline_u.if_id_stage_u.register_file_u.rv32_register[8]);
+    $display("rv32 register[09] s1  : 0x%H", mhome_soc_top_u.riscv_pipeline_u.if_id_stage_u.register_file_u.rv32_register[9]);
+    $display("rv32 register[10] a0  : 0x%H", mhome_soc_top_u.riscv_pipeline_u.if_id_stage_u.register_file_u.rv32_register[10]);
+    $display("rv32 register[11] a1  : 0x%H", mhome_soc_top_u.riscv_pipeline_u.if_id_stage_u.register_file_u.rv32_register[11]);
+    $display("rv32 register[12] a2  : 0x%H", mhome_soc_top_u.riscv_pipeline_u.if_id_stage_u.register_file_u.rv32_register[12]);
+    $display("rv32 register[13] a3  : 0x%H", mhome_soc_top_u.riscv_pipeline_u.if_id_stage_u.register_file_u.rv32_register[13]);
+    $display("rv32 register[14] a4  : 0x%H", mhome_soc_top_u.riscv_pipeline_u.if_id_stage_u.register_file_u.rv32_register[14]);
+    $display("rv32 register[15] a5  : 0x%H", mhome_soc_top_u.riscv_pipeline_u.if_id_stage_u.register_file_u.rv32_register[15]);
+    $display("rv32 register[16] a6  : 0x%H", mhome_soc_top_u.riscv_pipeline_u.if_id_stage_u.register_file_u.rv32_register[16]);
+    $display("rv32 register[17] a7  : 0x%H", mhome_soc_top_u.riscv_pipeline_u.if_id_stage_u.register_file_u.rv32_register[17]);
+    $display("rv32 register[18] s2  : 0x%H", mhome_soc_top_u.riscv_pipeline_u.if_id_stage_u.register_file_u.rv32_register[18]);
+    $display("rv32 register[19] s3  : 0x%H", mhome_soc_top_u.riscv_pipeline_u.if_id_stage_u.register_file_u.rv32_register[19]);
+    $display("rv32 register[20] s4  : 0x%H", mhome_soc_top_u.riscv_pipeline_u.if_id_stage_u.register_file_u.rv32_register[20]);
+    $display("rv32 register[21] s5  : 0x%H", mhome_soc_top_u.riscv_pipeline_u.if_id_stage_u.register_file_u.rv32_register[21]);
+    $display("rv32 register[22] s6  : 0x%H", mhome_soc_top_u.riscv_pipeline_u.if_id_stage_u.register_file_u.rv32_register[22]);
+    $display("rv32 register[23] s7  : 0x%H", mhome_soc_top_u.riscv_pipeline_u.if_id_stage_u.register_file_u.rv32_register[23]);
+    $display("rv32 register[24] s8  : 0x%H", mhome_soc_top_u.riscv_pipeline_u.if_id_stage_u.register_file_u.rv32_register[24]);
+    $display("rv32 register[25] s9  : 0x%H", mhome_soc_top_u.riscv_pipeline_u.if_id_stage_u.register_file_u.rv32_register[25]);
+    $display("rv32 register[26] s10 : 0x%H", mhome_soc_top_u.riscv_pipeline_u.if_id_stage_u.register_file_u.rv32_register[26]);
+    $display("rv32 register[27] s11 : 0x%H", mhome_soc_top_u.riscv_pipeline_u.if_id_stage_u.register_file_u.rv32_register[27]);
+    $display("rv32 register[28] t3  : 0x%H", mhome_soc_top_u.riscv_pipeline_u.if_id_stage_u.register_file_u.rv32_register[28]);
+    $display("rv32 register[29] t4  : 0x%H", mhome_soc_top_u.riscv_pipeline_u.if_id_stage_u.register_file_u.rv32_register[29]);
+    $display("rv32 register[30] t5  : 0x%H", mhome_soc_top_u.riscv_pipeline_u.if_id_stage_u.register_file_u.rv32_register[30]);
+    $display("rv32 register[31] t6  : 0x%H", mhome_soc_top_u.riscv_pipeline_u.if_id_stage_u.register_file_u.rv32_register[31]);
+    $display("rv32 register pc      : 0x%H", (mhome_soc_top_u.riscv_pipeline_u.mem_wb_stage_u.mem_pc_plus4_wb - 4));
 end
 endtask
 

@@ -27,7 +27,7 @@
 
 //--------------------------------------------------------------------------
 // Designer: macro
-// Brief:
+// Brief: control pipeline flush and stall
 // Change Log:
 //--------------------------------------------------------------------------
 
@@ -45,15 +45,28 @@ module hazard_unit
 //--------------------------------------------------------------------------
 (
     // Inputs
-    input wire         clk,
-    input wire         rst_n,
+    input wire        ex_pc_jump_en_pc_mux,
 
     // Outputs
+    output reg        hazard_flush_if_id_reg,
+    output reg        hazard_flush_id_ex_reg
 );
 
 //--------------------------------------------------------------------------
-// Design:
+// Design: when flush is enable, if_id_register and id_ex register will
+//         flush
 //--------------------------------------------------------------------------
+//assign hazard_flush_if_id_reg = ex_pc_jump_en_pc_mux ? `PP_FLUSH_IF_ID_REG_ENABLE : `PP_FLUSH_IF_ID_DISABLE;
+//assign hazard_flush_id_ex_reg = ex_pc_jump_en_pc_mux ? `PP_FLUSH_ID_EX_REG_ENABLE : `PP_FLUSH_IF_ID_DISABLE;
+always @(ex_pc_jump_en_pc_mux) begin
+    if (ex_pc_jump_en_pc_mux) begin
+        hazard_flush_if_id_reg <= `PP_FLUSH_IF_ID_REG_ENABLE;
+        hazard_flush_id_ex_reg <= `PP_FLUSH_ID_EX_REG_ENABLE;
+    end else begin
+        hazard_flush_if_id_reg <= `PP_FLUSH_IF_ID_REG_DISABLE;
+        hazard_flush_id_ex_reg <= `PP_FLUSH_ID_EX_REG_DISABLE;
+    end
+end
 
 endmodule
 //--------------------------------------------------------------------------

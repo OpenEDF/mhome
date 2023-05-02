@@ -2,7 +2,7 @@ Magic 271485
 Revision Verdi_O-2018.09-SP2
 
 ; Window Layout <x> <y> <width> <height> <signalwidth> <valuewidth>
-viewPort 0 27 1278 572 273 116
+viewPort 0 27 1278 408 273 116
 
 ; File list:
 ; openDirFile [-d delimiter] [-s time_offset] [-rf auto_bus_rule_file] path_name file_name
@@ -16,16 +16,16 @@ signalSpacing 5
 
 ; windowTimeUnit is used for zoom, cursor & marker
 ; waveform viewport range
-zoom 0.000000 1020.100000
-cursor 69.74032444959
+zoom 0.000000 126.250000
+cursor 0.000000
 marker 0.000000
 
 ; user define markers
 ; userMarker time_pos marker_name color linestyle
 ; visible top row signal index
-top 0
+top 20
 ; marker line index
-markerPos 39
+markerPos 56
 
 ; counter signal list
 ; addCounterSig -Rising|-Falling|-AnyChange signal
@@ -37,6 +37,16 @@ addCounterSig -AnyChange "/mhome_soc_tb/mhome_soc_top_u/riscv_pipeline_u/if_id_s
 ; addCounterSig -Rising|-Falling|-AnyChange signal
 
 addCounterSig -Rising "/mhome_soc_tb/mhome_soc_top_u/riscv_pipeline_u/if_id_stage_u/register_file_u/clk"
+
+; counter signal list
+; addCounterSig -Rising|-Falling|-AnyChange signal
+
+addCounterSig -Rising "/mhome_soc_tb/mhome_soc_top_u/riscv_pipeline_u/source_pc_gen_if_w[31:0]"
+
+; counter signal list
+; addCounterSig -Rising|-Falling|-AnyChange signal
+
+addCounterSig -AnyChange "/mhome_soc_tb/mhome_soc_top_u/riscv_pipeline_u/source_pc_gen_if_w[31:0]"
 
 ; event list
 ; addEvent event_name event_expression
@@ -68,38 +78,58 @@ addSignal -h 15 -holdScope ex_cycle_count_mem_w[31:0]
 addSignal -h 15 -holdScope mem_cycle_count_wb_w[31:0]
 addSignal -h 15 -holdScope mem_cycle_count_end_check_w[31:0]
 addGroup "pc" -e FALSE
-addSignal -h 15 /mhome_soc_tb/mhome_soc_top_u/riscv_pipeline_u/source_pc_gen_if_w[31:0]
-addSignal -h 15 -holdScope id_pc_plus4_ex_w[31:0]
-addGroup "if_id_stage" -e FALSE
-addSignal -c ID_GREEN5 -ls solid -lw 1 -h 15 -UNSIGNED -ASC /mhome_soc_tb/mhome_soc_top_u/riscv_pipeline_u/id_inst_debug_str_ex_w[24:1]
-addSignal -c ID_YELLOW5 -ls solid -lw 1 -h 15 -holdScope if_instruction_id_w[31:0]
-addSignal -h 15 -holdScope id_read_rs1_data_ex_w[31:0]
-addSignal -h 15 -holdScope id_read_rs2_data_ex_w[31:0]
-addSignal -c ID_ORANGE5 -ls solid -lw 1 -h 15 -holdScope id_imm_exten_data_ex_w[31:0]
-addSignal -c ID_PURPLE5 -ls solid -lw 1 -h 15 -holdScope id_write_dest_register_index_ex_w[4:0]
-addSignal -c ID_YELLOW4 -ls solid -lw 1 -h 15 -holdScope id_write_register_en_ex_w
-addSignal -h 15 -holdScope id_inst_encoding_ex_w[7:0]
+addSignal -h 15 /mhome_soc_tb/mhome_soc_top_u/riscv_pipeline_u/pc_gen_u/if_pc_plus4_pc_src[31:0]
+addSignal -h 15 -holdScope ex_pc_jump_en_pc_mux
+addSignal -h 15 -holdScope ex_jump_new_pc_pc_mux[31:0]
+addSignal -h 15 -holdScope source_pc_gen_if[31:0]
+addGroup "pc_if_stage" -e FALSE
+addSignal -c ID_YELLOW5 -ls solid -lw 1 -h 15 /mhome_soc_tb/mhome_soc_top_u/riscv_pipeline_u/pc_if_stage_u/if_instruction_id[31:0]
+addSignal -h 15 -holdScope if_pc_plus4_pc_gen[31:0]
+addSignal -h 15 -UNSIGNED -HEX -holdScope if_pc_plus4_id[31:0]
+addSignal -h 15 -holdScope if_current_pc_id[31:0]
+addGroup "if_id_stage"
+addSignal -c ID_GREEN5 -ls solid -lw 1 -h 15 -UNSIGNED -ASC /mhome_soc_tb/mhome_soc_top_u/riscv_pipeline_u/if_id_stage_u/id_inst_debug_str_ex[24:1]
+addSignal -h 15 -holdScope id_pc_plus4_ex[31:0]
+addSignal -h 15 -holdScope id_read_rs1_data_ex[31:0]
+addSignal -h 15 -holdScope id_read_rs2_data_ex[31:0]
+addSignal -c ID_PURPLE5 -ls solid -lw 1 -h 15 -holdScope id_imm_exten_data_ex[31:0]
+addSignal -c ID_YELLOW5 -ls solid -lw 1 -h 15 -holdScope id_write_dest_register_index_ex[4:0]
+addSignal -h 15 -holdScope id_write_register_en_ex
+addSignal -h 15 -holdScope id_mem_write_en_ex
+addSignal -h 15 -holdScope id_mem_oper_size_ex[1:0]
+addSignal -h 15 -holdScope id_current_pc_ex[31:0]
+addSignal -h 15 -holdScope id_rs2_shamt_ex[4:0]
+addSignal -h 15 -holdScope id_wb_result_src_ex[1:0]
+addSignal -h 15 -holdScope id_sel_imm_rs2data_alu_ex
+addSignal -h 15 -holdScope id_pc_jump_en_ex
 addGroup "id_ex_stage" -e FALSE
-addSignal -h 15 -UNSIGNED -ASC /mhome_soc_tb/mhome_soc_top_u/riscv_pipeline_u/ex_inst_debug_str_mem_w[24:1]
-addSignal -h 15 -holdScope ex_write_dest_register_index_mem_w[4:0]
-addSignal -h 15 -holdScope ex_write_register_en_mem_w
-addSignal -c ID_GREEN7 -ls solid -lw 1 -h 15 -holdScope ex_alu_addr_calcul_result_mem_w[31:0]
-addSignal -h 15 -holdScope ex_write_rs2_data_mem_w[31:0]
+addSignal -c ID_GREEN5 -ls solid -lw 1 -h 15 -UNSIGNED -ASC /mhome_soc_tb/mhome_soc_top_u/riscv_pipeline_u/id_ex_stage_u/ex_inst_debug_str_mem[24:1]
+addSignal -h 15 -holdScope ex_pc_plus4_mem[31:0]
+addSignal -h 15 -holdScope ex_write_dest_register_index_mem[4:0]
+addSignal -h 15 -holdScope ex_write_register_en_mem
+addSignal -h 15 -holdScope ex_alu_addr_calcul_result_mem[31:0]
+addSignal -h 15 -holdScope ex_write_rs2_data_mem[31:0]
+addSignal -h 15 -holdScope ex_mem_write_en_mem
+addSignal -h 15 -holdScope ex_mem_oper_size_mem[1:0]
+addSignal -h 15 -UNSIGNED -HEX -holdScope ex_wb_result_src_mem[1:0]
+addSignal -h 15 -holdScope ex_pc_jump_en_pc_mux
+addSignal -h 15 -holdScope ex_jump_new_pc_pc_mux[31:0]
 addGroup "ex_mem_stage" -e FALSE
-addSignal -h 15 -UNSIGNED -ASC /mhome_soc_tb/mhome_soc_top_u/riscv_pipeline_u/mem_inst_debug_str_wb_w[24:1]
-addSignal -h 15 -holdScope mem_pc_plus4_wb_w[31:0]
-addSignal -h 15 -holdScope mem_write_dest_register_index_wb_w[4:0]
-addSignal -h 15 -holdScope mem_write_register_en_wb_w
-addSignal -h 15 -holdScope mem_read_mem_data_wb_w[31:0]
-addSignal -h 15 -holdScope mem_alu_result_direct_wb_w[31:0]
-addGroup "mem_wb_stage" -e FALSE
-addSignal -h 15 /mhome_soc_tb/mhome_soc_top_u/riscv_pipeline_u/wb_write_dest_register_index_id_w[4:0]
-addSignal -h 15 -holdScope wb_write_register_en_id_w
-addSignal -c ID_YELLOW5 -ls solid -lw 1 -h 15 -holdScope wb_select_data_write_register_id_w[31:0]
+addSignal -c ID_GREEN5 -ls solid -lw 1 -h 15 -UNSIGNED -ASC /mhome_soc_tb/mhome_soc_top_u/riscv_pipeline_u/ex_mem_stage_u/mem_inst_debug_str_wb[24:1]
+addSignal -h 15 -holdScope mem_pc_plus4_wb[31:0]
+addSignal -h 15 -holdScope mem_write_dest_register_index_wb[4:0]
+addSignal -h 15 -holdScope mem_write_register_en_wb
+addSignal -h 15 -holdScope mem_read_mem_data_wb[31:0]
+addSignal -h 15 -holdScope mem_alu_result_direct_wb[31:0]
+addSignal -h 15 -holdScope mem_wb_result_src_wb[1:0]
+addGroup "mem_wb_stage"
+addSignal -h 15 -UNSIGNED -HEX /mhome_soc_tb/mhome_soc_top_u/riscv_pipeline_u/if_id_stage_u/id_inst_encoding_ex_w[7:0]
+addSignal -c ID_GREEN5 -ls solid -lw 1 -h 15 -UNSIGNED -ASC /mhome_soc_tb/mhome_soc_top_u/riscv_pipeline_u/mem_wb_stage_u/wb_inst_debug_str_finish[24:1]
+addSignal -h 15 -holdScope wb_write_dest_register_index_id[4:0]
+addSignal -h 15 -holdScope wb_write_register_en_id
+addSignal -h 15 -holdScope wb_sel_result_to_register_id[31:0]
 addGroup "register_file" -e FALSE
-addSignal -c ID_GREEN5 -ls solid -lw 1 -h 15 /mhome_soc_tb/mhome_soc_top_u/riscv_pipeline_u/if_id_stage_u/register_file_u/clk
-addSignal -c ID_YELLOW5 -ls solid -lw 1 -h 15 -UNSIGNED -HEX -holdScope RisingCounter_clk[63:0]
-addSignal -h 15 -UNSIGNED -HEX -holdScope rv32_register[0][31:0]
+addSignal -h 15 -UNSIGNED -HEX /mhome_soc_tb/mhome_soc_top_u/riscv_pipeline_u/if_id_stage_u/register_file_u/rv32_register[0][31:0]
 addSignal -c ID_CYAN5 -ls solid -lw 1 -h 15 -UNSIGNED -HEX -holdScope rv32_register[1][31:0]
 addSignal -h 15 -holdScope rv32_register[2][31:0]
 addSignal -h 15 -holdScope rv32_register[3][31:0]
@@ -131,7 +161,7 @@ addSignal -h 15 -holdScope rv32_register[28][31:0]
 addSignal -h 15 -holdScope rv32_register[29][31:0]
 addSignal -h 15 -holdScope rv32_register[30][31:0]
 addSignal -h 15 -holdScope rv32_register[31][31:0]
-addGroup "G9"
+addGroup "G10"
 
 ; getSignalForm Scope Hierarchy Status
 ; active file of getSignalForm

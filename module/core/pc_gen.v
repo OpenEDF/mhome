@@ -48,7 +48,8 @@ module pc_gen
     input wire         clk,
     input wire         rst_n,
     input wire [31:0]  if_pc_plus4_pc_src,
-    // input wire  branch_en
+    input wire         ex_pc_jump_en_pc_mux,
+    input wire [31:0]  ex_jump_new_pc_pc_mux,
 
     // outputs
     output reg [31:0]  cycle_count_pc_gen_start,
@@ -59,11 +60,12 @@ reg [31:0] tmp_pc_src;
 
 //--------------------------------------------------------------------------
 // Design: Multiplexer selects the source of PC
+//         TODO: branch/stall/jtag/interrupt and other, blocking assign
 //--------------------------------------------------------------------------
-always @(*) begin
-    /* TODO: branch/stall/jtag/interrupt and other, blocking assign */
-    //if () begin
-    //end
+always @(ex_pc_jump_en_pc_mux or ex_jump_new_pc_pc_mux or if_pc_plus4_pc_src) begin
+    if (ex_pc_jump_en_pc_mux) begin
+        tmp_pc_src = ex_jump_new_pc_pc_mux;
+    end
     // end
     // else if () begin
     //
@@ -72,9 +74,9 @@ always @(*) begin
     //
     // end ...
     //
-    //else begin
-    tmp_pc_src = if_pc_plus4_pc_src;
-    //end
+    else begin
+        tmp_pc_src = if_pc_plus4_pc_src;
+    end
 end
 
 //--------------------------------------------------------------------------

@@ -55,7 +55,8 @@ module pipeline_ctrl
     output reg [1:0]   id_mem_oper_size,
     output reg         id_rs2_shamt_en,
     output reg [1:0]   id_wb_result_src,
-    output reg         id_sel_imm_rs2data_alu
+    output reg         id_sel_imm_rs2data_alu,
+    output reg         id_pc_jump_en
 );
 
 //--------------------------------------------------------------------------
@@ -84,7 +85,7 @@ assign inst_20bit_exten = id_instruction_ctrl[20];
 //         insstruction
 //--------------------------------------------------------------------------
 always @(id_instruction_ctrl or inst_funct3 or inst_opcode or inst_30bit or inst_20bit_exten) begin
-    /* default value */
+    /* default value, TODO: deleted it */
     begin: def_val
         id_imm_src_ctrl <= `R_TYPE_INST;
         id_write_register_en <= 1'b0;
@@ -94,6 +95,7 @@ always @(id_instruction_ctrl or inst_funct3 or inst_opcode or inst_30bit or inst
         id_rs2_shamt_en <= 1'b0;
         id_wb_result_src <= `WB_SEL_ALU_RESULT;
         id_sel_imm_rs2data_alu <= `ALU_SEL_RS2DATA_INPUT;
+        id_pc_jump_en <= `PP_JUMP_DISABLE;
     end
     case (inst_opcode)
         `OPCODE_LUI_U: begin
@@ -108,7 +110,9 @@ always @(id_instruction_ctrl or inst_funct3 or inst_opcode or inst_30bit or inst
         end
         `OPCODE_JAL_J: begin
             id_imm_src_ctrl <= `J_TYPE_INST;
-            id_write_register_en <= 1'b1;
+            id_write_register_en <= `PP_WRITE_DEST_REG_ENABLE;
+            id_pc_jump_en <= `PP_JUMP_ENABLE;
+            id_wb_result_src <= `WB_SEL_PCP4_RESULT;
             id_inst_encoding <= `RV32_BASE_INST_JAL;
         end
         `OPCODE_JALR_I: begin
@@ -216,6 +220,7 @@ always @(id_instruction_ctrl or inst_funct3 or inst_opcode or inst_30bit or inst
             id_rs2_shamt_en <= 1'b0;
             id_wb_result_src <= `WB_SEL_ALU_RESULT;
             id_sel_imm_rs2data_alu <= `ALU_SEL_RS2DATA_INPUT;
+            id_pc_jump_en <= `PP_JUMP_DISABLE;
         end
     endcase
 end

@@ -49,6 +49,7 @@ module pc_if_stage
     input wire          rst_n,
     input wire  [31:0]  pc_gen_start_cycle_count_if,
     input wire  [31:0]  pc_source_pc_gen_if,
+    input wire          hazard_flush_if_id_reg,
 
     // outputs
     output reg  [31:0]  if_cycle_count_id,
@@ -102,9 +103,15 @@ always @(posedge clk or negedge rst_n) begin
         if_current_pc_id <= `MHOME_START_PC;
     end
     else begin
-        if_instruction_id <= if_instruction_id_w;
-        if_pc_plus4_id <= if_pc_plus4_id_w;
-        if_current_pc_id <= pc_source_pc_gen_if;
+        if (hazard_flush_if_id_reg) begin
+            if_instruction_id <= `RV32I_NOP;
+            if_pc_plus4_id <= 32'h0000_0000;
+            if_current_pc_id <= `MHOME_START_PC;
+        end else begin
+            if_instruction_id <= if_instruction_id_w;
+            if_pc_plus4_id <= if_pc_plus4_id_w;
+            if_current_pc_id <= pc_source_pc_gen_if;
+        end
     end
 end
 

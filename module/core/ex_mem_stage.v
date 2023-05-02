@@ -39,7 +39,7 @@
 //--------------------------------------------------------------------------
 // Module
 //--------------------------------------------------------------------------
-module ex_mem_stage 
+module ex_mem_stage
 //--------------------------------------------------------------------------
 // Ports
 //--------------------------------------------------------------------------
@@ -111,7 +111,7 @@ always @(posedge clk or negedge rst_n) begin
         mem_write_register_en_wb <= 1'b0;
         mem_alu_result_direct_wb <= 32'h00000000;
         mem_wb_result_src_wb <= `WB_SEL_ALU_RESULT;
-        mem_inst_debug_str_wb <= "nop";
+        mem_inst_debug_str_wb <= "adi";
     end else begin
         mem_pc_plus4_wb <= ex_pc_plus4_mem;
         mem_write_dest_register_index_wb <= ex_write_dest_register_index_mem;

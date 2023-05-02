@@ -81,6 +81,7 @@ wire [31:0]  id_current_pc_ex_w;            /* current stage PC */
 wire [4:0]   id_rs2_shamt_ex_w;             /* SLLI/SRLI/SALI shamt data */
 wire [1:0]   id_wb_result_src_ex_w;         /* wb stage select data write to register */
 wire         id_sel_imm_rs2data_alu_ex_w;   /* execute alu select immidate or rs2 data an input2 */
+wire         id_pc_jump_en_ex_w;            /* pipeline jump enable */
 wire [8*3:1] id_inst_debug_str_ex_w;        /* riscv instruction debug string name */
 
 // execute stage
@@ -93,6 +94,8 @@ wire [31:0]  ex_write_rs2_data_mem_w;              /* data will be write to memo
 wire         ex_mem_write_en_mem_w;                /* memory operation read and wirte */
 wire [1:0]   ex_mem_oper_size_mem_w;               /* memory opearation size word/halfword/byte */
 wire [1:0]   ex_wb_result_src_mem_w;               /* wb stage select data write to register */
+wire         ex_pc_jump_en_pc_mux_w;               /* pipeline enable jump */
+wire [31:0]  ex_jump_new_pc_pc_mux_w;              /* pipeline jump to new pc */
 wire [8*3:1] ex_inst_debug_str_mem_w;              /* riscv instruction debug string name */
 
 // access memory stage
@@ -112,6 +115,10 @@ wire [4:0]   wb_write_dest_register_index_id_w;  /* write register file index */
 wire         wb_write_register_en_id_w;          /* enable write register file */
 wire [31:0]  wb_sel_result_to_register_id_w;     /* write the data to register file*/
 
+// hazard unit
+wire         hazard_flush_if_id_reg_w;      /* hazard flush if id register */
+wire         hazard_flush_id_ex_reg_w;      /* hazard flush id ex register */
+
 //--------------------------------------------------------------------------
 // Design: led test logic show core state
 //--------------------------------------------------------------------------
@@ -130,6 +137,8 @@ pc_gen pc_gen_u(
     .clk        (sys_clk),
     .rst_n      (sys_rst_n),
     .if_pc_plus4_pc_src           (if_pc_plus4_pc_gen_w),
+    .ex_pc_jump_en_pc_mux         (ex_pc_jump_en_pc_mux_w),
+    .ex_jump_new_pc_pc_mux        (ex_jump_new_pc_pc_mux_w),
 
     .cycle_count_pc_gen_start     (pc_gen_start_cycle_count_if_w),
     .source_pc_gen_if             (source_pc_gen_if_w)
@@ -143,6 +152,7 @@ pc_if_stage pc_if_stage_u(
     .rst_n      (sys_rst_n),
     .pc_gen_start_cycle_count_if  (pc_gen_start_cycle_count_if_w),
     .pc_source_pc_gen_if          (source_pc_gen_if_w),
+    .hazard_flush_if_id_reg       (hazard_flush_if_id_reg_w),
 
     .if_cycle_count_id            (if_cycle_count_id_w),
     .if_instruction_id            (if_instruction_id_w),
@@ -164,6 +174,7 @@ if_id_stage if_id_stage_u(
     .wb_write_register_data_id   (wb_sel_result_to_register_id_w),
     .wb_write_reginster_en_id    (wb_write_register_en_id_w),
     .if_current_pc_id            (if_current_pc_id_w),
+    .hazard_flush_id_ex_reg      (hazard_flush_id_ex_reg_w),
 
     .id_cycle_count_ex     (id_cycle_count_ex_w),
     .id_pc_plus4_ex        (id_pc_plus4_ex_w),
@@ -179,6 +190,7 @@ if_id_stage if_id_stage_u(
     .id_rs2_shamt_ex           (id_rs2_shamt_ex_w),
     .id_wb_result_src_ex       (id_wb_result_src_ex_w),
     .id_sel_imm_rs2data_alu_ex (id_sel_imm_rs2data_alu_ex_w),
+    .id_pc_jump_en_ex          (id_pc_jump_en_ex_w),
 
     .id_inst_debug_str_ex    (id_inst_debug_str_ex_w)
 );
@@ -203,6 +215,7 @@ id_ex_stage id_ex_stage_u(
     .id_rs2_shamt_ex           (id_rs2_shamt_ex_w),
     .id_wb_result_src_ex       (id_wb_result_src_ex_w),
     .id_sel_imm_rs2data_alu_ex (id_sel_imm_rs2data_alu_ex_w),
+    .id_pc_jump_en_ex          (id_pc_jump_en_ex_w),
     .id_inst_debug_str_ex      (id_inst_debug_str_ex_w),
 
     .ex_cycle_count_mem    (ex_cycle_count_mem_w),
@@ -214,6 +227,8 @@ id_ex_stage id_ex_stage_u(
     .ex_mem_write_en_mem                 (ex_mem_write_en_mem_w),
     .ex_mem_oper_size_mem                (ex_mem_oper_size_mem_w),
     .ex_wb_result_src_mem                (ex_wb_result_src_mem_w),
+    .ex_pc_jump_en_pc_mux                (ex_pc_jump_en_pc_mux_w),
+    .ex_jump_new_pc_pc_mux               (ex_jump_new_pc_pc_mux_w),
 
     .ex_inst_debug_str_mem               (ex_inst_debug_str_mem_w)
 
@@ -269,5 +284,16 @@ mem_wb_stage mem_wb_stage_u(
     .wb_inst_debug_str_finish            (mem_instruction_name_check_w)
 );
 
+//--------------------------------------------------------------------------
+// Design: pipeline control and data hazard signal
+//--------------------------------------------------------------------------
+hazard_unit hazard_unit_u(
+    .ex_pc_jump_en_pc_mux        (ex_pc_jump_en_pc_mux_w),
+
+    .hazard_flush_if_id_reg      (hazard_flush_if_id_reg_w),
+    .hazard_flush_id_ex_reg      (hazard_flush_id_ex_reg_w)
+);
+
 endmodule
+
 //--------------------------------------------------------------------------

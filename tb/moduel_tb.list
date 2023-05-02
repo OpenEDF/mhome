@@ -10,6 +10,7 @@ src/mem_wb_stage.v
 src/mhome_soc_top.v
 src/pc_gen.v
 src/pc_if_stage.v
+src/hazard_unit.v
 src/riscv_pipeline.v
 
 # testbech file

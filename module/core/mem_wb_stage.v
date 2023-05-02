@@ -108,7 +108,7 @@ end
 //--------------------------------------------------------------------------
 always @(posedge clk or negedge rst_n) begin
     if (!rst_n) begin
-        wb_inst_debug_str_finish <= "nop";
+        wb_inst_debug_str_finish <= "adi";
     end else begin
         wb_inst_debug_str_finish <= mem_inst_debug_str_wb;
     end

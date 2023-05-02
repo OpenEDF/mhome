@@ -54,6 +54,7 @@ module if_id_stage
     input wire [31:0]  wb_write_register_data_id,
     input wire         wb_write_reginster_en_id,
     input wire [31:0]  if_current_pc_id,
+    input wire         hazard_flush_id_ex_reg,
 
     // outputs
     output reg [31:0]  id_cycle_count_ex,
@@ -70,6 +71,7 @@ module if_id_stage
     output reg [4:0]   id_rs2_shamt_ex,
     output reg [1:0]   id_wb_result_src_ex,
     output reg         id_sel_imm_rs2data_alu_ex,
+    output reg         id_pc_jump_en_ex,
     output reg [8*3:1] id_inst_debug_str_ex
 );
 
@@ -92,6 +94,7 @@ reg  [4:0]  id_rs2_shamt_ex_r;
 wire        id_rs2_shamt_en_w;
 wire [1:0]  id_wb_result_src_w;
 wire        id_sel_imm_rs2data_alu_w;
+wire        id_pc_jump_en_w;
 reg  [8*3:1] id_inst_debug_str_r;
 
 assign id_inst_rs1_w = if_instruction_id[19:15];
@@ -132,7 +135,7 @@ always @(id_imm_exten_src_w or inst) begin
         U_TYPE:
            id_imm_exten_data_r <= {inst[31], inst[30:20], inst[19:12], {12{1'b0}}};
         J_TYPE:
-           id_imm_exten_data_r <= {inst[31], inst[30:20], inst[19:12], {12{1'b0}}};
+           id_imm_exten_data_r <= {{12{inst[31]}}, inst[19:12], inst[20], inst[30:25], inst[24:21], 1'b0};
         default:
            id_imm_exten_data_r <= 32'h0000_0000;
     endcase
@@ -146,6 +149,8 @@ always @(id_inst_encoding_ex_w) begin
     case (id_inst_encoding_ex_w)
         `RV32_BASE_INST_LUI:                id_inst_debug_str_r = "lui";
         `RV32_BASE_INST_AUIPC:              id_inst_debug_str_r = "aui";
+        `RV32_BASE_INST_JAL:                id_inst_debug_str_r = "jal";
+        `RV32_BASE_INST_JALR:               id_inst_debug_str_r = "jar";
         `RV32_BASE_INST_BEQ:                id_inst_debug_str_r = "beq";
         `RV32_BASE_INST_BNE:                id_inst_debug_str_r = "bne";
         `RV32_BASE_INST_BLT:                id_inst_debug_str_r = "blt";
@@ -232,7 +237,8 @@ pipeline_ctrl pipeline_ctrl_u(
     .id_mem_oper_size       (id_mem_oper_size_ex_w),
     .id_rs2_shamt_en        (id_rs2_shamt_en_w),
     .id_wb_result_src       (id_wb_result_src_w),
-    .id_sel_imm_rs2data_alu (id_sel_imm_rs2data_alu_w)
+    .id_sel_imm_rs2data_alu (id_sel_imm_rs2data_alu_w),
+    .id_pc_jump_en          (id_pc_jump_en_w)
 );
 
 //--------------------------------------------------------------------------
@@ -244,29 +250,47 @@ always @(posedge clk or negedge rst_n) begin
         id_read_rs1_data_ex <= 32'h0000_0000;
         id_read_rs2_data_ex <= 32'h0000_0000;
         id_imm_exten_data_ex <= 32'h0000_0000;
-        id_inst_encoding_ex  <= 8'h00;
-        id_write_register_en_ex <= 1'b0;
+        id_inst_encoding_ex  <= `RV32_BASE_INST_ADDI;
+        id_write_register_en_ex <= `PP_WRITE_DEST_REG_ENABLE;
         id_write_dest_register_index_ex <= 5'b00000;
         id_current_pc_ex <= `MHOME_START_PC;
         id_rs2_shamt_ex <= 5'b00000;
         id_wb_result_src_ex <= `WB_SEL_ALU_RESULT;
         id_sel_imm_rs2data_alu_ex <= `ALU_SEL_RS2DATA_INPUT;
-        id_inst_debug_str_ex <= "nop";
+        id_pc_jump_en_ex <= `PP_JUMP_DISABLE;
+        id_inst_debug_str_ex <= "adi";
     end else begin
-        id_pc_plus4_ex <= if_pc_plus4_id;
-        id_read_rs1_data_ex  <= id_read_rs1_data_ex_w;
-        id_read_rs2_data_ex  <= id_read_rs2_data_ex_w;
-        id_imm_exten_data_ex <= id_imm_exten_data_r;
-        id_inst_encoding_ex  <= id_inst_encoding_ex_w;
-        id_write_register_en_ex <= id_write_register_en_ex_w;
-        id_write_dest_register_index_ex <= id_write_dest_register_index_ex_w;
-        id_mem_write_en_ex <= id_mem_write_en_ex_w;
-        id_mem_oper_size_ex <= id_mem_oper_size_ex_w;
-        id_current_pc_ex <= if_current_pc_id;
-        id_rs2_shamt_ex <= id_rs2_shamt_ex_r;
-        id_wb_result_src_ex <= id_wb_result_src_w;
-        id_sel_imm_rs2data_alu_ex <= id_sel_imm_rs2data_alu_w;
-        id_inst_debug_str_ex <= id_inst_debug_str_r;
+        if (hazard_flush_id_ex_reg) begin
+            id_pc_plus4_ex <= 32'h0000_0000;
+            id_read_rs1_data_ex <= 32'h0000_0000;
+            id_read_rs2_data_ex <= 32'h0000_0000;
+            id_imm_exten_data_ex <= 32'h0000_0000;
+            id_inst_encoding_ex  <= `RV32_BASE_INST_ADDI;  // nop: addi x0, x0, 0
+            id_write_register_en_ex <= `PP_WRITE_DEST_REG_ENABLE;
+            id_write_dest_register_index_ex <= 5'b00000;
+            id_current_pc_ex <= `MHOME_START_PC;
+            id_rs2_shamt_ex <= 5'b00000;
+            id_wb_result_src_ex <= `WB_SEL_ALU_RESULT;
+            id_sel_imm_rs2data_alu_ex <= `ALU_SEL_RS2DATA_INPUT;
+            id_pc_jump_en_ex <= `PP_JUMP_DISABLE;
+            id_inst_debug_str_ex <= "adi";
+        end else begin
+            id_pc_plus4_ex <= if_pc_plus4_id;
+            id_read_rs1_data_ex  <= id_read_rs1_data_ex_w;
+            id_read_rs2_data_ex  <= id_read_rs2_data_ex_w;
+            id_imm_exten_data_ex <= id_imm_exten_data_r;
+            id_inst_encoding_ex  <= id_inst_encoding_ex_w;
+            id_write_register_en_ex <= id_write_register_en_ex_w;
+            id_write_dest_register_index_ex <= id_write_dest_register_index_ex_w;
+            id_mem_write_en_ex <= id_mem_write_en_ex_w;
+            id_mem_oper_size_ex <= id_mem_oper_size_ex_w;
+            id_current_pc_ex <= if_current_pc_id;
+            id_rs2_shamt_ex <= id_rs2_shamt_ex_r;
+            id_wb_result_src_ex <= id_wb_result_src_w;
+            id_sel_imm_rs2data_alu_ex <= id_sel_imm_rs2data_alu_w;
+            id_pc_jump_en_ex <= id_pc_jump_en_w;
+            id_inst_debug_str_ex <= id_inst_debug_str_r;
+        end
     end
 end
 endmodule

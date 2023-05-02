@@ -54,6 +54,20 @@
 `define ALU_SEL_RS2DATA_INPUT  1'b0
 `define ALU_SEL_IMM_INPUT      1'b1
 
+// pipeline jump enable or disable
+`define PP_JUMP_DISABLE    1'b0
+`define PP_JUMP_ENABLE     1'b1
+
+// pipeline write dest register enable or disable
+`define PP_WRITE_DEST_REG_ENABLE  1'b1
+`define PP_WRITE_DEST_REG_DISABLE 1'b0
+
+// pipeline flush control enable and disable
+`define PP_FLUSH_IF_ID_REG_ENABLE     1'b1
+`define PP_FLUSH_IF_ID_REG_DISABLE    1'b0
+`define PP_FLUSH_ID_EX_REG_ENABLE     1'b1
+`define PP_FLUSH_ID_EX_REG_DISABLE    1'b0
+
 // produce immediates by base instruction formats
 `define R_TYPE_INST      3'b000
 `define I_TYPE_INST      3'b001

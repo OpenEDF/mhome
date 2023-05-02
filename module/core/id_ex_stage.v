@@ -61,6 +61,7 @@ module id_ex_stage
     input wire [4:0]   id_rs2_shamt_ex,
     input wire [1:0]   id_wb_result_src_ex,
     input wire         id_sel_imm_rs2data_alu_ex,
+    input wire         id_pc_jump_en_ex,
     input wire [8*3:1] id_inst_debug_str_ex,
 
     // outputs
@@ -73,6 +74,8 @@ module id_ex_stage
     output reg         ex_mem_write_en_mem,
     output reg [1:0]   ex_mem_oper_size_mem,
     output reg [1:0]   ex_wb_result_src_mem,
+    output wire        ex_pc_jump_en_pc_mux,
+    output reg [31:0]  ex_jump_new_pc_pc_mux,
 
     output reg [8*3:1] ex_inst_debug_str_mem
 );
@@ -82,6 +85,13 @@ module id_ex_stage
 //--------------------------------------------------------------------------
 reg [31:0] ex_alu_addr_calcul_result_mem_r;
 reg [31:0] ex_alu_oper_src2_data;
+
+//--------------------------------------------------------------------------
+// Design: pipeline jump new pc
+//--------------------------------------------------------------------------
+wire [31:0] ex_jump_new_pc_auipc_inst_w;
+assign ex_jump_new_pc_auipc_inst_w = id_imm_exten_data_ex + id_current_pc_ex;
+assign ex_pc_jump_en_pc_mux = id_pc_jump_en_ex;
 
 // TODO: UNUSED WARNING
 wire [4:0] shamt;
@@ -112,14 +122,28 @@ end
 //--------------------------------------------------------------------------
 // Design: riscv pipeline execution arithmetic and instruction processing
 //--------------------------------------------------------------------------
-always @(id_inst_encoding_ex or id_imm_exten_data_ex or id_read_rs1_data_ex or id_current_pc_ex) begin
+//always @(*) begin //TODO: diifferent?
+always @(id_inst_encoding_ex or id_imm_exten_data_ex or id_read_rs1_data_ex or id_current_pc_ex or ex_jump_new_pc_auipc_inst_w or ex_alu_oper_src2_data) begin
+    /* default value */
+    begin
+        ex_jump_new_pc_pc_mux <= 32'h0000_0000;
+        ex_alu_addr_calcul_result_mem_r <= 32'h0000_0000;
+    end
     case (id_inst_encoding_ex)
         `RV32_BASE_INST_LUI:
             ex_alu_addr_calcul_result_mem_r <= id_imm_exten_data_ex;
         `RV32_BASE_INST_AUIPC:
             ex_alu_addr_calcul_result_mem_r <= id_imm_exten_data_ex + id_current_pc_ex;
-        default:
+        `RV32_BASE_INST_ADDI:
+            ex_alu_addr_calcul_result_mem_r <= id_read_rs1_data_ex + ex_alu_oper_src2_data;
+        `RV32_BASE_INST_JAL: begin
             ex_alu_addr_calcul_result_mem_r <= 32'h0000_0000;
+            ex_jump_new_pc_pc_mux <= ex_jump_new_pc_auipc_inst_w;
+        end
+        default: begin
+            ex_alu_addr_calcul_result_mem_r <= 32'h0000_0000;
+            ex_jump_new_pc_pc_mux <= 32'h0000_0000;
+        end
     endcase
 end
 
@@ -136,7 +160,7 @@ always @(posedge clk or negedge rst_n) begin
         ex_mem_write_en_mem <= `MEM_READ;
         ex_mem_oper_size_mem <= `MEM_OPER_WORD;
         ex_wb_result_src_mem <= `WB_SEL_ALU_RESULT;
-        ex_inst_debug_str_mem <= "nop";
+        ex_inst_debug_str_mem <= "adi";
     end else begin
         ex_pc_plus4_mem <= id_pc_plus4_ex;
         ex_write_dest_register_index_mem <= id_write_dest_register_index_ex;

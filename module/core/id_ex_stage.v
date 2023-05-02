@@ -154,7 +154,7 @@ always @(posedge clk or negedge rst_n) begin
     if (!rst_n) begin
         ex_pc_plus4_mem <= 32'h0000_0000;
         ex_write_dest_register_index_mem <= 5'b00000;
-        ex_write_register_en_mem <= 1'b0;
+        ex_write_register_en_mem <= `PP_WRITE_DEST_REG_ENABLE;
         ex_write_rs2_data_mem <= 32'h0000_0000;
         ex_alu_addr_calcul_result_mem <= 32'h0000_0000;
         ex_mem_write_en_mem <= `MEM_READ;

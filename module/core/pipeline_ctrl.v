@@ -88,7 +88,7 @@ always @(id_instruction_ctrl or inst_funct3 or inst_opcode or inst_30bit or inst
     /* default value, TODO: deleted it */
     begin: def_val
         id_imm_src_ctrl <= `R_TYPE_INST;
-        id_write_register_en <= 1'b0;
+        id_write_register_en <= `PP_WRITE_DEST_REG_DISABLE;
         id_inst_encoding <= `RV32_ILLEGAL_INST;
         id_mem_write_en <= `MEM_READ;
         id_mem_oper_size <= `MEM_OPER_WORD;
@@ -100,12 +100,12 @@ always @(id_instruction_ctrl or inst_funct3 or inst_opcode or inst_30bit or inst
     case (inst_opcode)
         `OPCODE_LUI_U: begin
             id_imm_src_ctrl <= `U_TYPE_INST;
-            id_write_register_en <= 1'b1;
+            id_write_register_en <= `PP_WRITE_DEST_REG_ENABLE;
             id_inst_encoding <= `RV32_BASE_INST_LUI;
         end
         `OPCODE_AUIPC_U: begin
             id_imm_src_ctrl <= `U_TYPE_INST;
-            id_write_register_en <= 1'b1;
+            id_write_register_en <= `PP_WRITE_DEST_REG_ENABLE;
             id_inst_encoding <= `RV32_BASE_INST_AUIPC;
         end
         `OPCODE_JAL_J: begin
@@ -117,12 +117,12 @@ always @(id_instruction_ctrl or inst_funct3 or inst_opcode or inst_30bit or inst
         end
         `OPCODE_JALR_I: begin
             id_imm_src_ctrl <= `I_TYPE_INST;
-            id_write_register_en <= 1'b1;
+            id_write_register_en <= `PP_WRITE_DEST_REG_ENABLE;
             id_inst_encoding <= `RV32_BASE_INST_JALR;
         end
         `OPCODE_BRANCH_B: begin
             id_imm_src_ctrl <= `B_TYPE_INST;
-            id_write_register_en <= 1'b0;
+            id_write_register_en <= `PP_WRITE_DEST_REG_DISABLE;
             case (inst_funct3)
                 3'b000: id_inst_encoding <= `RV32_BASE_INST_BEQ;
                 3'b001: id_inst_encoding <= `RV32_BASE_INST_BNE;
@@ -135,7 +135,7 @@ always @(id_instruction_ctrl or inst_funct3 or inst_opcode or inst_30bit or inst
         end
         `OPCODE_LOAD_I: begin
             id_imm_src_ctrl <= `I_TYPE_INST;
-            id_write_register_en <= 1'b1;
+            id_write_register_en <= `PP_WRITE_DEST_REG_ENABLE;
             case (inst_funct3)
                 3'b000: id_inst_encoding <= `RV32_BASE_INST_LB;
                 3'b001: id_inst_encoding <= `RV32_BASE_INST_LH;
@@ -147,7 +147,7 @@ always @(id_instruction_ctrl or inst_funct3 or inst_opcode or inst_30bit or inst
          end
         `OPCODE_STORE_S: begin
             id_imm_src_ctrl <= `S_TYPE_INST;
-            id_write_register_en <= 1'b0;
+            id_write_register_en <= `PP_WRITE_DEST_REG_DISABLE;
             case (inst_funct3)
                 3'b000: id_inst_encoding <= `RV32_BASE_INST_SB;
                 3'b001: id_inst_encoding <= `RV32_BASE_INST_SH;
@@ -157,7 +157,7 @@ always @(id_instruction_ctrl or inst_funct3 or inst_opcode or inst_30bit or inst
          end
         `OPCODE_ALU_I: begin
             id_imm_src_ctrl <= `I_TYPE_INST;
-            id_write_register_en <= 1'b1;
+            id_write_register_en <= `PP_WRITE_DEST_REG_ENABLE;
             id_sel_imm_rs2data_alu <= `ALU_SEL_IMM_INPUT;
             case (inst_funct3)
                 3'b000: id_inst_encoding <= `RV32_BASE_INST_ADDI;
@@ -171,7 +171,7 @@ always @(id_instruction_ctrl or inst_funct3 or inst_opcode or inst_30bit or inst
         end
         `OPCODE_ALU_R: begin
             id_imm_src_ctrl <= `R_TYPE_INST;
-            id_write_register_en <= 1'b1;
+            id_write_register_en <= `PP_WRITE_DEST_REG_ENABLE;
             case ({inst_30bit, inst_funct3})
                 4'b0001: begin
                     id_inst_encoding <= `RV32_BASE_INST_SLLI;
@@ -200,12 +200,12 @@ always @(id_instruction_ctrl or inst_funct3 or inst_opcode or inst_30bit or inst
         end
         `OPCODE_FENCE_I: begin
             id_imm_src_ctrl <= `I_TYPE_INST;
-            id_write_register_en <= 1'b1;
+            id_write_register_en <= `PP_WRITE_DEST_REG_ENABLE;
             id_inst_encoding <= `RV32_BASE_INST_FENCE;
         end
         `OPCODE_EXTEN_I: begin
             id_imm_src_ctrl <= `I_TYPE_INST;
-            id_write_register_en <= 1'b1;
+            id_write_register_en <= `PP_WRITE_DEST_REG_ENABLE;
             if (inst_20bit_exten)
                 id_inst_encoding <= `RV32_BASE_INST_FENCE;
             else
@@ -213,7 +213,7 @@ always @(id_instruction_ctrl or inst_funct3 or inst_opcode or inst_30bit or inst
         end
         default: begin
             id_imm_src_ctrl <= `R_TYPE_INST;
-            id_write_register_en <= 1'b0;
+            id_write_register_en <= `PP_WRITE_DEST_REG_DISABLE;
             id_inst_encoding <= `RV32_ILLEGAL_INST;
             id_mem_write_en <= `MEM_READ;
             id_mem_oper_size <= `MEM_OPER_WORD;

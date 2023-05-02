@@ -108,7 +108,7 @@ always @(posedge clk or negedge rst_n) begin
         mem_pc_plus4_wb <= 32'h0000_0000;
         mem_write_dest_register_index_wb <= 5'b00000;
         mem_read_mem_data_wb <= 32'h0000_0000;
-        mem_write_register_en_wb <= 1'b0;
+        mem_write_register_en_wb <= `PP_WRITE_DEST_REG_ENABLE;
         mem_alu_result_direct_wb <= 32'h00000000;
         mem_wb_result_src_wb <= `WB_SEL_ALU_RESULT;
         mem_inst_debug_str_wb <= "adi";

@@ -24,6 +24,14 @@ $ make wave
 | bltu   | branch unsigned rs1 less than rs2 |✔ |  rv32mi_bltu[n].s | make case=bltu[n] |
 | bge    | branch signed rs1 greater than or euqal rs2 |✔ |  rv32mi_bge[n].s | make case=bge[n] |
 | bgeu   | branch unsigned rs1 greater than or equal rs2 |✔ |  rv32mi_bgeu[n].s | make case=bgeu[n] |
+| lb     | load 8-bit data from memory rs1+offset to register rd |✔ |  rv32mi_lb.s | make case=lb |
+| lh     | load 16-bit data from memory rs1+offset to register rd |✔ |  rv32mi_lh.s | make case=lh |
+| lw     | load 32-bit data from memory rs1+offset to register rd |✔ |  rv32mi_lw.s | make case=lw |
+| lbu    | load 8-bit unsigned data from memory rs1+offset to register rd |✔ |  rv32mi_lbu.s | make case=lbu |
+| lhu    | load 16-bit unsigned data from memory rs1+offset to register rd |✔ |  rv32mi_lhu.s | make case=lhu |
+| sb     | store 8-bit data from rs2 register to rs1+offset memory |✔ |  rv32mi_sb.s | make case=sb |
+| sl     | store 16-bit data from rs2 register to rs1+offset memory |✔ |  rv32mi_sh.s | make case=sh |
+| sw     | store 32-bit data from rs2 register to rs1+offset memory |✔ |  rv32mi_sw.s | make case=sw |
 | auipc  | Text        |❌|                 | |
 
 ### debug:

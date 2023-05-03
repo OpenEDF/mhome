@@ -258,6 +258,8 @@ always @(posedge clk or negedge rst_n) begin
         id_inst_encoding_ex  <= `RV32_BASE_INST_ADDI;
         id_write_register_en_ex <= `PP_WRITE_DEST_REG_ENABLE;
         id_write_dest_register_index_ex <= 5'b00000;
+        id_mem_write_en_ex <= `MEM_READ;
+        id_mem_oper_size_ex <= `MEM_OPER_WORD;
         id_current_pc_ex <= `MHOME_START_PC;
         id_rs2_shamt_ex <= 5'b00000;
         id_wb_result_src_ex <= `WB_SEL_ALU_RESULT;
@@ -276,6 +278,8 @@ always @(posedge clk or negedge rst_n) begin
             id_inst_encoding_ex  <= `RV32_BASE_INST_ADDI;  // nop: addi x0, x0, 0
             id_write_register_en_ex <= `PP_WRITE_DEST_REG_ENABLE;
             id_write_dest_register_index_ex <= 5'b00000;
+            id_mem_write_en_ex <= `MEM_READ;
+            id_mem_oper_size_ex <= `MEM_OPER_WORD;
             id_current_pc_ex <= `MHOME_START_PC;
             id_rs2_shamt_ex <= 5'b00000;
             id_wb_result_src_ex <= `WB_SEL_ALU_RESULT;

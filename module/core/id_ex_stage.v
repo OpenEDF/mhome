@@ -118,6 +118,15 @@ assign ex_inst_rs1_hazard = id_inst_rs1_ex;
 assign ex_inst_rs2_hazard = id_inst_rs2_ex;
 
 //--------------------------------------------------------------------------
+// Design: load copy a value from memory to register, address is base
+//         address for rs1 data adding  offset
+//--------------------------------------------------------------------------
+wire [31:0] ex_load_address;
+assign ex_load_address = ex_alu_oper_src1_data + id_imm_exten_data_ex;
+//wire [31:0] ex_load_address_u;
+//assign ex_load_address_u = $unsigned(ex_alu_oper_src1_data) + $unsigned(id_imm_exten_data_ex);
+
+//--------------------------------------------------------------------------
 // Design: pipeline cycle counter logic
 //--------------------------------------------------------------------------
 always @(posedge clk or negedge rst_n) begin
@@ -222,6 +231,14 @@ always @(*) begin
             ex_jump_new_pc_pc_mux <= ex_jump_new_pc_auipc_inst_w;
             ex_branch_comp_ctrl <= (ex_alu_oper_src1_data >= ex_alu_oper_src2_data) ? `PP_BRANCH_COMP_ENABLE : `PP_BRANCH_COMP_DISABLE;
         end
+        `RV32_BASE_INST_LB: ex_alu_addr_calcul_result_mem_r <= ex_load_address;
+        `RV32_BASE_INST_LH: ex_alu_addr_calcul_result_mem_r <= ex_load_address;
+        `RV32_BASE_INST_LW: ex_alu_addr_calcul_result_mem_r <= ex_load_address;
+        `RV32_BASE_INST_LBU: ex_alu_addr_calcul_result_mem_r <= ex_load_address;
+        `RV32_BASE_INST_LHU: ex_alu_addr_calcul_result_mem_r <= ex_load_address;
+        `RV32_BASE_INST_SB:  ex_alu_addr_calcul_result_mem_r <= ex_load_address;
+        `RV32_BASE_INST_SH: ex_alu_addr_calcul_result_mem_r <= ex_load_address;
+        `RV32_BASE_INST_SW: ex_alu_addr_calcul_result_mem_r <= ex_load_address;
         default: begin
             ex_alu_addr_calcul_result_mem_r <= 32'h0000_0000;
             ex_jump_new_pc_pc_mux <= 32'h0000_0000;

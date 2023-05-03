@@ -141,13 +141,34 @@ always @(id_instruction_ctrl or inst_funct3 or inst_opcode or inst_30bit or inst
         `OPCODE_LOAD_I: begin
             id_imm_src_ctrl <= `I_TYPE_INST;
             id_write_register_en <= `PP_WRITE_DEST_REG_ENABLE;
+            id_wb_result_src <= `WB_SEL_MEM_RESULT;
+            id_mem_oper_size <= `MEM_OPER_WORD;
+            id_mem_write_en <= `MEM_READ;
             case (inst_funct3)
-                3'b000: id_inst_encoding <= `RV32_BASE_INST_LB;
-                3'b001: id_inst_encoding <= `RV32_BASE_INST_LH;
-                3'b010: id_inst_encoding <= `RV32_BASE_INST_LW;
-                3'b100: id_inst_encoding <= `RV32_BASE_INST_LBU;
-                3'b101: id_inst_encoding <= `RV32_BASE_INST_LHU;
-                default: id_inst_encoding <= `RV32_ILLEGAL_INST;
+                3'b000: begin
+                    id_inst_encoding <= `RV32_BASE_INST_LB;
+                    id_mem_oper_size <= `MEM_OPER_BYTE;
+                end
+                3'b001: begin
+                    id_inst_encoding <= `RV32_BASE_INST_LH;
+                    id_mem_oper_size <= `MEM_OPER_HALFWORD;
+                end
+                3'b010: begin
+                    id_inst_encoding <= `RV32_BASE_INST_LW;
+                    id_mem_oper_size <= `MEM_OPER_WORD;
+                end
+                3'b100: begin
+                    id_inst_encoding <= `RV32_BASE_INST_LBU;
+                    id_mem_oper_size <= `MEM_OPER_BYTE;
+                end
+                3'b101: begin
+                    id_inst_encoding <= `RV32_BASE_INST_LHU;
+                    id_mem_oper_size <= `MEM_OPER_HALFWORD;
+                end
+                default: begin
+                    id_inst_encoding <= `RV32_ILLEGAL_INST;
+                    id_mem_oper_size <= `MEM_OPER_WORD;
+                end
             endcase
          end
         `OPCODE_STORE_S: begin

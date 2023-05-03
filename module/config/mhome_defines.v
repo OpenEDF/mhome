@@ -41,7 +41,7 @@
 // pipeline memory read and write operation size
 `define MEM_OPER_WORD      2'b00
 `define MEM_OPER_HALFWORD  2'b01
-`define MEM_OPER_BYTE      2'b00
+`define MEM_OPER_BYTE      2'b10
 `define MEM_READ           1'b0
 `define MEM_WRITE          1'b1
 

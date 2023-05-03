@@ -60,11 +60,11 @@ wire [31:0] pc_gen_start_cycle_count_if_w; /* pc gen register to IF/ID stage */
 wire [31:0] source_pc_gen_if_w;            /* source pc value */
 
 // instruction fetch stage
-wire [31:0] if_cycle_count_id_w;           /* IF/ID stage register to ID/EX stage */
-wire [31:0] if_instruction_id_w;           /* instruction */
-wire [31:0] if_pc_plus4_pc_gen_w;          /* pc pluse 4 to pc gen*/
-wire [31:0] if_pc_plus4_id_w;              /* PC plus 4 to next stage */
-wire [31:0] if_current_pc_id_w;            /* current stage PC */
+wire [31:0] if_cycle_count_id_w;            /* IF/ID stage register to ID/EX stage */
+wire [31:0] if_instruction_id_w;            /* instruction */
+wire [31:0] if_pc_plus4_pc_gen_w;           /* pc pluse 4 to pc gen*/
+wire [31:0] if_pc_plus4_id_w;               /* PC plus 4 to next stage */
+wire [31:0] if_current_pc_id_w;             /* current stage PC */
 
 // decoder stage
 wire [31:0]  id_cycle_count_ex_w;           /* ID/EX stage register to EX/MEM stage */
@@ -90,7 +90,7 @@ wire [8*3:1] id_inst_debug_str_ex_w;        /* riscv instruction debug string na
 // execute stage
 wire [31:0]  ex_cycle_count_mem_w;          /* EX/MEM stage register to MEM/WB stage */
 wire [31:0]  ex_pc_plus4_mem_w;             /* pc plus 4 to next stage */
-wire [4:0]   ex_write_dest_register_index_mem_w; /* write register file index */
+wire [4:0]   ex_write_dest_register_index_mem_w;   /* write register file index */
 wire         ex_write_register_en_mem_w;           /* write register enable */
 wire [31:0]  ex_alu_addr_calcul_result_mem_w;      /* alu result or read or write memory address to mem stage */
 wire [31:0]  ex_write_rs2_data_mem_w;              /* data will be write to memory */
@@ -110,11 +110,11 @@ wire [4:0]   mem_write_dest_register_index_wb_w; /* write register file index */
 wire         mem_write_register_en_wb_w;         /* write register enable */
 wire [31:0]  mem_read_mem_data_wb_w;             /* access memory read data to write back */
 wire [31:0]  mem_alu_result_direct_wb_w;         /* excute stage direct send data to wb stage */
-wire [1:0]   mem_wb_result_src_wb_w;               /* wb stage select data write to register */
+wire [1:0]   mem_wb_result_src_wb_w;                 /* wb stage select data write to register */
 wire [31:0]  mem_alu_addr_calcul_result_mem_ex_w;    /* data hazard connect result to execute */
 wire [4:0]   mem_write_dest_register_index_hazard_w; /* data hazard connect register index to hazard */
 wire         mem_write_register_en_hazard_w;         /* data hazard connect register write enable to hazard */
-wire [8*3:1] mem_inst_debug_str_wb_w;            /* riscv instruction debug string nane */
+wire [8*3:1] mem_inst_debug_str_wb_w;                /* riscv instruction debug string nane */
 
 // write back stage
 wire [31:0]  mem_cycle_count_end_check_w;   /* MEM/WB output pc check */

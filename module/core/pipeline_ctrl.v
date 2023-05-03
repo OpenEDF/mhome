@@ -174,10 +174,20 @@ always @(id_instruction_ctrl or inst_funct3 or inst_opcode or inst_30bit or inst
         `OPCODE_STORE_S: begin
             id_imm_src_ctrl <= `S_TYPE_INST;
             id_write_register_en <= `PP_WRITE_DEST_REG_DISABLE;
+            id_mem_write_en <= `MEM_WRITE;
             case (inst_funct3)
-                3'b000: id_inst_encoding <= `RV32_BASE_INST_SB;
-                3'b001: id_inst_encoding <= `RV32_BASE_INST_SH;
-                3'b010: id_inst_encoding <= `RV32_BASE_INST_SW;
+                3'b000: begin
+                    id_inst_encoding <= `RV32_BASE_INST_SB;
+                    id_mem_oper_size <= `MEM_OPER_BYTE;
+                end
+                3'b001: begin
+                    id_inst_encoding <= `RV32_BASE_INST_SH;
+                    id_mem_oper_size <= `MEM_OPER_HALFWORD;
+                end
+                3'b010: begin
+                    id_inst_encoding <= `RV32_BASE_INST_SW;
+                    id_mem_oper_size <= `MEM_OPER_WORD;
+                end
                 default: id_inst_encoding <= `RV32_ILLEGAL_INST;
             endcase
          end

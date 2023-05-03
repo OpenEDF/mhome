@@ -9,8 +9,8 @@ _start:
     .text
     .align 2
 rv32mi_beq:
-    lui a0, 0x000FFF08
-    lui a1, 0x000FFF01
+    lui a0, 0x000FFF01
+    lui a1, 0x000FFF08
     bgeu a0, a1, func2
     
 func1:

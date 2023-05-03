@@ -11,7 +11,7 @@ _start:
 rv32mi_beq:
     lui a0, 0x000FFF01
     lui a1, 0x000FFF08
-    beq a0, a1, func2
+    bltu a0, a1, func2
     
 func1:
     lui a3, 0x000FFF03

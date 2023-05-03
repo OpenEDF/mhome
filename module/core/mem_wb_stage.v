@@ -61,6 +61,9 @@ module mem_wb_stage
     output wire [4:0]   wb_write_dest_register_index_id,
     output wire         wb_write_register_en_id,
     output wire [31:0]  wb_sel_result_to_register_id,
+    output wire [31:0]  wb_sel_result_to_register_ex,
+    output wire [4:0]   wb_write_dest_register_index_hazard,
+    output wire         wb_write_register_en_hazard,
     output reg  [8*3:1] wb_inst_debug_str_finish
 );
 
@@ -75,6 +78,14 @@ assign wb_sel_result_to_register_id = wb_sel_result_to_register_r;
 //--------------------------------------------------------------------------
 assign wb_write_dest_register_index_id = mem_write_dest_register_index_wb;
 assign wb_write_register_en_id = mem_write_register_en_wb;
+
+//--------------------------------------------------------------------------
+// Design: pipeline output the data hazards signal to execute and hazards
+//         unit.
+//--------------------------------------------------------------------------
+assign wb_sel_result_to_register_ex = wb_sel_result_to_register_r;
+assign wb_write_dest_register_index_hazard = wb_write_dest_register_index_id;
+assign wb_write_register_en_hazard = wb_write_register_en_id;
 
 //--------------------------------------------------------------------------
 //Design: According to the control signal selection

@@ -62,6 +62,13 @@ module id_ex_stage
     input wire [1:0]   id_wb_result_src_ex,
     input wire         id_sel_imm_rs2data_alu_ex,
     input wire         id_pc_jump_en_ex,
+    input wire         id_pc_branch_en_ex,
+    input wire [31:0]  mem_alu_addr_calcul_result_mem_ex,
+    input wire [31:0]  wb_sel_result_to_register_ex,
+    input wire [1:0]   hazard_ctrl_ex_rs1data_sel_src,
+    input wire [1:0]   hazard_ctrl_ex_rs2data_sel_src,
+    input wire [4:0]   id_inst_rs1_ex,
+    input wire [4:0]   id_inst_rs2_ex,
     input wire [8*3:1] id_inst_debug_str_ex,
 
     // outputs
@@ -76,6 +83,8 @@ module id_ex_stage
     output reg [1:0]   ex_wb_result_src_mem,
     output wire        ex_pc_jump_en_pc_mux,
     output reg [31:0]  ex_jump_new_pc_pc_mux,
+    output wire [4:0]  ex_inst_rs1_hazard,
+    output wire [4:0]  ex_inst_rs2_hazard,
 
     output reg [8*3:1] ex_inst_debug_str_mem
 );
@@ -85,6 +94,9 @@ module id_ex_stage
 //--------------------------------------------------------------------------
 reg [31:0] ex_alu_addr_calcul_result_mem_r;
 reg [31:0] ex_alu_oper_src2_data;
+reg        ex_branch_comp_ctrl;
+reg [31:0] ex_alu_oper_src1_data;
+reg [31:0] ex_alu_oper_src2_data_pre;
 
 //--------------------------------------------------------------------------
 // Design: pipeline jump new pc
@@ -92,12 +104,18 @@ reg [31:0] ex_alu_oper_src2_data;
 wire [31:0] ex_jump_new_pc_auipc_inst_w;
 wire [31:0] ex_jump_rs1data_imm_pc_w;
 assign ex_jump_new_pc_auipc_inst_w = id_imm_exten_data_ex + id_current_pc_ex;
-assign ex_jump_rs1data_imm_pc_w = id_imm_exten_data_ex + id_read_rs1_data_ex;
-assign ex_pc_jump_en_pc_mux = id_pc_jump_en_ex;
+assign ex_jump_rs1data_imm_pc_w = id_imm_exten_data_ex + ex_alu_oper_src1_data;
+assign ex_pc_jump_en_pc_mux = id_pc_jump_en_ex | (id_pc_branch_en_ex & ex_branch_comp_ctrl);
 
 // TODO: UNUSED WARNING
 wire [4:0] shamt;
 assign shamt = id_rs2_shamt_ex;
+
+//--------------------------------------------------------------------------
+// Design: pipeline data hazard slove for read rs1 and rs2 of execute stage
+//--------------------------------------------------------------------------
+assign ex_inst_rs1_hazard = id_inst_rs1_ex;
+assign ex_inst_rs2_hazard = id_inst_rs2_ex;
 
 //--------------------------------------------------------------------------
 // Design: pipeline cycle counter logic
@@ -111,13 +129,45 @@ always @(posedge clk or negedge rst_n) begin
 end
 
 //--------------------------------------------------------------------------
+// Design: pipeline data hazards sloving forwarding select rs1 data source
+//--------------------------------------------------------------------------
+always @(hazard_ctrl_ex_rs1data_sel_src or id_read_rs1_data_ex or mem_alu_addr_calcul_result_mem_ex or wb_sel_result_to_register_ex) begin
+    case (hazard_ctrl_ex_rs1data_sel_src)
+        `PP_FORWARD_EX_RSXDATA_SEL_ID:
+            ex_alu_oper_src1_data <= id_read_rs1_data_ex;
+        `PP_FORWARD_EX_RSXDATA_SEL_MEM:
+            ex_alu_oper_src1_data <= mem_alu_addr_calcul_result_mem_ex;
+        `PP_FORWARD_EX_RSXDATA_SEL_WB:
+            ex_alu_oper_src1_data <= wb_sel_result_to_register_ex;
+        default:
+            ex_alu_oper_src1_data <= 32'h0000_0000;
+    endcase
+end
+
+//--------------------------------------------------------------------------
+// Design: pipeline data hazards sloving forwarding select rs2 data source
+//--------------------------------------------------------------------------
+always @(hazard_ctrl_ex_rs2data_sel_src or id_read_rs2_data_ex or mem_alu_addr_calcul_result_mem_ex or wb_sel_result_to_register_ex) begin
+    case (hazard_ctrl_ex_rs2data_sel_src)
+        `PP_FORWARD_EX_RSXDATA_SEL_ID:
+            ex_alu_oper_src2_data_pre <= id_read_rs2_data_ex;
+        `PP_FORWARD_EX_RSXDATA_SEL_MEM:
+            ex_alu_oper_src2_data_pre <= mem_alu_addr_calcul_result_mem_ex;
+        `PP_FORWARD_EX_RSXDATA_SEL_WB:
+            ex_alu_oper_src2_data_pre <= wb_sel_result_to_register_ex;
+        default:
+            ex_alu_oper_src2_data_pre <= 32'h0000_0000;
+    endcase
+end
+
+//--------------------------------------------------------------------------
 // Design: ALU operational data source control
 //--------------------------------------------------------------------------
-always @(id_sel_imm_rs2data_alu_ex or id_read_rs2_data_ex or id_imm_exten_data_ex) begin
+always @(id_sel_imm_rs2data_alu_ex or ex_alu_oper_src2_data_pre or id_imm_exten_data_ex) begin
     if (id_sel_imm_rs2data_alu_ex) begin
         ex_alu_oper_src2_data <= id_imm_exten_data_ex;
     end else begin
-        ex_alu_oper_src2_data <= id_read_rs2_data_ex;
+        ex_alu_oper_src2_data <= ex_alu_oper_src2_data_pre;
     end
 end
 
@@ -125,11 +175,13 @@ end
 // Design: riscv pipeline execution arithmetic and instruction processing
 //--------------------------------------------------------------------------
 //always @(*) begin //TODO: diifferent?
-always @(id_inst_encoding_ex or id_imm_exten_data_ex or id_read_rs1_data_ex or id_current_pc_ex or ex_jump_new_pc_auipc_inst_w or ex_alu_oper_src2_data) begin
+//always @(id_inst_encoding_ex or id_imm_exten_data_ex or id_read_rs1_data_ex or id_current_pc_ex or ex_jump_new_pc_auipc_inst_w or ex_alu_oper_src2_data) begin
+always @(*) begin
     /* default value */
     begin
         ex_jump_new_pc_pc_mux <= 32'h0000_0000;
         ex_alu_addr_calcul_result_mem_r <= 32'h0000_0000;
+        ex_branch_comp_ctrl <= `PP_BRANCH_COMP_DISABLE;
     end
     case (id_inst_encoding_ex)
         `RV32_BASE_INST_LUI:
@@ -137,14 +189,38 @@ always @(id_inst_encoding_ex or id_imm_exten_data_ex or id_read_rs1_data_ex or i
         `RV32_BASE_INST_AUIPC:
             ex_alu_addr_calcul_result_mem_r <= id_imm_exten_data_ex + id_current_pc_ex;
         `RV32_BASE_INST_ADDI:
-            ex_alu_addr_calcul_result_mem_r <= id_read_rs1_data_ex + ex_alu_oper_src2_data;
+            ex_alu_addr_calcul_result_mem_r <= ex_alu_oper_src1_data + ex_alu_oper_src2_data;
         `RV32_BASE_INST_JAL: begin
-            ex_alu_addr_calcul_result_mem_r <= 32'h0000_0000;
+            ex_alu_addr_calcul_result_mem_r <= 32'h0000_0000; //TODO: deleted it
             ex_jump_new_pc_pc_mux <= ex_jump_new_pc_auipc_inst_w;
         end
         `RV32_BASE_INST_JALR: begin
-            ex_alu_addr_calcul_result_mem_r <= 32'h0000_0000;
+            ex_alu_addr_calcul_result_mem_r <= 32'h0000_0000; //TODO: deleted it
             ex_jump_new_pc_pc_mux <= ex_jump_rs1data_imm_pc_w;
+        end
+        `RV32_BASE_INST_BEQ: begin
+            ex_jump_new_pc_pc_mux <= ex_jump_new_pc_auipc_inst_w;
+            ex_branch_comp_ctrl <= (ex_alu_oper_src1_data == ex_alu_oper_src2_data) ? `PP_BRANCH_COMP_ENABLE : `PP_BRANCH_COMP_DISABLE;
+        end
+        `RV32_BASE_INST_BNE: begin
+            ex_jump_new_pc_pc_mux <= ex_jump_new_pc_auipc_inst_w;
+            ex_branch_comp_ctrl <= (ex_alu_oper_src1_data != ex_alu_oper_src2_data) ? `PP_BRANCH_COMP_ENABLE : `PP_BRANCH_COMP_DISABLE;
+        end
+        `RV32_BASE_INST_BLT: begin
+            ex_jump_new_pc_pc_mux <= ex_jump_new_pc_auipc_inst_w;
+            ex_branch_comp_ctrl <= ($signed(ex_alu_oper_src1_data) < $signed(ex_alu_oper_src2_data)) ? `PP_BRANCH_COMP_ENABLE : `PP_BRANCH_COMP_DISABLE;
+        end
+        `RV32_BASE_INST_BGE: begin
+            ex_jump_new_pc_pc_mux <= ex_jump_new_pc_auipc_inst_w;
+            ex_branch_comp_ctrl <= ($signed(ex_alu_oper_src1_data) >= $signed(ex_alu_oper_src2_data)) ? `PP_BRANCH_COMP_ENABLE : `PP_BRANCH_COMP_DISABLE;
+        end
+        `RV32_BASE_INST_BLTU: begin
+            ex_jump_new_pc_pc_mux <= ex_jump_new_pc_auipc_inst_w;
+            ex_branch_comp_ctrl <= (ex_alu_oper_src1_data < ex_alu_oper_src2_data) ? `PP_BRANCH_COMP_ENABLE : `PP_BRANCH_COMP_DISABLE;
+        end
+        `RV32_BASE_INST_BGEU: begin
+            ex_jump_new_pc_pc_mux <= ex_jump_new_pc_auipc_inst_w;
+            ex_branch_comp_ctrl <= (ex_alu_oper_src1_data >= ex_alu_oper_src2_data) ? `PP_BRANCH_COMP_ENABLE : `PP_BRANCH_COMP_DISABLE;
         end
         default: begin
             ex_alu_addr_calcul_result_mem_r <= 32'h0000_0000;
@@ -171,7 +247,7 @@ always @(posedge clk or negedge rst_n) begin
         ex_pc_plus4_mem <= id_pc_plus4_ex;
         ex_write_dest_register_index_mem <= id_write_dest_register_index_ex;
         ex_write_register_en_mem <= id_write_register_en_ex;
-        ex_write_rs2_data_mem <= id_read_rs2_data_ex;
+        ex_write_rs2_data_mem <= ex_alu_oper_src2_data_pre;
         ex_alu_addr_calcul_result_mem <= ex_alu_addr_calcul_result_mem_r;
         ex_mem_write_en_mem <= id_mem_write_en_ex;
         ex_mem_oper_size_mem <= id_mem_oper_size_ex;

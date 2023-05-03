@@ -27,7 +27,7 @@
 
 //--------------------------------------------------------------------------
 // Designer: macro
-// Brief: control pipeline flush and stall
+// Brief: control pipeline flush and stall, pipeline data hazards.
 // Change Log:
 //--------------------------------------------------------------------------
 
@@ -45,11 +45,19 @@ module hazard_unit
 //--------------------------------------------------------------------------
 (
     // Inputs
-    input wire        ex_pc_jump_en_pc_mux,
+    input wire         ex_pc_jump_en_pc_mux,
+    input wire [4:0]   ex_rs1_index_hazard,
+    input wire [4:0]   ex_rs2_index_hazard,
+    input wire [4:0]   mem_rd_index_hazard,
+    input wire         mem_write_dest_en_hazard,
+    input wire [4:0]   wb_rd_index_hazard,
+    input wire         wb_write_dest_en_hazard,
 
     // Outputs
     output reg        hazard_flush_if_id_reg,
-    output reg        hazard_flush_id_ex_reg
+    output reg        hazard_flush_id_ex_reg,
+    output reg [1:0]  hazard_ctrl_ex_rs1data_sel_src,
+    output reg [1:0]  hazard_ctrl_ex_rs2data_sel_src
 );
 
 //--------------------------------------------------------------------------
@@ -65,6 +73,36 @@ always @(ex_pc_jump_en_pc_mux) begin
     end else begin
         hazard_flush_if_id_reg <= `PP_FLUSH_IF_ID_REG_DISABLE;
         hazard_flush_id_ex_reg <= `PP_FLUSH_ID_EX_REG_DISABLE;
+    end
+end
+
+//--------------------------------------------------------------------------
+// Design: sloving data hazards with forwarding for execute register 1
+//         must use the blocking assignment, mem stage has hogher priority
+//         over wb stage.
+//--------------------------------------------------------------------------
+always @(*) begin
+    if ((ex_rs1_index_hazard == mem_rd_index_hazard) && mem_write_dest_en_hazard) begin
+        hazard_ctrl_ex_rs1data_sel_src = `PP_FORWARD_EX_RSXDATA_SEL_MEM;
+    end else if ((ex_rs1_index_hazard == wb_rd_index_hazard) && wb_write_dest_en_hazard) begin
+        hazard_ctrl_ex_rs1data_sel_src = `PP_FORWARD_EX_RSXDATA_SEL_WB;
+    end else begin
+        hazard_ctrl_ex_rs1data_sel_src = `PP_FORWARD_EX_RSXDATA_SEL_ID;
+    end
+end
+
+//--------------------------------------------------------------------------
+// Design: sloving data hazards with forwarding for execute register 2
+//         must use the blocking assignment, mem stage has hogher priority
+//         over wb stage.
+//--------------------------------------------------------------------------
+always @(*) begin
+    if ((ex_rs2_index_hazard == mem_rd_index_hazard) && mem_write_dest_en_hazard) begin
+        hazard_ctrl_ex_rs2data_sel_src = `PP_FORWARD_EX_RSXDATA_SEL_MEM;
+    end else if ((ex_rs2_index_hazard == wb_rd_index_hazard) && wb_write_dest_en_hazard) begin
+        hazard_ctrl_ex_rs2data_sel_src = `PP_FORWARD_EX_RSXDATA_SEL_WB;
+    end else begin
+        hazard_ctrl_ex_rs2data_sel_src = `PP_FORWARD_EX_RSXDATA_SEL_ID;
     end
 end
 

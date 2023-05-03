@@ -82,6 +82,9 @@ wire [4:0]   id_rs2_shamt_ex_w;             /* SLLI/SRLI/SALI shamt data */
 wire [1:0]   id_wb_result_src_ex_w;         /* wb stage select data write to register */
 wire         id_sel_imm_rs2data_alu_ex_w;   /* execute alu select immidate or rs2 data an input2 */
 wire         id_pc_jump_en_ex_w;            /* pipeline jump enable */
+wire         id_pc_branch_en_ex_w;          /* pipeline branch enable */
+wire [4:0]   id_inst_rs1_w;                 /* instruction register port1 */
+wire [4:0]   id_inst_rs2_w;                 /* instruction register port2 */
 wire [8*3:1] id_inst_debug_str_ex_w;        /* riscv instruction debug string name */
 
 // execute stage
@@ -96,6 +99,8 @@ wire [1:0]   ex_mem_oper_size_mem_w;               /* memory opearation size wor
 wire [1:0]   ex_wb_result_src_mem_w;               /* wb stage select data write to register */
 wire         ex_pc_jump_en_pc_mux_w;               /* pipeline enable jump */
 wire [31:0]  ex_jump_new_pc_pc_mux_w;              /* pipeline jump to new pc */
+wire [4:0]   ex_inst_rs1_hazard_w;                 /* instruction register port1 to hazard*/
+wire [4:0]   ex_inst_rs2_hazard_w;                 /* instruction register port2 to hazard */
 wire [8*3:1] ex_inst_debug_str_mem_w;              /* riscv instruction debug string name */
 
 // access memory stage
@@ -106,6 +111,9 @@ wire         mem_write_register_en_wb_w;         /* write register enable */
 wire [31:0]  mem_read_mem_data_wb_w;             /* access memory read data to write back */
 wire [31:0]  mem_alu_result_direct_wb_w;         /* excute stage direct send data to wb stage */
 wire [1:0]   mem_wb_result_src_wb_w;               /* wb stage select data write to register */
+wire [31:0]  mem_alu_addr_calcul_result_mem_ex_w;    /* data hazard connect result to execute */
+wire [4:0]   mem_write_dest_register_index_hazard_w; /* data hazard connect register index to hazard */
+wire         mem_write_register_en_hazard_w;         /* data hazard connect register write enable to hazard */
 wire [8*3:1] mem_inst_debug_str_wb_w;            /* riscv instruction debug string nane */
 
 // write back stage
@@ -114,10 +122,15 @@ wire [8*3:1] mem_instruction_name_check_w;  /* MEM/WB output inst name check */
 wire [4:0]   wb_write_dest_register_index_id_w;  /* write register file index */
 wire         wb_write_register_en_id_w;          /* enable write register file */
 wire [31:0]  wb_sel_result_to_register_id_w;     /* write the data to register file*/
+wire [31:0]  wb_sel_result_to_register_ex_w;     /* data hazard connect regsiter data to execute */
+wire [4:0]   wb_write_dest_register_index_hazard_w; /* data hazard connect register index to hazard */
+wire         wb_write_register_en_hazard_w;         /* data hazard connect rd enable to hazard */
 
 // hazard unit
 wire         hazard_flush_if_id_reg_w;      /* hazard flush if id register */
 wire         hazard_flush_id_ex_reg_w;      /* hazard flush id ex register */
+wire [1:0]   hazard_ctrl_ex_rs1data_sel_src_w;    /* hazards control execute satge rs1 input data sources */
+wire [1:0]   hazard_ctrl_ex_rs2data_sel_src_w;    /* hazards control execute satge rs2 input data sources */
 
 //--------------------------------------------------------------------------
 // Design: led test logic show core state
@@ -191,6 +204,9 @@ if_id_stage if_id_stage_u(
     .id_wb_result_src_ex       (id_wb_result_src_ex_w),
     .id_sel_imm_rs2data_alu_ex (id_sel_imm_rs2data_alu_ex_w),
     .id_pc_jump_en_ex          (id_pc_jump_en_ex_w),
+    .id_pc_branch_en_ex        (id_pc_branch_en_ex_w),
+    .id_inst_rs1_ex            (id_inst_rs1_w),
+    .id_inst_rs2_ex            (id_inst_rs2_w),
 
     .id_inst_debug_str_ex    (id_inst_debug_str_ex_w)
 );
@@ -216,7 +232,14 @@ id_ex_stage id_ex_stage_u(
     .id_wb_result_src_ex       (id_wb_result_src_ex_w),
     .id_sel_imm_rs2data_alu_ex (id_sel_imm_rs2data_alu_ex_w),
     .id_pc_jump_en_ex          (id_pc_jump_en_ex_w),
+    .id_pc_branch_en_ex        (id_pc_branch_en_ex_w),
     .id_inst_debug_str_ex      (id_inst_debug_str_ex_w),
+    .mem_alu_addr_calcul_result_mem_ex (mem_alu_addr_calcul_result_mem_ex_w),
+    .wb_sel_result_to_register_ex      (wb_sel_result_to_register_ex_w),
+    .hazard_ctrl_ex_rs1data_sel_src    (hazard_ctrl_ex_rs1data_sel_src_w),
+    .hazard_ctrl_ex_rs2data_sel_src    (hazard_ctrl_ex_rs2data_sel_src_w),
+    .id_inst_rs1_ex                    (id_inst_rs1_w),
+    .id_inst_rs2_ex                    (id_inst_rs2_w),
 
     .ex_cycle_count_mem    (ex_cycle_count_mem_w),
     .ex_pc_plus4_mem       (ex_pc_plus4_mem_w),
@@ -229,13 +252,15 @@ id_ex_stage id_ex_stage_u(
     .ex_wb_result_src_mem                (ex_wb_result_src_mem_w),
     .ex_pc_jump_en_pc_mux                (ex_pc_jump_en_pc_mux_w),
     .ex_jump_new_pc_pc_mux               (ex_jump_new_pc_pc_mux_w),
+    .ex_inst_rs1_hazard                  (ex_inst_rs1_hazard_w),
+    .ex_inst_rs2_hazard                  (ex_inst_rs2_hazard_w),
 
     .ex_inst_debug_str_mem               (ex_inst_debug_str_mem_w)
 
 );
 
 //--------------------------------------------------------------------------
-// Design: access instaniate
+// Design: access memory instaniate
 //--------------------------------------------------------------------------
 ex_mem_stage ex_mem_stage_u(
     .clk       (sys_clk),
@@ -259,6 +284,9 @@ ex_mem_stage ex_mem_stage_u(
     .mem_read_mem_data_wb             (mem_read_mem_data_wb_w),
     .mem_alu_result_direct_wb         (mem_alu_result_direct_wb_w),
     .mem_wb_result_src_wb             (mem_wb_result_src_wb_w),
+    .mem_alu_addr_calcul_result_mem_ex    (mem_alu_addr_calcul_result_mem_ex_w),
+    .mem_write_dest_register_index_hazard (mem_write_dest_register_index_hazard_w),
+    .mem_write_register_en_hazard         (mem_write_register_en_hazard_w),
     .mem_inst_debug_str_wb            (mem_inst_debug_str_wb_w)
 );
 
@@ -281,6 +309,9 @@ mem_wb_stage mem_wb_stage_u(
     .wb_write_dest_register_index_id     (wb_write_dest_register_index_id_w),
     .wb_write_register_en_id             (wb_write_register_en_id_w),
     .wb_sel_result_to_register_id        (wb_sel_result_to_register_id_w),
+    .wb_sel_result_to_register_ex        (wb_sel_result_to_register_ex_w),
+    .wb_write_dest_register_index_hazard (wb_write_dest_register_index_hazard_w),
+    .wb_write_register_en_hazard         (wb_write_register_en_hazard_w),
     .wb_inst_debug_str_finish            (mem_instruction_name_check_w)
 );
 
@@ -289,9 +320,17 @@ mem_wb_stage mem_wb_stage_u(
 //--------------------------------------------------------------------------
 hazard_unit hazard_unit_u(
     .ex_pc_jump_en_pc_mux        (ex_pc_jump_en_pc_mux_w),
+    .ex_rs1_index_hazard         (ex_inst_rs1_hazard_w),
+    .ex_rs2_index_hazard         (ex_inst_rs2_hazard_w),
+    .mem_rd_index_hazard         (mem_write_dest_register_index_hazard_w),
+    .mem_write_dest_en_hazard    (mem_write_register_en_hazard_w),
+    .wb_rd_index_hazard          (wb_write_dest_register_index_hazard_w),
+    .wb_write_dest_en_hazard     (wb_write_register_en_hazard_w),
 
     .hazard_flush_if_id_reg      (hazard_flush_if_id_reg_w),
-    .hazard_flush_id_ex_reg      (hazard_flush_id_ex_reg_w)
+    .hazard_flush_id_ex_reg      (hazard_flush_id_ex_reg_w),
+    .hazard_ctrl_ex_rs1data_sel_src    (hazard_ctrl_ex_rs1data_sel_src_w),
+    .hazard_ctrl_ex_rs2data_sel_src    (hazard_ctrl_ex_rs2data_sel_src_w)
 );
 
 endmodule

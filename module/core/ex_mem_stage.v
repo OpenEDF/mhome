@@ -66,6 +66,9 @@ module ex_mem_stage
     output reg  [31:0]  mem_read_mem_data_wb,
     output reg  [31:0]  mem_alu_result_direct_wb,
     output reg  [1:0]   mem_wb_result_src_wb,
+    output wire [31:0]  mem_alu_addr_calcul_result_mem_ex,
+    output wire [4:0]   mem_write_dest_register_index_hazard,
+    output wire         mem_write_register_en_hazard,
     output reg  [8*3:1] mem_inst_debug_str_wb
 );
 
@@ -84,6 +87,14 @@ always @(posedge clk or negedge rst_n) begin
         mem_cycle_count_wb <= ex_cycle_count_mem;
     end
 end
+
+//--------------------------------------------------------------------------
+// Design: pipeline output the data hazards signal to execute and hazards
+//         unit.
+//--------------------------------------------------------------------------
+assign mem_alu_addr_calcul_result_mem_ex = ex_alu_addr_calcul_result_mem;
+assign mem_write_dest_register_index_hazard = ex_write_dest_register_index_mem;
+assign mem_write_register_en_hazard = ex_write_register_en_mem;
 
 //--------------------------------------------------------------------------
 // Design: pipeline instance data memory, 4K

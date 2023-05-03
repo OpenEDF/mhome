@@ -72,6 +72,9 @@ module if_id_stage
     output reg [1:0]   id_wb_result_src_ex,
     output reg         id_sel_imm_rs2data_alu_ex,
     output reg         id_pc_jump_en_ex,
+    output reg         id_pc_branch_en_ex,
+    output reg [4:0]   id_inst_rs1_ex,
+    output reg [4:0]   id_inst_rs2_ex,
     output reg [8*3:1] id_inst_debug_str_ex
 );
 
@@ -95,6 +98,7 @@ wire        id_rs2_shamt_en_w;
 wire [1:0]  id_wb_result_src_w;
 wire        id_sel_imm_rs2data_alu_w;
 wire        id_pc_jump_en_w;
+wire        id_pc_branch_en_w;
 reg  [8*3:1] id_inst_debug_str_r;
 
 assign id_inst_rs1_w = if_instruction_id[19:15];
@@ -155,7 +159,7 @@ always @(id_inst_encoding_ex_w) begin
         `RV32_BASE_INST_BNE:                id_inst_debug_str_r = "bne";
         `RV32_BASE_INST_BLT:                id_inst_debug_str_r = "blt";
         `RV32_BASE_INST_BGE:                id_inst_debug_str_r = "bge";
-        `RV32_BASE_INST_BLTU:               id_inst_debug_str_r = "btu";
+        `RV32_BASE_INST_BLTU:               id_inst_debug_str_r = "blu";
         `RV32_BASE_INST_BGEU:               id_inst_debug_str_r = "bgu";
         `RV32_BASE_INST_LB:                 id_inst_debug_str_r = "l_b";
         `RV32_BASE_INST_LH:                 id_inst_debug_str_r = "l_h";
@@ -238,7 +242,8 @@ pipeline_ctrl pipeline_ctrl_u(
     .id_rs2_shamt_en        (id_rs2_shamt_en_w),
     .id_wb_result_src       (id_wb_result_src_w),
     .id_sel_imm_rs2data_alu (id_sel_imm_rs2data_alu_w),
-    .id_pc_jump_en          (id_pc_jump_en_w)
+    .id_pc_jump_en          (id_pc_jump_en_w),
+    .id_pc_branch_en        (id_pc_branch_en_w)
 );
 
 //--------------------------------------------------------------------------
@@ -258,6 +263,9 @@ always @(posedge clk or negedge rst_n) begin
         id_wb_result_src_ex <= `WB_SEL_ALU_RESULT;
         id_sel_imm_rs2data_alu_ex <= `ALU_SEL_RS2DATA_INPUT;
         id_pc_jump_en_ex <= `PP_JUMP_DISABLE;
+        id_pc_branch_en_ex <= `PP_BRANCH_DISABLE;
+        id_inst_rs1_ex <= 5'b00000;
+        id_inst_rs2_ex <= 5'b00000;
         id_inst_debug_str_ex <= "adi";
     end else begin
         if (hazard_flush_id_ex_reg) begin
@@ -273,6 +281,9 @@ always @(posedge clk or negedge rst_n) begin
             id_wb_result_src_ex <= `WB_SEL_ALU_RESULT;
             id_sel_imm_rs2data_alu_ex <= `ALU_SEL_RS2DATA_INPUT;
             id_pc_jump_en_ex <= `PP_JUMP_DISABLE;
+            id_pc_branch_en_ex <= `PP_BRANCH_DISABLE;
+            id_inst_rs1_ex <= 5'b00000;
+            id_inst_rs2_ex <= 5'b00000;
             id_inst_debug_str_ex <= "adi";
         end else begin
             id_pc_plus4_ex <= if_pc_plus4_id;
@@ -289,6 +300,9 @@ always @(posedge clk or negedge rst_n) begin
             id_wb_result_src_ex <= id_wb_result_src_w;
             id_sel_imm_rs2data_alu_ex <= id_sel_imm_rs2data_alu_w;
             id_pc_jump_en_ex <= id_pc_jump_en_w;
+            id_pc_branch_en_ex <= id_pc_branch_en_w;
+            id_inst_rs1_ex <= id_inst_rs1_w;
+            id_inst_rs2_ex <= id_inst_rs2_w;
             id_inst_debug_str_ex <= id_inst_debug_str_r;
         end
     end

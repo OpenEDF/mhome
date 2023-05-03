@@ -58,6 +58,12 @@
 `define PP_JUMP_DISABLE    1'b0
 `define PP_JUMP_ENABLE     1'b1
 
+// pipeline branch enable or disable
+`define PP_BRANCH_DISABLE    1'b0
+`define PP_BRANCH_ENABLE     1'b1
+`define PP_BRANCH_COMP_DISABLE    1'b0
+`define PP_BRANCH_COMP_ENABLE     1'b1
+
 // pipeline write dest register enable or disable
 `define PP_WRITE_DEST_REG_ENABLE  1'b1
 `define PP_WRITE_DEST_REG_DISABLE 1'b0
@@ -67,6 +73,11 @@
 `define PP_FLUSH_IF_ID_REG_DISABLE    1'b0
 `define PP_FLUSH_ID_EX_REG_ENABLE     1'b1
 `define PP_FLUSH_ID_EX_REG_DISABLE    1'b0
+
+// pipeline data hazards slove with forwarding
+`define PP_FORWARD_EX_RSXDATA_SEL_ID     2'b00
+`define PP_FORWARD_EX_RSXDATA_SEL_MEM    2'b01
+`define PP_FORWARD_EX_RSXDATA_SEL_WB     2'b10
 
 // produce immediates by base instruction formats
 `define R_TYPE_INST      3'b000

@@ -82,9 +82,9 @@ end
 //         over wb stage.
 //--------------------------------------------------------------------------
 always @(*) begin
-    if ((ex_rs1_index_hazard == mem_rd_index_hazard) && mem_write_dest_en_hazard) begin
+    if (((ex_rs1_index_hazard == mem_rd_index_hazard) && (mem_rd_index_hazard != 5'b00000)) && mem_write_dest_en_hazard) begin
         hazard_ctrl_ex_rs1data_sel_src = `PP_FORWARD_EX_RSXDATA_SEL_MEM;
-    end else if ((ex_rs1_index_hazard == wb_rd_index_hazard) && wb_write_dest_en_hazard) begin
+    end else if (((ex_rs1_index_hazard == wb_rd_index_hazard) && (wb_rd_index_hazard != 5'b00000)) && wb_write_dest_en_hazard) begin
         hazard_ctrl_ex_rs1data_sel_src = `PP_FORWARD_EX_RSXDATA_SEL_WB;
     end else begin
         hazard_ctrl_ex_rs1data_sel_src = `PP_FORWARD_EX_RSXDATA_SEL_ID;
@@ -94,12 +94,12 @@ end
 //--------------------------------------------------------------------------
 // Design: sloving data hazards with forwarding for execute register 2
 //         must use the blocking assignment, mem stage has hogher priority
-//         over wb stage.
+//         over wb stage
 //--------------------------------------------------------------------------
 always @(*) begin
-    if ((ex_rs2_index_hazard == mem_rd_index_hazard) && mem_write_dest_en_hazard) begin
+    if (((ex_rs2_index_hazard == mem_rd_index_hazard) && (mem_rd_index_hazard != 5'b00000)) && mem_write_dest_en_hazard) begin
         hazard_ctrl_ex_rs2data_sel_src = `PP_FORWARD_EX_RSXDATA_SEL_MEM;
-    end else if ((ex_rs2_index_hazard == wb_rd_index_hazard) && wb_write_dest_en_hazard) begin
+    end else if (((ex_rs2_index_hazard == wb_rd_index_hazard) && (wb_rd_index_hazard != 5'b00000)) && wb_write_dest_en_hazard) begin
         hazard_ctrl_ex_rs2data_sel_src = `PP_FORWARD_EX_RSXDATA_SEL_WB;
     end else begin
         hazard_ctrl_ex_rs2data_sel_src = `PP_FORWARD_EX_RSXDATA_SEL_ID;

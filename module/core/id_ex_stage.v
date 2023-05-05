@@ -107,7 +107,7 @@ assign ex_jump_new_pc_auipc_inst_w = id_imm_exten_data_ex + id_current_pc_ex;
 assign ex_jump_rs1data_imm_pc_w = id_imm_exten_data_ex + ex_alu_oper_src1_data;
 assign ex_pc_jump_en_pc_mux = id_pc_jump_en_ex | (id_pc_branch_en_ex & ex_branch_comp_ctrl);
 
-// TODO: UNUSED WARNING
+// SLLI/SRLI/SRAI shift amount
 wire [4:0] shamt;
 assign shamt = id_rs2_shamt_ex;
 
@@ -123,8 +123,9 @@ assign ex_inst_rs2_hazard = id_inst_rs2_ex;
 //--------------------------------------------------------------------------
 wire [31:0] ex_load_address;
 assign ex_load_address = ex_alu_oper_src1_data + id_imm_exten_data_ex;
+// TODO: LBU LHU
 //wire [31:0] ex_load_address_u;
-//assign ex_load_address_u = $unsigned(ex_alu_oper_src1_data) + $unsigned(id_imm_exten_data_ex);
+//assign ex_load_address_u = ex_alu_oper_src1_data + $unsigned(id_imm_exten_data_ex);
 
 //--------------------------------------------------------------------------
 // Design: pipeline cycle counter logic
@@ -197,8 +198,6 @@ always @(*) begin
             ex_alu_addr_calcul_result_mem_r <= id_imm_exten_data_ex;
         `RV32_BASE_INST_AUIPC:
             ex_alu_addr_calcul_result_mem_r <= id_imm_exten_data_ex + id_current_pc_ex;
-        `RV32_BASE_INST_ADDI:
-            ex_alu_addr_calcul_result_mem_r <= ex_alu_oper_src1_data + ex_alu_oper_src2_data;
         `RV32_BASE_INST_JAL: begin
             ex_alu_addr_calcul_result_mem_r <= 32'h0000_0000; //TODO: deleted it
             ex_jump_new_pc_pc_mux <= ex_jump_new_pc_auipc_inst_w;
@@ -239,6 +238,24 @@ always @(*) begin
         `RV32_BASE_INST_SB:  ex_alu_addr_calcul_result_mem_r <= ex_load_address;
         `RV32_BASE_INST_SH:  ex_alu_addr_calcul_result_mem_r <= ex_load_address;
         `RV32_BASE_INST_SW:  ex_alu_addr_calcul_result_mem_r <= ex_load_address;
+        `RV32_BASE_INST_ADDI,
+        `RV32_BASE_INST_ADD: ex_alu_addr_calcul_result_mem_r <= ex_alu_oper_src1_data + ex_alu_oper_src2_data;
+        `RV32_BASE_INST_SUB: ex_alu_addr_calcul_result_mem_r <= ex_alu_oper_src1_data - ex_alu_oper_src2_data;
+        `RV32_BASE_INST_SLTI,
+        `RV32_BASE_INST_SLTIU,
+        `RV32_BASE_INST_SLT: ex_alu_addr_calcul_result_mem_r <= (ex_alu_oper_src1_data < ex_alu_oper_src2_data) ? 32'h1 : 32'h0;
+        `RV32_BASE_INST_XORI,
+        `RV32_BASE_INST_XOR:  ex_alu_addr_calcul_result_mem_r <= ex_alu_oper_src1_data ^ ex_alu_oper_src2_data;
+        `RV32_BASE_INST_ORI,
+        `RV32_BASE_INST_OR:  ex_alu_addr_calcul_result_mem_r <= ex_alu_oper_src1_data | ex_alu_oper_src2_data;
+        `RV32_BASE_INST_ANDI,
+        `RV32_BASE_INST_AND: ex_alu_addr_calcul_result_mem_r <= ex_alu_oper_src1_data & ex_alu_oper_src2_data;
+        `RV32_BASE_INST_SLLI,
+        `RV32_BASE_INST_SLL: ex_alu_addr_calcul_result_mem_r <= ex_alu_oper_src1_data << ex_alu_oper_src2_data[4:0];
+        `RV32_BASE_INST_SRLI:  ex_alu_addr_calcul_result_mem_r <= ex_alu_oper_src1_data >> shamt;
+        `RV32_BASE_INST_SRL: ex_alu_addr_calcul_result_mem_r <= ex_alu_oper_src1_data >> ex_alu_oper_src2_data[4:0];
+        `RV32_BASE_INST_SRAI:  ex_alu_addr_calcul_result_mem_r <= ex_alu_oper_src1_data >>> shamt;
+        `RV32_BASE_INST_SRA: ex_alu_addr_calcul_result_mem_r <= ex_alu_oper_src1_data >>> ex_alu_oper_src2_data[4:0];
         default: begin
             ex_alu_addr_calcul_result_mem_r <= 32'h0000_0000;
             ex_jump_new_pc_pc_mux <= 32'h0000_0000;

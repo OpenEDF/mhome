@@ -79,6 +79,10 @@
 `define PP_FORWARD_EX_RSXDATA_SEL_MEM    2'b01
 `define PP_FORWARD_EX_RSXDATA_SEL_WB     2'b10
 
+// pipeline shift instruction shamt control
+`define RS2_SHAMT_DISABLE  1'b0
+`define RS2_SHAMT_ENABLE   1'b1
+
 // produce immediates by base instruction formats
 `define R_TYPE_INST      3'b000
 `define I_TYPE_INST      3'b001

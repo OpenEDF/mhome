@@ -93,7 +93,7 @@ always @(id_instruction_ctrl or inst_funct3 or inst_opcode or inst_30bit or inst
         id_inst_encoding <= `RV32_ILLEGAL_INST;
         id_mem_write_en <= `MEM_READ;
         id_mem_oper_size <= `MEM_OPER_WORD;
-        id_rs2_shamt_en <= 1'b0;
+        id_rs2_shamt_en <= `RS2_SHAMT_DISABLE;
         id_wb_result_src <= `WB_SEL_ALU_RESULT;
         id_sel_imm_rs2data_alu <= `ALU_SEL_RS2DATA_INPUT;
         id_pc_jump_en <= `PP_JUMP_DISABLE;
@@ -194,7 +194,9 @@ always @(id_instruction_ctrl or inst_funct3 or inst_opcode or inst_30bit or inst
         `OPCODE_ALU_I: begin
             id_imm_src_ctrl <= `I_TYPE_INST;
             id_write_register_en <= `PP_WRITE_DEST_REG_ENABLE;
+            id_wb_result_src <= `WB_SEL_ALU_RESULT;
             id_sel_imm_rs2data_alu <= `ALU_SEL_IMM_INPUT;
+            id_rs2_shamt_en <= `RS2_SHAMT_DISABLE;
             case (inst_funct3)
                 3'b000: id_inst_encoding <= `RV32_BASE_INST_ADDI;
                 3'b010: id_inst_encoding <= `RV32_BASE_INST_SLTI;
@@ -202,32 +204,36 @@ always @(id_instruction_ctrl or inst_funct3 or inst_opcode or inst_30bit or inst
                 3'b100: id_inst_encoding <= `RV32_BASE_INST_XORI;
                 3'b110: id_inst_encoding <= `RV32_BASE_INST_ORI;
                 3'b111: id_inst_encoding <= `RV32_BASE_INST_ANDI;
-                default: id_inst_encoding <= `RV32_ILLEGAL_INST;
+                3'b001: begin
+                    id_inst_encoding <= `RV32_BASE_INST_SLLI;
+                    id_rs2_shamt_en <= `RS2_SHAMT_ENABLE;
+                end
+                3'b101: begin
+                    if (inst_30bit)
+                        id_inst_encoding <= `RV32_BASE_INST_SRAI;
+                    else
+                        id_inst_encoding <= `RV32_BASE_INST_SRLI;
+                    id_rs2_shamt_en <= `RS2_SHAMT_ENABLE;
+                end
+                default: begin
+                    id_inst_encoding <= `RV32_ILLEGAL_INST;
+                    id_rs2_shamt_en <= `RS2_SHAMT_DISABLE;
+                end
             endcase
         end
         `OPCODE_ALU_R: begin
             id_imm_src_ctrl <= `R_TYPE_INST;
             id_write_register_en <= `PP_WRITE_DEST_REG_ENABLE;
+            id_wb_result_src <= `WB_SEL_ALU_RESULT;
+            id_sel_imm_rs2data_alu <= `ALU_SEL_RS2DATA_INPUT;
             case ({inst_30bit, inst_funct3})
-                4'b0001: begin
-                    id_inst_encoding <= `RV32_BASE_INST_SLLI;
-                    id_rs2_shamt_en <= 1'b1;
-                end
-                4'b0101: begin
-                    id_inst_encoding <= `RV32_BASE_INST_SRLI;
-                    id_rs2_shamt_en <= 1'b1;
-                end
-                4'b1011: begin
-                    id_inst_encoding <= `RV32_BASE_INST_SRAI;
-                    id_rs2_shamt_en <= 1'b1;
-                end
                 4'b0000: id_inst_encoding <= `RV32_BASE_INST_ADD;
                 4'b1000: id_inst_encoding <= `RV32_BASE_INST_SUB;
-                //4'b0001: id_inst_encoding <= `RV32_BASE_INST_SLL; SLLI
+                4'b0001: id_inst_encoding <= `RV32_BASE_INST_SLL;
                 4'b0010: id_inst_encoding <= `RV32_BASE_INST_SLT;
                 4'b0011: id_inst_encoding <= `RV32_BASE_INST_SLTU;
                 4'b0100: id_inst_encoding <= `RV32_BASE_INST_XOR;
-                //4'b0101: id_inst_encoding <= `RV32_BASE_INST_SRL; SRLI
+                4'b0101: id_inst_encoding <= `RV32_BASE_INST_SRL;
                 4'b1101: id_inst_encoding <= `RV32_BASE_INST_SRA;
                 4'b0110: id_inst_encoding <= `RV32_BASE_INST_OR;
                 4'b0111: id_inst_encoding <= `RV32_BASE_INST_AND;
@@ -253,7 +259,7 @@ always @(id_instruction_ctrl or inst_funct3 or inst_opcode or inst_30bit or inst
             id_inst_encoding <= `RV32_ILLEGAL_INST;
             id_mem_write_en <= `MEM_READ;
             id_mem_oper_size <= `MEM_OPER_WORD;
-            id_rs2_shamt_en <= 1'b0;
+            id_rs2_shamt_en <= `RS2_SHAMT_DISABLE;
             id_wb_result_src <= `WB_SEL_ALU_RESULT;
             id_sel_imm_rs2data_alu <= `ALU_SEL_RS2DATA_INPUT;
             id_pc_jump_en <= `PP_JUMP_DISABLE;

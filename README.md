@@ -32,6 +32,7 @@ $ make wave
 | sb     | store 8-bit data from rs2 register to rs1+offset memory |✔ |  rv32mi_sb.s | make case=sb |
 | sl     | store 16-bit data from rs2 register to rs1+offset memory |✔ |  rv32mi_sh.s | make case=sh |
 | sw     | store 32-bit data from rs2 register to rs1+offset memory |✔ |  rv32mi_sw.s | make case=sw |
+| addi   | rddata = rs1data + imm |✔ |  rv32mi_addi.s | make case=addi |
 | auipc  | Text        |❌|                 | |
 
 ### debug:

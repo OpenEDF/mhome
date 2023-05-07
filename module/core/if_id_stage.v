@@ -52,7 +52,7 @@ module if_id_stage
     input wire [31:0]  if_pc_plus4_id,
     input wire [4:0]   wb_write_register_dest_id,
     input wire [31:0]  wb_write_register_data_id,
-    input wire         wb_write_reginster_en_id,
+    input wire         wb_write_register_en_id,
     input wire [31:0]  if_current_pc_id,
     input wire         hazard_flush_id_ex_reg,
 
@@ -99,6 +99,8 @@ wire [1:0]  id_wb_result_src_w;
 wire        id_sel_imm_rs2data_alu_w;
 wire        id_pc_jump_en_w;
 wire        id_pc_branch_en_w;
+reg [31:0]  id_read_rs1_data_hazard_r;
+reg [31:0]  id_read_rs2_data_hazard_r;
 reg  [8*3:1] id_inst_debug_str_r;
 
 assign id_inst_rs1_w = if_instruction_id[19:15];
@@ -213,6 +215,26 @@ always @(id_rs2_shamt_en_w or id_inst_rs2_w) begin
 end
 
 //--------------------------------------------------------------------------
+// Design: write back clock hazard rs1, rs1 == 5'b0
+//--------------------------------------------------------------------------
+always @(*)begin
+    if ((id_inst_rs1_w == wb_write_register_dest_id) && wb_write_register_en_id)
+        id_read_rs1_data_hazard_r <= wb_write_register_data_id;
+    else
+        id_read_rs1_data_hazard_r <= id_read_rs1_data_ex_w;
+end
+
+//--------------------------------------------------------------------------
+// Design: write back clock hazard rs2, rs2 == 5'b0
+//--------------------------------------------------------------------------
+always @(*)begin
+    if ((id_inst_rs2_w == wb_write_register_dest_id) && wb_write_register_en_id)
+        id_read_rs2_data_hazard_r <= wb_write_register_data_id;
+    else
+        id_read_rs2_data_hazard_r <= id_read_rs2_data_ex_w;
+end
+
+//--------------------------------------------------------------------------
 // Design: instantiate riscv register file
 //--------------------------------------------------------------------------
 register_file register_file_u(
@@ -222,7 +244,7 @@ register_file register_file_u(
     .id_inst_read_2_src     (id_inst_rs2_w),
     .wb_inst_write_dest     (wb_write_register_dest_id),
     .wb_inst_write_data     (wb_write_register_data_id),
-    .wb_inst_write_en       (wb_write_reginster_en_id),
+    .wb_inst_write_en       (wb_write_register_en_id),
 
     .id_inst_read_1_data    (id_read_rs1_data_ex_w),
     .id_inst_read_2_data    (id_read_rs2_data_ex_w)
@@ -291,8 +313,8 @@ always @(posedge clk or negedge rst_n) begin
             id_inst_debug_str_ex <= "adi";
         end else begin
             id_pc_plus4_ex <= if_pc_plus4_id;
-            id_read_rs1_data_ex  <= id_read_rs1_data_ex_w;
-            id_read_rs2_data_ex  <= id_read_rs2_data_ex_w;
+            id_read_rs1_data_ex  <= id_read_rs1_data_hazard_r;
+            id_read_rs2_data_ex  <= id_read_rs2_data_hazard_r;
             id_imm_exten_data_ex <= id_imm_exten_data_r;
             id_inst_encoding_ex  <= id_inst_encoding_ex_w;
             id_write_register_en_ex <= id_write_register_en_ex_w;

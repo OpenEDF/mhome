@@ -185,7 +185,7 @@ if_id_stage if_id_stage_u(
     .if_pc_plus4_id        (if_pc_plus4_id_w),
     .wb_write_register_dest_id   (wb_write_dest_register_index_id_w),
     .wb_write_register_data_id   (wb_sel_result_to_register_id_w),
-    .wb_write_reginster_en_id    (wb_write_register_en_id_w),
+    .wb_write_register_en_id     (wb_write_register_en_id_w),
     .if_current_pc_id            (if_current_pc_id_w),
     .hazard_flush_id_ex_reg      (hazard_flush_id_ex_reg_w),
 

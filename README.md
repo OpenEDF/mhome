@@ -36,7 +36,7 @@ $ make wave
 | slti   | rddata = rs1data < imm ? 1 : 0 |✔ |  rv32mi_slti.s | make case=slti |
 | sltiu  | rddata = rs1data < imm ? 1 : 0 |✔ |  rv32mi_sltiu.s | make case=sltiu |
 | xori   | rddata = rs1data ^ imm |✔ |  rv32mi_xori.s | make case=xori |
-| ori    | rddata = rs1data | imm |✔ |  rv32mi_ori.s | make case=ori |
+| ori    | rddata = rs1data \| imm |✔ |  rv32mi_ori.s | make case=ori |
 | andi   | rddata = rs1data & imm |✔ |  rv32mi_andi.s | make case=andi |
 | slli   | rddata = rs1data << imm |✔ |  rv32mi_slli.s | make case=slli |
 | srli   | rddata = rs1data >> imm |✔ |  rv32mi_srli.s | make case=srli |

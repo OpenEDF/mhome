@@ -33,7 +33,27 @@ $ make wave
 | sl     | store 16-bit data from rs2 register to rs1+offset memory |✔ |  rv32mi_sh.s | make case=sh |
 | sw     | store 32-bit data from rs2 register to rs1+offset memory |✔ |  rv32mi_sw.s | make case=sw |
 | addi   | rddata = rs1data + imm |✔ |  rv32mi_addi.s | make case=addi |
-| auipc  | Text        |❌|                 | |
+| slti   | rddata = rs1data < imm ? 1 : 0 |✔ |  rv32mi_slti.s | make case=slti |
+| sltiu  | rddata = rs1data < imm ? 1 : 0 |✔ |  rv32mi_sltiu.s | make case=sltiu |
+| xori   | rddata = rs1data ^ imm |✔ |  rv32mi_xori.s | make case=xori |
+| ori    | rddata = rs1data | imm |✔ |  rv32mi_ori.s | make case=ori |
+| andi   | rddata = rs1data & imm |✔ |  rv32mi_andi.s | make case=andi |
+| slli   | rddata = rs1data << imm |✔ |  rv32mi_slli.s | make case=slli |
+| srli   | rddata = rs1data >> imm |✔ |  rv32mi_srli.s | make case=srli |
+| srai   | rddata = rs1data >>> imm |✔ |  rv32mi_srai.s | make case=srai |
+| add    | rddata = rs1data + rs2data |✔ |  rv32mi_add.s | make case=add |
+| sub    | rddata = rs1data - rs2data |✔ |  rv32mi_sub.s | make case=sub |
+| sll    | rddata = rs1data << rs2data |✔ |  rv32mi_sll.s | make case=sll |
+| slt    | rddata = rs1data < rs2data ? 1 : 0 |✔ |  rv32mi_slt.s | make case=slt |
+| sltu   | rddata = rs1data < rs2data ? 1 : 0 |✔ |  rv32mi_sltu.s | make case=sltu |
+| xor    | rddata = rs1data ^ rs2data |✔ |  rv32mi_xor.s | make case=xor |
+| srl    | rddata = rs1data >> rs2data |✔ |  rv32mi_srl.s | make case=srl |
+| sra    | rddata = rs1data >>> rs2data |✔ |  rv32mi_sra.s | make case=sra |
+| or     | rddata = rs1data | rs2data |✔ |  rv32mi_or.s | make case=or |
+| and    | rddata = rs1data & rs2data |✔ |  rv32mi_and.s | make case=and |
+| fence  | Text        |❌|                 | |
+| ecall  | Text        |❌|                 | |
+| ebreak | Text        |❌|                 | |
 
 ### debug:
 ![ifidstage](https://github.com/OpenEDF/mhome/blob/main/doc/pic/ifidstage.png)

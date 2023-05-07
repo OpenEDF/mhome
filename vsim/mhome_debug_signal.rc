@@ -2,7 +2,7 @@ Magic 271485
 Revision Verdi_O-2018.09-SP2
 
 ; Window Layout <x> <y> <width> <height> <signalwidth> <valuewidth>
-viewPort 0 27 1278 629 273 116
+viewPort 0 27 1278 612 273 116
 
 ; File list:
 ; openDirFile [-d delimiter] [-s time_offset] [-rf auto_bus_rule_file] path_name file_name
@@ -16,16 +16,16 @@ signalSpacing 5
 
 ; windowTimeUnit is used for zoom, cursor & marker
 ; waveform viewport range
-zoom 175.331963 301.581963
-cursor 210.000000
+zoom 0.000000 110.752246
+cursor 0.000000
 marker 0.000000
 
 ; user define markers
 ; userMarker time_pos marker_name color linestyle
 ; visible top row signal index
-top 0
+top 20
 ; marker line index
-markerPos 67
+markerPos 24
 
 ; counter signal list
 ; addCounterSig -Rising|-Falling|-AnyChange signal
@@ -87,9 +87,11 @@ addSignal -c ID_YELLOW5 -ls solid -lw 1 -h 15 /mhome_soc_tb/mhome_soc_top_u/risc
 addSignal -h 15 -holdScope if_pc_plus4_pc_gen[31:0]
 addSignal -h 15 -UNSIGNED -HEX -holdScope if_pc_plus4_id[31:0]
 addSignal -h 15 -holdScope if_current_pc_id[31:0]
-addGroup "if_id_stage" -e FALSE
+addGroup "if_id_stage"
 addSignal -c ID_GREEN5 -ls solid -lw 1 -h 15 -UNSIGNED -ASC /mhome_soc_tb/mhome_soc_top_u/riscv_pipeline_u/if_id_stage_u/id_inst_debug_str_ex[24:1]
 addSignal -h 15 -holdScope id_pc_plus4_ex[31:0]
+addSignal -h 15 -UNSIGNED -UDEC -holdScope id_inst_rs1_w[4:0]
+addSignal -h 15 -UNSIGNED -UDEC -holdScope id_inst_rs2_w[4:0]
 addSignal -h 15 -UNSIGNED -HEX -holdScope id_read_rs1_data_ex[31:0]
 addSignal -h 15 -UNSIGNED -HEX -holdScope id_read_rs2_data_ex[31:0]
 addSignal -c ID_PURPLE5 -ls solid -lw 1 -h 15 -holdScope id_imm_exten_data_ex[31:0]
@@ -121,7 +123,7 @@ addSignal -h 15 -holdScope ex_alu_oper_src1_data[31:0]
 addSignal -h 15 -holdScope ex_alu_oper_src2_data[31:0]
 addSignal -h 15 /mhome_soc_tb/mhome_soc_top_u/riscv_pipeline_u/mem_wb_stage_u/wb_sel_result_to_register_ex[31:0]
 addSignal -h 15 /mhome_soc_tb/mhome_soc_top_u/riscv_pipeline_u/ex_mem_stage_u/mem_alu_addr_calcul_result_mem_ex[31:0]
-addGroup "ex_mem_stage"
+addGroup "ex_mem_stage" -e FALSE
 addSignal -c ID_GREEN5 -ls solid -lw 1 -h 15 -UNSIGNED -ASC /mhome_soc_tb/mhome_soc_top_u/riscv_pipeline_u/ex_mem_stage_u/mem_inst_debug_str_wb[24:1]
 addSignal -h 15 -holdScope mem_pc_plus4_wb[31:0]
 addSignal -h 15 -UNSIGNED -UDEC -holdScope mem_write_dest_register_index_wb[4:0]
@@ -150,7 +152,7 @@ addSignal -h 15 -UNSIGNED -UDEC -holdScope id_inst_read_1_src[4:0]
 addSignal -h 15 -UNSIGNED -UDEC -holdScope id_inst_read_2_src[4:0]
 addSignal -h 15 -UNSIGNED -UDEC -holdScope wb_inst_write_dest[4:0]
 addSignal -h 15 -holdScope wb_inst_write_data[31:0]
-addGroup "ram"
+addGroup "ram" -e FALSE
 addSignal -h 15 /mhome_soc_tb/mhome_soc_top_u/riscv_pipeline_u/ex_mem_stage_u/ex_alu_addr_calcul_result_mem[31:0]
 addSignal -h 15 -holdScope ex_write_rs2_data_mem[31:0]
 addSignal -h 15 -holdScope ex_mem_write_en_mem

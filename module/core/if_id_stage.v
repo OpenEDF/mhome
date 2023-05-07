@@ -182,11 +182,11 @@ always @(id_inst_encoding_ex_w) begin
         `RV32_BASE_INST_SRAI:               id_inst_debug_str_r = "sai";
         `RV32_BASE_INST_ADD:                id_inst_debug_str_r = "add";
         `RV32_BASE_INST_SUB:                id_inst_debug_str_r = "sub";
-        // `RV32_BASE_INST_SLL:             id_inst_debug_str_r = "sll";
+        `RV32_BASE_INST_SLL:                id_inst_debug_str_r = "sll";
         `RV32_BASE_INST_SLT:                id_inst_debug_str_r = "slt";
         `RV32_BASE_INST_SLTU:               id_inst_debug_str_r = "slu";
         `RV32_BASE_INST_XOR:                id_inst_debug_str_r = "xor";
-        //`RV32_BASE_INST_SRL:              id_inst_debug_str_r = "srl";
+        `RV32_BASE_INST_SRL:                id_inst_debug_str_r = "srl";
         `RV32_BASE_INST_SRA:                id_inst_debug_str_r = "sra";
         `RV32_BASE_INST_OR:                 id_inst_debug_str_r = "o_r";
         `RV32_BASE_INST_AND:                id_inst_debug_str_r = "and";

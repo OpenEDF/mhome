@@ -54,6 +54,20 @@ $ make wave
 | fence  | Text        |❌|                 | |
 | ecall  | Text        |❌|                 | |
 | ebreak | Text        |❌|                 | |
+| csrrw  | Text        |❌|                 | |
+| csrrs  | Text        |❌|                 | |
+| csrrc  | Text        |❌|                 | |
+| csrrwi | Text        |❌|                 | |
+| csrrsi | Text        |❌|                 | |
+| csrrci | Text        |❌|                 | |
+| mul    | Text        |❌|                 | |
+| mulh   | Text        |❌|                 | |
+| mulhsu | Text        |❌|                 | |
+| mulhu  | Text        |❌|                 | |
+| div    | Text        |❌|                 | |
+| divu   | Text        |❌|                 | |
+| rem    | Text        |❌|                 | |
+| remu   | Text        |❌|                 | |
 
 ### debug:
 ![ifidstage](https://github.com/OpenEDF/mhome/blob/main/doc/pic/ifidstage.png)

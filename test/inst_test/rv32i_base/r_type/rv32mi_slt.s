@@ -9,7 +9,8 @@ y:  .word 20
 	.globl  _start
 _start:
 rv32mi_slt:
-    lui a0, 0x00000005
-    lui a1, 0x00000008
-    slt a3, a0, a1
+    addi a0, zero, 0x00000005
+    addi a1, zero, 0x00000008
+    slt a2, a0, a1
+    slt a3, a1, a2
     .end

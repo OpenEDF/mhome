@@ -49,7 +49,7 @@ $ make wave
 | xor    | rddata = rs1data ^ rs2data |✔ |  rv32mi_xor.s | make case=xor |
 | srl    | rddata = rs1data >> rs2data |✔ |  rv32mi_srl.s | make case=srl |
 | sra    | rddata = rs1data >>> rs2data |✔ |  rv32mi_sra.s | make case=sra |
-| or     | rddata = rs1data | rs2data |✔ |  rv32mi_or.s | make case=or |
+| or     | rddata = rs1data \| rs2data |✔ |  rv32mi_or.s | make case=or |
 | and    | rddata = rs1data & rs2data |✔ |  rv32mi_and.s | make case=and |
 | fence  | Text        |❌|                 | |
 | ecall  | Text        |❌|                 | |

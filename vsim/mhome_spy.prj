@@ -15,6 +15,7 @@ read_file -type verilog src/id_ex_stage.v
 read_file -type verilog src/if_id_stage.v
 read_file -type verilog src/mem_wb_stage.v
 read_file -type verilog src/mhome_defines.v
+read_file -type verilog src/debug_defines.v
 read_file -type verilog src/mhome_soc_top.v
 read_file -type verilog src/pc_gen.v
 read_file -type verilog src/pc_if_stage.v
@@ -23,6 +24,7 @@ read_file -type verilog src/single_port_ram.v
 read_file -type verilog src/register_file.v
 read_file -type verilog src/pipeline_ctrl.v
 read_file -type verilog src/hazard_unit.v
+read_file -type verilog src/jtag_tap.v
 
 ##Common Options Section
 

@@ -92,6 +92,7 @@ install:
 	@cp ${PWD}/../module/config/*               ${VSIM_DIR}/
 	@cp ${PWD}/../module/soc/*                  ${VSIM_DIR}/
 	@cp ${PWD}/../module/memory/*               ${VSIM_DIR}/
+	@cp ${PWD}/../module/debug/*                ${VSIM_DIR}/
 	@cp ${PWD}/../tb/mhome_soc_tb.v             ${VSIM_DIR}/mhome_soc_tb.v
 	@cp ${PWD}/../tb/moduel_tb.list             module.list
 	@cp ${PWD}/../test/inst_test/inst_test.verilog ${PWD}/inst_test.verilog

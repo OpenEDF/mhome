@@ -39,21 +39,46 @@
 //--------------------------------------------------------------------------
 // Module
 //--------------------------------------------------------------------------
-module dmi_intf
+module dmi_intf #(
+    parameter DMI_ABITIS = 6
+)
 //--------------------------------------------------------------------------
 // Ports
 //--------------------------------------------------------------------------
 (
-    // inputs
-    input wire         tck,
-    input wire         trst,
+    // inputs from dtm
+    input wire [DMI_ABITIS-1:0]  dtm_dmi_addr,
+    input wire [31:0]            dtm_dmi_write_data,
+    input wire                   dtm_dmi_write_en,
+    input wire                   dtm_dmi_request,
 
-    // outputs
+    // from dm
+    input wire                   dm_dmi_response,
+    input [1:0]                  dm_dmi_op,
+    input [31:0]                 dm_dmi_read_data,
+
+    // outputs to dm
+    output wire [DMI_ABITIS-1:0] dmi_addr_dm,
+    output wire [31:0]           dmi_write_data_dm,
+    output wire                  dmi_write_en_dm,
+    output wire                  dmi_request_dm,
+
+    // to dtm
+    output wire                  dmi_response_dtm,
+    output wire [1:0]            dmi_op_dtm,
+    output wire [31:0]           dmi_read_data_dtm
 );
 
 //--------------------------------------------------------------------------
-// Design:
+// Design: dmi intergace is only one master and slave
 //--------------------------------------------------------------------------
+assign dmi_addr_dm       = dtm_dmi_addr;
+assign dmi_write_data_dm = dtm_dmi_write_data;
+assign dmi_write_en_dm   = dtm_dmi_write_en;
+assign dmi_request_dm    = dtm_dmi_request;
+assign dmi_response_dtm  = dmi_response_dtm;
+assign dmi_op_dtm        = dm_dmi_op;
+assign dmi_read_data_dtm = dm_dmi_read_data;
 
 endmodule
 //--------------------------------------------------------------------------

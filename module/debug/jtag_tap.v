@@ -492,13 +492,27 @@ end
 // Design: DTM update dmi op and data register
 //         TODO: will DTM wait for data and status adfer read/write request,
 //         and the there will be competition
+//         dmi_op: 2/3: This status is sticky and can be cleared by writing
+//                    dmireset in dtmcs.
+//                 0: The previous operation completed successfully
 //--------------------------------------------------------------------------
 always @(posedge tck) begin
     if (dm_dmi_response) begin
-        dmi[1:0]  <= dm_dmi_op;
-        dmi[33:2] <= dm_dmi_read_data;
+        dmi[1:0]     <= dm_dmi_op;
+        dtmcs[11:10] <= dmi[1:0];
+        if (dm_dmi_op == 2'b00) begin
+            dmi[33:2] <= dm_dmi_read_data;
+        end else begin
+            dmi[33:2] <= dmi[33:2];
+        end
     end else begin
-        dmi       <= dmi;
+        if (dmireset) begin
+            dmi[1:0]     <= 2'b00;
+            dtmcs[11:10] <= dmi[1:0];
+        end else begin
+            dmi[1:0]     <= dmi[1:0];
+            dtmcs[11:10] <= dtmcs[11:10];
+        end
     end
 end
 
@@ -516,23 +530,6 @@ always @(idle) begin
     end
 end
 
-//--------------------------------------------------------------------------
-// Design: update the dtm status
-//--------------------------------------------------------------------------
-always @() begin
-    if (dm_dmi_response) begin
-        case (dm_dmi_op)
-            2'b00: dtmcs[11:10] <= 2'b00;
-            2'b10: dtmcs[11:10] <= 2'b10;
-            2'b11: dtmcs[11:10] <= 2'b11;
-            default: dtmcs[11:10] <= dtmcs[11:10];
-        endcase
-    end else if (dmireset) begin
-        dtmcs[11:10] <= 2'b00;
-    end else begin
-        dtmcs[11:10] <= dtmcs[11:10];
-    end
-end
 //--------------------------------------------------------------------------
 // Design: DTM reset control
 //--------------------------------------------------------------------------

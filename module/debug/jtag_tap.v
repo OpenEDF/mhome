@@ -62,8 +62,8 @@ module jtag_tap #(
     input [31:0]       dm_dmi_read_data,
 
     // outputs
-    output reg         tdo_en,
-    output reg         tdo,
+    output reg                  tdo_en,
+    output reg                  tdo,
     output reg [DMI_ABITS-1:0]  dmi_addr,
     output reg [31:0]           dmi_write_data,
     output reg                  dmi_write_en,

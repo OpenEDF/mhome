@@ -39,16 +39,25 @@
 //--------------------------------------------------------------------------
 // Module
 //--------------------------------------------------------------------------
-module dm_csrs
+module dm_csrs #(
+    parameter DMI_ABITIS = 6
+)
 //--------------------------------------------------------------------------
 // Ports
 //--------------------------------------------------------------------------
 (
     // inputs
-    input wire         clk,
-    input wire         rst_n,
+    input wire                   clk,
+    input wire                   rst_n,
+    input wire [DMI_ABITIS-1:0]  dmi_addr_dm,
+    input wire [31:0]            dmi_write_data_dm,
+    input wire                   dmi_write_en_dm,
+    input wire                   dmi_request_dm,
 
     // outputs
+    output wire                  dm_dmi_response_dmi,
+    output wire [1:0]            dm_dmi_op_dmi,
+    output wire [31:0]           dm_dmi_read_data_dmi
 );
 
 //--------------------------------------------------------------------------

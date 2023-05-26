@@ -45,7 +45,7 @@
 // Module
 //--------------------------------------------------------------------------
 module jtag_tap #(
-    parameter DMI_ABITS = 6,
+    parameter DMI_ABITS = 8,
     parameter IR_BITS = 5
 )
 //--------------------------------------------------------------------------
@@ -58,12 +58,14 @@ module jtag_tap #(
     input wire         tdi,
     input wire         tms,
     input wire         dm_dmi_response,
+    input wire         dm_dmi_request_ready,
     input [1:0]        dm_dmi_op,
     input [31:0]       dm_dmi_read_data,
 
     // outputs
     output reg                  tdo_en,
     output reg                  tdo,
+    output reg                  dmi_dtm_response_ready,
     output reg [DMI_ABITS-1:0]  dmi_addr,
     output reg [31:0]           dmi_write_data,
     output reg                  dmi_write_en,
@@ -114,22 +116,22 @@ localparam DTM_VERSION_013_AND_10 = 4'b0001;
 //--------------------------------------------------------------------------
 // Design: JTAG DTM TAP Register
 //--------------------------------------------------------------------------
-reg [31:0] idcode;
-reg [31:0] dtmcs;
-reg [DMI_BITS-1:0] dmi;  // ABITS = 6
+reg [31:0]         idcode;
+reg [31:0]         dtmcs;
+reg [DMI_BITS-1:0] dmi;  // ABITS = 8
 reg [DMI_BITS-1:0] dmi_neg;
 reg [DMI_BITS-1:0] dr_shift;
-reg        bypass0; /* addr: 5'b00000 */
-reg        bypass1; /* addr: 5'b11111 */
+reg                bypass0; /* addr: 5'b00000 */
+reg                bypass1; /* addr: 5'b11111 */
 reg [IR_BITS-1:0]  ir_shift;
 reg [IR_BITS-1:0]  ir_latched;
 reg [IR_BITS-1:0]  ir_latched_neg;
-reg        idcode_select;
-reg        dtmcs_select;
-reg        dmi_select;
-reg        dmi_select_neg;
-reg        bypass0_select;
-reg        bypass1_select;
+reg                idcode_select;
+reg                dtmcs_select;
+reg                dmi_select;
+reg                dmi_select_neg;
+reg                bypass0_select;
+reg                bypass1_select;
 
 //--------------------------------------------------------------------------
 // Design: JTAG TAP shift output signal
@@ -169,7 +171,7 @@ reg [3:0] tap_next_state;
 // Design: update the dmi request and write enable signal sccroding dmi
 //         op feild
 //--------------------------------------------------------------------------
-wire [5:0]  dmi_addr_w;
+wire [DMI_ABITS-1:0]  dmi_addr_w;
 wire [31:0] dmi_write_data_w;
 wire [1:0]  dmi_op_w;
 wire dmi_write_en_w;
@@ -178,7 +180,7 @@ assign dmi_addr_w = dmi_neg[DMI_BITS-1:34];  //TODO: spyglass check lint
 assign dmi_write_data_w = dmi_neg[33:2];
 assign dmi_op_w = dmi_neg[1:0];
 assign dmi_write_en_w = (dmi_op_w == 2'b10) ? 1'b1 : 1'b0;
-assign dmi_request_w = (dmi_op_w == 2'b00) ? 1'b0 : 1'b1;
+assign dmi_request_w = ((dmi_op_w == 2'b00) && (dmi_op_w == 2'b11)) ? 1'b0 : 1'b1;
 
 //--------------------------------------------------------------------------
 // Design: DTM internal control signal

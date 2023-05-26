@@ -51,7 +51,7 @@ module debug_top
     input wire         tms_pad,
 
     // outputs
-    output wire        tdo_pad,
+    output reg         tdo_pad
 );
 
 //--------------------------------------------------------------------------
@@ -86,14 +86,19 @@ wire dm_dmi_read_data_dmi_w;
 //--------------------------------------------------------------------------
 // Design: assign tdo_pad = tdo & tdo_en
 //--------------------------------------------------------------------------
-assign tdo_pad = tdo_w & tdo_en_w;
-
+always @(tdo_en_w or tdo_w) begin
+    if (tdo_en_w) begin
+        tdo_pad <= tdo_w;
+    end else begin
+        tdo_pad <= 1'b0;
+    end
+end
 //--------------------------------------------------------------------------
 // Design: instdantiated jtag tap module
 //--------------------------------------------------------------------------
 jtag_tap jtag_tap_u #(
-    DMI_ABITS = 6,
-    IR_BITS = 5
+    DMI_ABITS = `DMI_ABITS_WIDTH,
+    IR_BITS = `IR_BITS_WIDTH
 )
 (
     .tck              (tck_pad),
@@ -116,7 +121,7 @@ jtag_tap jtag_tap_u #(
 // Design: instdantiated dm crs module
 //--------------------------------------------------------------------------
 dm_csrs dm_csrs_u #(
-    DMI_ABITIS = 6
+    DMI_ABITIS = `DMI_ABITIS_WIDTH
 )
 (
     .tck                    (tck_pad),
@@ -135,7 +140,7 @@ dm_csrs dm_csrs_u #(
 // Design: instdantiated dmi interface
 //--------------------------------------------------------------------------
 dmi_intf dmi_intf_u #(
-    DMI_ABITIS = 6
+    DMI_ABITIS = `DMI_ABITIS_WIDTH
 )
 (
     .dtm_dmi_addr         (dmi_addr_w),

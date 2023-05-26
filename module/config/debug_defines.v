@@ -34,9 +34,27 @@
 //--------------------------------------------------------------------------
 // debug system config define
 //--------------------------------------------------------------------------
-`define IDCODE_VERSION        4'b1101 
+`define IDCODE_VERSION        4'b1101
 `define IDCODE_PART_NUMBER    16'b1101011011010010
 `define IDCODE_MANUFID        11'b110110101100
 
+// dmi and ir width
+`define DMI_ABITIS_WIDTH      8
+`define IR_BITS_WIDTH         5
+
+// cmderr
+`define CMDERR_NONE           3'b000
+`define CMDERR_BUSY           3'b001
+`define CMDERR_NOT_SUPPORT    3'b010
+`define CMDERR_EXCEPTION      3'b011
+`define CMDERR_HALT_RESUME    3'b100
+`define CMDERR_BUS            3'b101
+`define CMDERR_RES            3'b110
+`define CMDERR_OTHER          3'b111
+
+// command aarize
+`define ACCESS_32BIT_GPRS     3'b010
+`define ACCESS_64BIT_GPRS     3'b011
+`define ACCESS_128BIT_GPRS    3'b100
 
 //--------------------------------------------------------------------------

@@ -55,6 +55,9 @@ module if_id_stage
     input wire         wb_write_register_en_id,
     input wire [31:0]  if_current_pc_id,
     input wire         hazard_flush_id_ex_reg,
+    input wire [4:0]   dm_access_gprs_index_hart,
+    input wire [31:0]  dm_write_gprs_data_hart,
+    input wire         dm_write_gprs_en_hart,
 
     // outputs
     output reg [31:0]  id_cycle_count_ex,
@@ -75,6 +78,7 @@ module if_id_stage
     output reg         id_pc_branch_en_ex,
     output reg [4:0]   id_inst_rs1_ex,
     output reg [4:0]   id_inst_rs2_ex,
+    output wire [31:0] hart_result_read_gprs_dm,
     output reg [8*3:1] id_inst_debug_str_ex
 );
 
@@ -240,14 +244,18 @@ end
 register_file register_file_u(
     .clk    (clk),
     .rst_n  (rst_n),
-    .id_inst_read_1_src     (id_inst_rs1_w),
-    .id_inst_read_2_src     (id_inst_rs2_w),
-    .wb_inst_write_dest     (wb_write_register_dest_id),
-    .wb_inst_write_data     (wb_write_register_data_id),
-    .wb_inst_write_en       (wb_write_register_en_id),
+    .id_inst_read_1_src        (id_inst_rs1_w),
+    .id_inst_read_2_src        (id_inst_rs2_w),
+    .wb_inst_write_dest        (wb_write_register_dest_id),
+    .wb_inst_write_data        (wb_write_register_data_id),
+    .wb_inst_write_en          (wb_write_register_en_id),
+    .dm_access_gprs_index_hart (dm_access_gprs_index_hart),
+    .dm_write_gprs_data_hart   (dm_write_gprs_data_hart),
+    .dm_write_gprs_en_hart     (dm_write_gprs_en_hart),
 
-    .id_inst_read_1_data    (id_read_rs1_data_ex_w),
-    .id_inst_read_2_data    (id_read_rs2_data_ex_w)
+    .id_inst_read_1_data       (id_read_rs1_data_ex_w),
+    .id_inst_read_2_data       (id_read_rs2_data_ex_w),
+    .hart_result_read_gprs_dm  (hart_result_read_gprs_dm)
 );
 
 //--------------------------------------------------------------------------

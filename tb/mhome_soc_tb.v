@@ -46,14 +46,27 @@ module mhome_soc_tb();
 //--------------------------------------------------------------------------
 reg sys_clk;
 reg sys_rst_n;
+reg tck_pad;
+reg trst_n_pad;
+reg tdi_pad;
+reg tms_pad;
+wire tdo_pad;
 wire sys_led;
 
 //--------------------------------------------------------------------------
 // Design: mhome soc instaniate
 //--------------------------------------------------------------------------
 mhome_soc_top mhome_soc_top_u(
+    //input
     .sys_clk    (sys_clk),
     .sys_rst_n  (sys_rst_n),
+    .tck_pad    (tck_pad),
+    .trst_n_pad (trst_n_pad),
+    .tdi_pad    (tdi_pad),
+    .tms_pad    (tms_pad),
+
+    //output
+    .tdo_pad    (tdo_pad),
     .sys_led    (sys_led)
 );
 

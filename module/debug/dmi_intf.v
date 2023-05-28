@@ -51,22 +51,26 @@ module dmi_intf #(
     input wire [31:0]            dtm_dmi_write_data,
     input wire                   dtm_dmi_write_en,
     input wire                   dtm_dmi_request,
+    input wire                   dtm_response_ready,
 
     // from dm
     input wire                   dm_dmi_response_dmi,
     input wire [1:0]             dm_dmi_op_dmi,
     input wire [31:0]            dm_dmi_read_data_dmi,
+    input wire                   dm_request_ready,
 
     // outputs to dm
     output wire [DMI_ABITIS-1:0] dmi_addr_dm,
     output wire [31:0]           dmi_write_data_dm,
     output wire                  dmi_write_en_dm,
     output wire                  dmi_request_dm,
+    output wire                  dmi_response_ready_dm,
 
     // to dtm
     output wire                  dmi_response_dtm,
     output wire [1:0]            dmi_op_dtm,
-    output wire [31:0]           dmi_read_data_dtm
+    output wire [31:0]           dmi_read_data_dtm,
+    output wire                  dmi_request_ready_dtm
 );
 
 //--------------------------------------------------------------------------
@@ -79,6 +83,8 @@ assign dmi_request_dm    = dtm_dmi_request;
 assign dmi_response_dtm  = dm_dmi_response_dmi;
 assign dmi_op_dtm        = dm_dmi_op_dmi;
 assign dmi_read_data_dtm = dm_dmi_read_data_dmi;
+assign dmi_response_ready_dm = dtm_response_ready;
+assign dmi_request_ready_dtm = dm_request_ready;
 
 endmodule
 //--------------------------------------------------------------------------

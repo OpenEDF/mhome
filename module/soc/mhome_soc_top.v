@@ -35,11 +35,12 @@
 // Include File
 //--------------------------------------------------------------------------
 `include "mhome_defines.v"
+`include "debug_defines.v"
 
 //--------------------------------------------------------------------------
 // Module
 //--------------------------------------------------------------------------
-module mhome_soc_top 
+module mhome_soc_top
 //--------------------------------------------------------------------------
 // Ports
 //--------------------------------------------------------------------------
@@ -47,10 +48,26 @@ module mhome_soc_top
     // inputs
     input wire         sys_clk,
     input wire         sys_rst_n,
+    // debug jtag port
+    input wire         tck_pad,
+    input wire         trst_n_pad,
+    input wire         tdi_pad,
+    input wire         tms_pad,
 
     // outputs
+    output wire        tdo_pad,
     output wire        sys_led
 );
+
+//--------------------------------------------------------------------------
+// Design: mhome riscv soc internal signal
+//--------------------------------------------------------------------------
+wire        dm_haltreq_hart_w;           // halt hart
+wire        dm_hartreset_hart_w;         // reset hart
+wire [4:0]  dm_access_gprs_index_hart_w; // access register file number
+wire [31:0] dm_write_gprs_data_hart_w;   // write data to register file
+wire        dm_write_gprs_en_hart_w;     // setup write enable
+wire [31:0] hart_result_read_gprs_dm_w;  // register return data
 
 //--------------------------------------------------------------------------
 // Design: mhome riscv soc
@@ -58,8 +75,33 @@ module mhome_soc_top
 riscv_pipeline riscv_pipeline_u(
     .sys_clk         (sys_clk),
     .sys_rst_n       (sys_rst_n),
+    .dm_access_gprs_index_hart   (dm_access_gprs_index_hart_w),
+    .dm_write_gprs_data_hart     (dm_write_gprs_data_hart_w),
+    .dm_write_gprs_en_hart       (dm_write_gprs_en_hart_w),
 
-    .sys_led         (sys_led)
+    .hart_result_read_gprs_dm    (hart_result_read_gprs_dm_w),
+    .sys_led                     (sys_led)
+);
+
+//--------------------------------------------------------------------------
+// Design: mhome instantiated debug system module
+//--------------------------------------------------------------------------
+debug_top #(
+    .DMI_ABITIS  (`DMI_ABITIS_WIDTH),
+    .IR_BITS     (`IR_BITS_WIDTH)
+) debug_top_u (
+    .tck_pad                    (tck_pad                     ), // I
+    .trst_n_pad                 (trst_n_pad                  ), // I
+    .tdi_pad                    (tdi_pad                     ), // I
+    .tms_pad                    (tms_pad                     ), // I
+    .hart_result_read_gprs_dm   (hart_result_read_gprs_dm_w  ), // I
+
+    .tdo_pad                    (tdo_pad                     ), // O
+    .dm_haltreq_hart            (dm_haltreq_hart_w           ), // O halt hart
+    .dm_hartreset_hart          (dm_hartreset_hart_w         ), // O reset hart
+    .dm_access_gprs_index_hart  (dm_access_gprs_index_hart_w ), // O access register file number
+    .dm_write_gprs_data_hart    (dm_write_gprs_data_hart_w   ), // O write data to register file
+    .dm_write_gprs_en_hart      (dm_write_gprs_en_hart_w     ) // O setup write enable
 );
 
 endmodule

@@ -198,9 +198,13 @@ reg enter_idle_stay_1_cycle;
 
 //--------------------------------------------------------------------------
 // Design: TAP controller state update by clock
+// Note:   SYNTH_149 (5) : Only '==' and '!=' binary operators are allowed
+//         in validation of the reset/set condition.
 //--------------------------------------------------------------------------
 always @(posedge tck or negedge trst_n) begin
-    if (!trst_n | dmihardreset) begin
+    if (!trst_n) begin
+        tap_cur_state <= TEST_LOGIC_RESET;
+    end else if (dmihardreset) begin
         tap_cur_state <= TEST_LOGIC_RESET;
     end else begin
         tap_cur_state <= tap_next_state;
@@ -214,15 +218,8 @@ always @(*) begin
     case (tap_cur_state)
         TEST_LOGIC_RESET:
             tap_next_state = (tms) ? TEST_LOGIC_RESET : RUN_TEST_IDLE;
-        RUN_TEST_IDLE: begin
+        RUN_TEST_IDLE:
             tap_next_state = ((tms) ? SELECT_DR_SCAN : RUN_TEST_IDLE) | enter_idle_leave_imm | enter_idle_stay_1_cycle;
-            /* 1: Enter Run-Test/Idle and leave it immediately. */
-            if (enter_idle_leave_imm) begin
-                dtmcs[14:12] <= 3'b000;
-            end else begin
-                dtmcs[14:12] <= dtmcs[14:12];
-            end
-        end
         SELECT_DR_SCAN:
             tap_next_state = (tms) ? SELECT_IR_SCAN : CAPTURE_DR;
         CAPTURE_DR:
@@ -261,22 +258,39 @@ end
 //         TODO: deleted the unused signal
 //--------------------------------------------------------------------------
 always @(posedge tck or negedge trst_n) begin
-    if (!trst_n | dmihardreset) begin
+    if (!trst_n) begin
         test_logic_reset <= 1'b0;
         run_test_idle    <= 1'b0;
         select_dr_scan   <= 1'b0;
         capture_dr       <= 1'b0;
         shift_dr         <= 1'b0;
-        exit1_dr         <= 1'b0;
-        pause_dr         <= 1'b0;
-        exit2_dr         <= 1'b0;
+        //exit1_dr         <= 1'b0;
+        //pause_dr         <= 1'b0;
+        //exit2_dr         <= 1'b0;
         update_dr        <= 1'b0;
         select_ir_scan   <= 1'b0;
         capture_ir       <= 1'b0;
         shift_ir         <= 1'b0;
-        exit1_ir         <= 1'b0;
-        pause_ir         <= 1'b0;
-        exit2_ir         <= 1'b0;
+        //exit1_ir         <= 1'b0;
+        //pause_ir         <= 1'b0;
+        //exit2_ir         <= 1'b0;
+        update_ir        <= 1'b0;
+    end else if (dmihardreset) begin
+        test_logic_reset <= 1'b0;
+        run_test_idle    <= 1'b0;
+        select_dr_scan   <= 1'b0;
+        capture_dr       <= 1'b0;
+        shift_dr         <= 1'b0;
+        //exit1_dr         <= 1'b0;
+        //pause_dr         <= 1'b0;
+        //exit2_dr         <= 1'b0;
+        update_dr        <= 1'b0;
+        select_ir_scan   <= 1'b0;
+        capture_ir       <= 1'b0;
+        shift_ir         <= 1'b0;
+        //exit1_ir         <= 1'b0;
+        //pause_ir         <= 1'b0;
+        //exit2_ir         <= 1'b0;
         update_ir        <= 1'b0;
     end else begin
         test_logic_reset <= 1'b0;
@@ -284,28 +298,20 @@ always @(posedge tck or negedge trst_n) begin
         select_dr_scan   <= 1'b0;
         capture_dr       <= 1'b0;
         shift_dr         <= 1'b0;
-        exit1_dr         <= 1'b0;
-        pause_dr         <= 1'b0;
-        exit2_dr         <= 1'b0;
+        //exit1_dr         <= 1'b0;
+        //pause_dr         <= 1'b0;
+        //exit2_dr         <= 1'b0;
         update_dr        <= 1'b0;
         select_ir_scan   <= 1'b0;
         capture_ir       <= 1'b0;
         shift_ir         <= 1'b0;
-        exit1_ir         <= 1'b0;
-        pause_ir         <= 1'b0;
-        exit2_ir         <= 1'b0;
+        //exit1_ir         <= 1'b0;
+        //pause_ir         <= 1'b0;
+        //exit2_ir         <= 1'b0;
         update_ir        <= 1'b0;
         case (tap_cur_state)
             TEST_LOGIC_RESET: test_logic_reset <= 1'b1;
-            RUN_TEST_IDLE: begin
-                run_test_idle    <= 1'b1;
-                /* 2: Enter Run-Test/Idle and stay there for 1 cycle before leaving.*/
-                if (enter_idle_stay_1_cycle) begin
-                    dtmcs[14:12] <= 3'b000;
-                end else begin
-                    dtmcs[14:12] <= dtmcs[14:12];
-                end
-            end
+            RUN_TEST_IDLE:    run_test_idle    <= 1'b1;
             SELECT_DR_SCAN:   select_dr_scan   <= 1'b1;
             CAPTURE_DR:       capture_dr       <= 1'b1;
             SHIFT_DR:         shift_dr         <= 1'b1;
@@ -334,7 +340,10 @@ end
 //         7.2) page: 46, 7.1.1 Specifications
 //--------------------------------------------------------------------------
 always @(posedge tck or negedge trst_n) begin
-    if (!trst_n | dmihardreset) begin
+    if (!trst_n) begin
+        ir_shift   <= IDCODE_ADDR;
+        ir_latched <= ir_shift;    //ir_latched = IDCODE_ADDR
+    end else if (dmihardreset) begin
         ir_shift   <= IDCODE_ADDR;
         ir_latched <= ir_shift;    //ir_latched = IDCODE_ADDR
     end else begin
@@ -356,15 +365,30 @@ end
 
 //--------------------------------------------------------------------------
 // Design: update the data register
+//         DTM update dmi op and data register
+//         TODO: will DTM wait for data and status adfer read/write request,
+//         and the there will be competition
+//         dmi_op: 2/3: This status is sticky and can be cleared by writing
+//                    dmireset in dtmcs.
+//                 0: The previous operation completed successfully
 //--------------------------------------------------------------------------
 always @(posedge tck or negedge trst_n) begin
-    if (!trst_n | test_logic_reset | dmihardreset) begin
+    if (!trst_n) begin
         idcode <= {`IDCODE_VERSION, `IDCODE_PART_NUMBER, `IDCODE_MANUFID, 1'b1};
         dtmcs  <= {14'b0, 1'b0, 1'b0, 1'b0, 2'b00, 2'b00, DMI_ABITS[5:0], DTM_VERSION_013_AND_10};
         dmi    <= {DMI_BITS{1'b0}};
         bypass0 <= 1'b0;
         bypass1 <= 1'b0;
+        dmi_dtm_response_ready <= 1'b0;
+    end else if (test_logic_reset | dmihardreset) begin
+        idcode <= {`IDCODE_VERSION, `IDCODE_PART_NUMBER, `IDCODE_MANUFID, 1'b1};
+        dtmcs  <= {14'b0, 1'b0, 1'b0, 1'b0, 2'b00, 2'b00, DMI_ABITS[5:0], DTM_VERSION_013_AND_10};
+        dmi    <= {DMI_BITS{1'b0}};
+        bypass0 <= 1'b0;
+        bypass1 <= 1'b0;
+        dmi_dtm_response_ready <= 1'b0;
     end else begin
+        dmi_dtm_response_ready <= 1'b1;
         if (capture_dr) begin
             if (idcode_select) begin
                 dr_shift[31:0] <= idcode;
@@ -372,6 +396,7 @@ always @(posedge tck or negedge trst_n) begin
                 dr_shift[31:0] <= dtmcs;
             end else if (dmi_select) begin
                 dr_shift       <= dmi;
+                dmi_dtm_response_ready <= 1'b0;
             end else if (bypass0_select) begin
                 dr_shift[0]    <= bypass0;
             end else if (bypass1_select) begin
@@ -391,25 +416,38 @@ always @(posedge tck or negedge trst_n) begin
             end
         end else if (update_dr) begin
             if (idcode_select) begin
-                idcode <= dr_shift[31:0];
+                idcode         <= dr_shift[31:0];
             end else if (dtmcs_select) begin
-                dtmcs  <= dr_shift[31:0];
+                dtmcs          <= dr_shift[31:0];
             end else if (dmi_select) begin
-                dmi    <= dr_shift;
+                dmi_dtm_response_ready <= 1'b0;
+                dmi            <= dr_shift;
              end else if (bypass0_select) begin
-                bypass0_select <= dr_shift[0];
+                bypass0        <= dr_shift[0];
             end else if (bypass1_select) begin
-                bypass1_select <= dr_shift[0];
+                bypass1        <= dr_shift[0];
             end else begin
-                bypass0_select <= dr_shift[0];
+                bypass1        <= dr_shift[0];
             end
         end else begin
-            dr_shift <= dr_shift;
-            idcode   <= idcode;
-            dtmcs    <= dtmcs;
-            dmi      <= dmi;
-            bypass0_select <= bypass0_select;
-            bypass1_select <= bypass1_select;
+            if (dm_dmi_response) begin
+                dmi[1:0]     <= dm_dmi_op;
+                dtmcs[11:10] <= dmi[1:0];
+                if (dm_dmi_op == 2'b00) begin
+                    dmi[33:2] <= dm_dmi_read_data;
+                end else begin
+                    dmi[33:2] <= dmi[33:2];
+                end
+            end else if (dmireset) begin
+                dmi[1:0]     <= 2'b00;
+            end else begin
+                dr_shift       <= dr_shift;
+                idcode         <= idcode;
+                dtmcs          <= dtmcs;
+                dmi            <= dmi;
+                bypass0        <= bypass0;
+                bypass1        <= bypass1;
+            end
         end
     end
 end
@@ -422,18 +460,18 @@ end
 //--------------------------------------------------------------------------
 always @(negedge tck) begin
     instruction_tdo <= ir_shift[0];
-    idcode_tdo      <= idcode_tdo[0];
-    dtmcs_tdo       <= dtmcs_tdo[0];
-    dmi_tdo         <= dmi_tdo[0];
-    bypass0_tdo     <= bypass0_tdo;
-    bypass1_tdo     <= bypass1_tdo;
+    idcode_tdo      <= idcode[0];
+    dtmcs_tdo       <= dtmcs[0];
+    dmi_tdo         <= dmi[0];
+    bypass0_tdo     <= bypass0;
+    bypass1_tdo     <= bypass1;
 end
 
 //--------------------------------------------------------------------------
 // Design: select data register active
 //--------------------------------------------------------------------------
 always @(ir_latched) begin
-    idcode_select  <= 1'b0;
+     idcode_select  <= 1'b0;
     dtmcs_select   <= 1'b0;
     dmi_select     <= 1'b0;
     bypass0_select <= 1'b0;
@@ -444,13 +482,14 @@ always @(ir_latched) begin
         DTMCS_ADDR:     dtmcs_select   <= 1'b1;
         DMI_ADDR:       dmi_select     <= 1'b1;
         BYPASS1_ADDR:   bypass1_select <= 1'b1;
+        default:        bypass0_select <= 1'b1;
     endcase
 end
 
 //--------------------------------------------------------------------------
 // Design: select output signal
 //--------------------------------------------------------------------------
-always @(shift_ir_neg or ir_latched_neg or idcode_tdo or dtmcs_tdo or dmi_tdo or bypass0_tdo or bypass0_tdo) begin
+always @(*) begin
     if (shift_ir_neg) begin
         tdo = instruction_tdo;
     end else begin
@@ -458,8 +497,8 @@ always @(shift_ir_neg or ir_latched_neg or idcode_tdo or dtmcs_tdo or dmi_tdo or
             IDCODE_ADDR:    tdo = idcode_tdo;
             DTMCS_ADDR:     tdo = dtmcs_tdo;
             DMI_ADDR:       tdo = dmi_tdo;
-            BYPASS0_ADDR,
-            BYPASS1_ADDR:   tdo = bypass0_tdo;
+            BYPASS0_ADDR:   tdo = bypass0_tdo;
+            BYPASS1_ADDR:   tdo = bypass1_tdo;
             default:        tdo = bypass0_tdo;
         endcase
     end
@@ -469,7 +508,9 @@ end
 // Design: output tdo enable signal
 //--------------------------------------------------------------------------
 always @(posedge tck or negedge trst_n) begin
-    if (!trst_n | dmihardreset) begin
+    if (!trst_n) begin
+        tdo_en <= 1'b0;
+    end else if (dmihardreset) begin
         tdo_en <= 1'b0;
     end else begin
         tdo_en <= shift_dr | shift_dr;
@@ -491,37 +532,11 @@ always @(negedge tck) begin
 end
 
 //--------------------------------------------------------------------------
-// Design: DTM update dmi op and data register
-//         TODO: will DTM wait for data and status adfer read/write request,
-//         and the there will be competition
-//         dmi_op: 2/3: This status is sticky and can be cleared by writing
-//                    dmireset in dtmcs.
-//                 0: The previous operation completed successfully
-//--------------------------------------------------------------------------
-always @(posedge tck) begin
-    if (dm_dmi_response) begin
-        dmi[1:0]     <= dm_dmi_op;
-        dtmcs[11:10] <= dmi[1:0];
-        if (dm_dmi_op == 2'b00) begin
-            dmi[33:2] <= dm_dmi_read_data;
-        end else begin
-            dmi[33:2] <= dmi[33:2];
-        end
-    end else begin
-        if (dmireset) begin
-            dmi[1:0]     <= 2'b00;
-            dtmcs[11:10] <= dmi[1:0];
-        end else begin
-            dmi[1:0]     <= dmi[1:0];
-            dtmcs[11:10] <= dtmcs[11:10];
-        end
-    end
-end
-
-//--------------------------------------------------------------------------
 // Design: DTM entry idle test status and leave it immediately
 //--------------------------------------------------------------------------
 always @(idle) begin
+    enter_idle_leave_imm     <= 1'b0;  /* InferLatch (3) : Latch inferred */
+    enter_idle_stay_1_cycle  <= 1'b0;
     if (idle == 3'b001) begin
         enter_idle_leave_imm     <= 1'b1;  //TODO: spyglass check
     end else if (idle == 3'b010) begin
@@ -541,13 +556,18 @@ end
 //         dmi data register
 //--------------------------------------------------------------------------
 always @(posedge tck or negedge trst_n) begin
-    if (!trst_n | dmihardreset) begin
+    if (!trst_n) begin
+        dmi_addr       <= 6'b000000;
+        dmi_write_data <= 32'h0000_0000;
+        dmi_write_en   <= 1'b0;
+        dmi_request    <= 1'b0;
+    end else if (dmihardreset) begin
         dmi_addr       <= 6'b000000;
         dmi_write_data <= 32'h0000_0000;
         dmi_write_en   <= 1'b0;
         dmi_request    <= 1'b0;
     end else begin
-        if (update_dr_neg & dmi_select_neg) begin
+        if (update_dr_neg & dmi_select_neg & dm_dmi_request_ready) begin
             dmi_addr       <= dmi_addr_w;
             dmi_write_data <= dmi_write_data_w;
             dmi_write_en   <= dmi_write_en_w;

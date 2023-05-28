@@ -36,7 +36,7 @@
 //--------------------------------------------------------------------------
 `define IDCODE_VERSION        4'b1101
 `define IDCODE_PART_NUMBER    16'b1101011011010010
-`define IDCODE_MANUFID        11'b110110101100
+`define IDCODE_MANUFID        11'b10110101100
 
 // dmi and ir width
 `define DMI_ABITIS_WIDTH      8
@@ -56,5 +56,10 @@
 `define ACCESS_32BIT_GPRS     3'b010
 `define ACCESS_64BIT_GPRS     3'b011
 `define ACCESS_128BIT_GPRS    3'b100
+
+// op code
+`define DMI_OP_SUCCESS         2'b00
+`define DMI_OP_FAILED          2'b01
+`define DMI_OP_IN_PROGRESS     2'b11
 
 //--------------------------------------------------------------------------

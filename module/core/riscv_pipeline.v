@@ -45,11 +45,15 @@ module riscv_pipeline
 //--------------------------------------------------------------------------
 (
     // inputs
-    input wire         sys_clk,
-    input wire         sys_rst_n,
+    input wire          sys_clk,
+    input wire          sys_rst_n,
+    input wire  [4:0]   dm_access_gprs_index_hart,
+    input wire  [31:0]  dm_write_gprs_data_hart,
+    input wire          dm_write_gprs_en_hart,
 
     // outputs
-    output reg         sys_led
+    output wire [31:0]  hart_result_read_gprs_dm,
+    output reg          sys_led
 );
 
 //--------------------------------------------------------------------------
@@ -188,6 +192,9 @@ if_id_stage if_id_stage_u(
     .wb_write_register_en_id     (wb_write_register_en_id_w),
     .if_current_pc_id            (if_current_pc_id_w),
     .hazard_flush_id_ex_reg      (hazard_flush_id_ex_reg_w),
+    .dm_access_gprs_index_hart   (dm_access_gprs_index_hart),
+    .dm_write_gprs_data_hart     (dm_write_gprs_data_hart),
+    .dm_write_gprs_en_hart       (dm_write_gprs_en_hart),
 
     .id_cycle_count_ex     (id_cycle_count_ex_w),
     .id_pc_plus4_ex        (id_pc_plus4_ex_w),
@@ -207,8 +214,9 @@ if_id_stage if_id_stage_u(
     .id_pc_branch_en_ex        (id_pc_branch_en_ex_w),
     .id_inst_rs1_ex            (id_inst_rs1_w),
     .id_inst_rs2_ex            (id_inst_rs2_w),
+    .hart_result_read_gprs_dm  (hart_result_read_gprs_dm),
+    .id_inst_debug_str_ex      (id_inst_debug_str_ex_w)
 
-    .id_inst_debug_str_ex    (id_inst_debug_str_ex_w)
 );
 
 //--------------------------------------------------------------------------

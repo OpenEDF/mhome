@@ -52,10 +52,14 @@ module register_file
     input wire [4:0]   wb_inst_write_dest,
     input wire [31:0]  wb_inst_write_data,
     input wire         wb_inst_write_en,
+    input wire [4:0]   dm_access_gprs_index_hart,
+    input wire [31:0]  dm_write_gprs_data_hart,
+    input wire         dm_write_gprs_en_hart,
 
     // outputs
     output wire [31:0] id_inst_read_1_data,
-    output wire [31:0] id_inst_read_2_data
+    output wire [31:0] id_inst_read_2_data,
+    output wire [31:0] hart_result_read_gprs_dm
 );
 
 //--------------------------------------------------------------------------
@@ -90,6 +94,8 @@ reg [31:0] rv32_register[0:31];
 //--------------------------------------------------------------------------
 assign id_inst_read_1_data = rv32_register[id_inst_read_1_src];
 assign id_inst_read_2_data = rv32_register[id_inst_read_2_src];
+// debug system read register file
+assign hart_result_read_gprs_dm = rv32_register[dm_access_gprs_index_hart];
 
 //--------------------------------------------------------------------------
 // Design: register file writen operation
@@ -128,76 +134,179 @@ always @(posedge clk or negedge rst_n) begin
         rv32_register[29] <= 32'h0000_0000;
         rv32_register[30] <= 32'h0000_0000;
         rv32_register[31] <= 32'h0000_0000;
-    end else begin
-        case ({wb_inst_write_en, wb_inst_write_dest})
-            6'b100000:
-                rv32_register[0] <= 32'h0000_0000;
-            6'b100001:
-                rv32_register[1] <= wb_inst_write_data;
-            6'b100010:
-                rv32_register[2] <= wb_inst_write_data;
-            6'b100011:
-                rv32_register[3] <= wb_inst_write_data;
-            6'b100100:
-                rv32_register[4] <= wb_inst_write_data;
-            6'b100101:
-                rv32_register[5] <= wb_inst_write_data;
-            6'b100110:
-                rv32_register[6] <= wb_inst_write_data;
-            6'b100111:
-                rv32_register[7] <= wb_inst_write_data;
-            6'b101000:
-                rv32_register[8] <= wb_inst_write_data;
-            6'b101001:
-                rv32_register[9] <= wb_inst_write_data;
-            6'b101010:
+    end else if (wb_inst_write_en) begin
+        case (wb_inst_write_dest)
+            5'b00000:
+                rv32_register[0]  <= 32'h0000_0000;
+            5'b00001:
+                rv32_register[1]  <= wb_inst_write_data;
+            5'b00010:
+                rv32_register[2]  <= wb_inst_write_data;
+            5'b00011:
+                rv32_register[3]  <= wb_inst_write_data;
+            5'b00100:
+                rv32_register[4]  <= wb_inst_write_data;
+            5'b00101:
+                rv32_register[5]  <= wb_inst_write_data;
+            5'b00110:
+                rv32_register[6]  <= wb_inst_write_data;
+            5'b00111:
+                rv32_register[7]  <= wb_inst_write_data;
+            5'b01000:
+                rv32_register[8]  <= wb_inst_write_data;
+            5'b01001:
+                rv32_register[9]  <= wb_inst_write_data;
+            5'b01010:
                 rv32_register[10] <= wb_inst_write_data;
-            6'b101011:
+            5'b01011:
                 rv32_register[11] <= wb_inst_write_data;
-            6'b101100:
+            5'b01100:
                 rv32_register[12] <= wb_inst_write_data;
-            6'b101101:
+            5'b01101:
                 rv32_register[13] <= wb_inst_write_data;
-            6'b101110:
+            5'b01110:
                 rv32_register[14] <= wb_inst_write_data;
-            6'b101111:
+            5'b01111:
                 rv32_register[15] <= wb_inst_write_data;
-            6'b110000:
+            5'b10000:
                 rv32_register[16] <= wb_inst_write_data;
-            6'b110001:
+            5'b10001:
                 rv32_register[17] <= wb_inst_write_data;
-            6'b110010:
+            5'b10010:
                 rv32_register[18] <= wb_inst_write_data;
-            6'b110011:
+            5'b10011:
                 rv32_register[19] <= wb_inst_write_data;
-            6'b110100:
+            5'b10100:
                 rv32_register[20] <= wb_inst_write_data;
-            6'b110101:
+            5'b10101:
                 rv32_register[21] <= wb_inst_write_data;
-            6'b110110:
+            5'b10110:
                 rv32_register[22] <= wb_inst_write_data;
-            6'b110111:
+            5'b10111:
                 rv32_register[23] <= wb_inst_write_data;
-            6'b111000:
+            5'b11000:
                 rv32_register[24] <= wb_inst_write_data;
-            6'b111001:
+            5'b11001:
                 rv32_register[25] <= wb_inst_write_data;
-            6'b111010:
+            5'b11010:
                 rv32_register[26] <= wb_inst_write_data;
-            6'b111011:
+            5'b11011:
                 rv32_register[27] <= wb_inst_write_data;
-            6'b111100:
+            5'b11100:
                 rv32_register[28] <= wb_inst_write_data;
-            6'b111101:
+            5'b11101:
                 rv32_register[29] <= wb_inst_write_data;
-            6'b111110:
+            5'b11110:
                 rv32_register[30] <= wb_inst_write_data;
-            6'b111111:
+            5'b11111:
                 rv32_register[31] <= wb_inst_write_data;
             default:
-                rv32_register[0] <= 32'h0000_0000;
+                rv32_register[0]  <= 32'h0000_0000;
         endcase
+    end else if (dm_write_gprs_en_hart) begin
+        case (dm_access_gprs_index_hart)
+            5'b00000:
+                rv32_register[0]  <= 32'h0000_0000;
+            5'b00001:
+                rv32_register[1]  <= dm_write_gprs_data_hart;
+            5'b00010:
+                rv32_register[2]  <= dm_write_gprs_data_hart;
+            5'b00011:
+                rv32_register[3]  <= dm_write_gprs_data_hart;
+            5'b00100:
+                rv32_register[4]  <= dm_write_gprs_data_hart;
+            5'b00101:
+                rv32_register[5]  <= dm_write_gprs_data_hart;
+            5'b00110:
+                rv32_register[6]  <= dm_write_gprs_data_hart;
+            5'b00111:
+                rv32_register[7]  <= dm_write_gprs_data_hart;
+            5'b01000:
+                rv32_register[8]  <= dm_write_gprs_data_hart;
+            5'b01001:
+                rv32_register[9]  <= dm_write_gprs_data_hart;
+            5'b01010:
+                rv32_register[10] <= dm_write_gprs_data_hart;
+            5'b01011:
+                rv32_register[11] <= dm_write_gprs_data_hart;
+            5'b01100:
+                rv32_register[12] <= dm_write_gprs_data_hart;
+            5'b01101:
+                rv32_register[13] <= dm_write_gprs_data_hart;
+            5'b01110:
+                rv32_register[14] <= dm_write_gprs_data_hart;
+            5'b01111:
+                rv32_register[15] <= dm_write_gprs_data_hart;
+            5'b10000:
+                rv32_register[16] <= dm_write_gprs_data_hart;
+            5'b10001:
+                rv32_register[17] <= dm_write_gprs_data_hart;
+            5'b10010:
+                rv32_register[18] <= dm_write_gprs_data_hart;
+            5'b10011:
+                rv32_register[19] <= dm_write_gprs_data_hart;
+            5'b10100:
+                rv32_register[20] <= dm_write_gprs_data_hart;
+            5'b10101:
+                rv32_register[21] <= dm_write_gprs_data_hart;
+            5'b10110:
+                rv32_register[22] <= dm_write_gprs_data_hart;
+            5'b10111:
+                rv32_register[23] <= dm_write_gprs_data_hart;
+            5'b11000:
+                rv32_register[24] <= dm_write_gprs_data_hart;
+            5'b11001:
+                rv32_register[25] <= dm_write_gprs_data_hart;
+            5'b11010:
+                rv32_register[26] <= dm_write_gprs_data_hart;
+            5'b11011:
+                rv32_register[27] <= dm_write_gprs_data_hart;
+            5'b11100:
+                rv32_register[28] <= dm_write_gprs_data_hart;
+            5'b11101:
+                rv32_register[29] <= dm_write_gprs_data_hart;
+            5'b11110:
+                rv32_register[30] <= dm_write_gprs_data_hart;
+            5'b11111:
+                rv32_register[31] <= dm_write_gprs_data_hart;
+            default:
+                rv32_register[0]  <= 32'h0000_0000;
+        endcase
+    end else begin
+        rv32_register[0]   <= 32'h0000_0000;
+        rv32_register[1]   <= rv32_register[1];
+        rv32_register[2]   <= rv32_register[2];
+        rv32_register[3]   <= rv32_register[3];
+        rv32_register[4]   <= rv32_register[4];
+        rv32_register[5]   <= rv32_register[5];
+        rv32_register[6]   <= rv32_register[6];
+        rv32_register[7]   <= rv32_register[7];
+        rv32_register[8]   <= rv32_register[8];
+        rv32_register[9]   <= rv32_register[9];
+        rv32_register[10]  <= rv32_register[10];
+        rv32_register[11]  <= rv32_register[11];
+        rv32_register[12]  <= rv32_register[12];
+        rv32_register[13]  <= rv32_register[13];
+        rv32_register[14]  <= rv32_register[14];
+        rv32_register[15]  <= rv32_register[15];
+        rv32_register[16]  <= rv32_register[16];
+        rv32_register[17]  <= rv32_register[17];
+        rv32_register[18]  <= rv32_register[18];
+        rv32_register[19]  <= rv32_register[19];
+        rv32_register[20]  <= rv32_register[20];
+        rv32_register[21]  <= rv32_register[21];
+        rv32_register[22]  <= rv32_register[22];
+        rv32_register[23]  <= rv32_register[23];
+        rv32_register[24]  <= rv32_register[24];
+        rv32_register[25]  <= rv32_register[25];
+        rv32_register[26]  <= rv32_register[26];
+        rv32_register[27]  <= rv32_register[27];
+        rv32_register[28]  <= rv32_register[28];
+        rv32_register[29]  <= rv32_register[29];
+        rv32_register[30]  <= rv32_register[30];
+        rv32_register[31]  <= rv32_register[31];
     end
 end
+
 endmodule
 //--------------------------------------------------------------------------

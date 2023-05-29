@@ -52,7 +52,7 @@ module rv_csrs
     input wire  [31:0]  id_write_data_csrs,
 
     // outputs
-    output wire [31:0]  csrs_read_csr_data
+    output reg  [31:0]  csrs_read_csr_data
 );
 
 //--------------------------------------------------------------------------

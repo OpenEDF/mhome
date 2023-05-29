@@ -259,6 +259,20 @@ register_file register_file_u(
 );
 
 //--------------------------------------------------------------------------
+// Design: instantiate riscv csrs module
+//--------------------------------------------------------------------------
+rv_csrs rv_csrs_u(
+    .clk                         (clk),
+    .rst_n                       (rst_n),
+    .id_access_csr_addr_csrs     (),
+    .id_write_en_csrs            (),
+    .id_write_data_csrs          (),
+
+    .csrs_read_csr_data          ()
+);
+
+
+//--------------------------------------------------------------------------
 // Design: instantiate riscv pipeline control module
 //--------------------------------------------------------------------------
 pipeline_ctrl pipeline_ctrl_u(

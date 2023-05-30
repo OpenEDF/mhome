@@ -57,25 +57,28 @@ module pipeline_ctrl
     output reg [1:0]   id_wb_result_src,
     output reg         id_sel_imm_rs2data_alu,
     output reg         id_pc_jump_en,
-    output reg         id_pc_branch_en
+    output reg         id_pc_branch_en,
+    output reg         id_csr_read_en,
+    output reg         id_csr_write_en,
+    output reg         id_rs1_uimm_en
 );
 
 //--------------------------------------------------------------------------
 // Design: instruction feild internal signal
 //--------------------------------------------------------------------------
 wire [6:0] inst_opcode;
-//wire [4:0] inst_rd;
+wire [4:0] inst_rd;
 wire [2:0] inst_funct3;
-//wire [4:0] inst_rs1;
+wire [4:0] inst_rs1;
 //wire [4:0] inst_rs2;
 //wire [6:0] inst_funct7;
 wire       inst_30bit;
 wire       inst_20bit_exten;
 
 assign inst_opcode = id_instruction_ctrl[6:0];
-//assign inst_rd = id_instruction_ctrl[11:7];
+assign inst_rd = id_instruction_ctrl[11:7];
 assign inst_funct3 = id_instruction_ctrl[14:12];
-//assign inst_rs1 = id_instruction_ctrl[19:15];
+assign inst_rs1 = id_instruction_ctrl[19:15];
 //assign inst_rs2 = id_instruction_ctrl[24:20];
 //assign inst_funct7 = id_instruction_ctrl[31:25];
 assign inst_30bit = id_instruction_ctrl[30];
@@ -98,6 +101,9 @@ always @(id_instruction_ctrl or inst_funct3 or inst_opcode or inst_30bit or inst
         id_sel_imm_rs2data_alu <= `ALU_SEL_RS2DATA_INPUT;
         id_pc_jump_en <= `PP_JUMP_DISABLE;
         id_pc_branch_en <= `PP_BRANCH_DISABLE;
+        id_csr_read_en  <= `PP_REWAD_CSR_DISABLE;
+        id_csr_write_en <= `PP_WRITE_CSR_DISABLE;
+        id_rs1_uimm_en  <= `RS1_UIMM_DISABLE;
     end
     case (inst_opcode)
         `OPCODE_LUI_U: begin
@@ -245,13 +251,83 @@ always @(id_instruction_ctrl or inst_funct3 or inst_opcode or inst_30bit or inst
             id_write_register_en <= `PP_WRITE_DEST_REG_ENABLE;
             id_inst_encoding <= `RV32_BASE_INST_FENCE;
         end
-        `OPCODE_EXTEN_I: begin
-            id_imm_src_ctrl <= `I_TYPE_INST;
+        /* system operation: TODO: design redundancy */
+        `OPCODE_SYS_I: begin
+            id_imm_src_ctrl      <= `I_TYPE_INST;
             id_write_register_en <= `PP_WRITE_DEST_REG_ENABLE;
-            if (inst_20bit_exten)
-                id_inst_encoding <= `RV32_BASE_INST_FENCE;
-            else
-                id_inst_encoding <= `RV32_BASE_INST_EBREAK;
+            id_csr_read_en       <= `PP_REWAD_CSR_ENABLE;
+            id_csr_write_en      <= `PP_WRITE_CSR_ENABLE;
+            id_rs1_uimm_en       <= `RS1_UIMM_DISABLE;
+            case(inst_funct3)
+                3'b000: begin
+                    id_write_register_en <= `PP_WRITE_DEST_REG_DISABLE;
+                    if (inst_20bit_exten) begin
+                        id_inst_encoding <= `RV32_BASE_INST_FENCE;
+                    end else begin
+                        id_inst_encoding <= `RV32_BASE_INST_EBREAK;
+                    end
+                end
+                3'b001: begin
+                    id_inst_encoding <= `RV32_ZICSR_STAND_INST_CSRRW;
+                    if (inst_rd == 5'b00000) begin
+                       id_csr_read_en <= `PP_REWAD_CSR_DISABLE;
+                    end else begin
+                       id_csr_read_en <= `PP_REWAD_CSR_ENABLE;
+                    end
+                end
+                3'b010: begin
+                    id_inst_encoding <= `RV32_ZICSR_STAND_INST_CSRRS;
+                    if (inst_rs1 == 5'b00000) begin
+                        id_csr_write_en <= `PP_WRITE_CSR_DISABLE;
+                    end else begin
+                        id_csr_write_en <= `PP_WRITE_CSR_ENABLE;
+                    end
+                end
+                3'b011: begin
+                    id_inst_encoding <= `RV32_ZICSR_STAND_INST_CSRRC;
+                    if (inst_rs1 == 5'b00000) begin
+                        id_csr_write_en <= `PP_WRITE_CSR_DISABLE;
+                    end else begin
+                        id_csr_write_en <= `PP_WRITE_CSR_ENABLE;
+                    end
+                end
+                3'b101: begin
+                    id_inst_encoding <= `RV32_ZICSR_STAND_INST_CSRRWI;
+                    id_rs1_uimm_en   <= `RS1_UIMM_ENABLE;
+                    if (inst_rd == 5'b00000) begin
+                       id_csr_read_en <= `PP_REWAD_CSR_DISABLE;
+                    end else begin
+                       id_csr_read_en <= `PP_REWAD_CSR_ENABLE;
+                    end
+                end
+                3'b110: begin
+                    id_inst_encoding <= `RV32_ZICSR_STAND_INST_CSRRSI;
+                    id_rs1_uimm_en   <= `RS1_UIMM_ENABLE;
+                    if (inst_rs1 == 5'b00000) begin
+                        id_csr_write_en <= `PP_WRITE_CSR_DISABLE;
+                    end else begin
+                        id_csr_write_en <= `PP_WRITE_CSR_ENABLE;
+                    end
+                end
+                3'b111: begin
+                    id_inst_encoding <= `RV32_ZICSR_STAND_INST_CSRRCI;
+                    id_rs1_uimm_en   <= `RS1_UIMM_ENABLE;
+                    if (inst_rs1 == 5'b00000) begin
+                        id_csr_write_en <= `PP_WRITE_CSR_DISABLE;
+                    end else begin
+                        id_csr_write_en <= `PP_WRITE_CSR_ENABLE;
+                    end
+                end
+                default: begin
+                    id_inst_encoding <= `RV32_ILLEGAL_INST;
+                    id_csr_write_en  <= `PP_WRITE_CSR_DISABLE;
+                    id_csr_read_en   <= `PP_REWAD_CSR_DISABLE;
+                    id_rs1_uimm_en   <= `RS1_UIMM_DISABLE;
+                    id_write_register_en <= `PP_WRITE_DEST_REG_DISABLE; //TODO: think
+                end
+            endcase
+        end
+        `OPCODE_MULD_R: begin
         end
         default: begin
             id_imm_src_ctrl <= `R_TYPE_INST;
@@ -264,6 +340,11 @@ always @(id_instruction_ctrl or inst_funct3 or inst_opcode or inst_30bit or inst
             id_sel_imm_rs2data_alu <= `ALU_SEL_RS2DATA_INPUT;
             id_pc_jump_en <= `PP_JUMP_DISABLE;
             id_pc_branch_en <= `PP_BRANCH_DISABLE;
+            id_csr_read_en  <= `PP_REWAD_CSR_DISABLE;
+            id_csr_write_en <= `PP_WRITE_CSR_DISABLE;
+            id_rs1_uimm_en  <= `RS1_UIMM_DISABLE;
+            id_csr_write_en <= `PP_WRITE_CSR_DISABLE;
+           i d_csr_read_en  <= `PP_REWAD_CSR_DISABLE;
         end
     endcase
 end

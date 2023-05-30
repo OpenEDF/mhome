@@ -47,7 +47,9 @@ module rv_csrs
     // inputs
     input wire          clk,
     input wire          rst_n,
-    input wire  [11:0]  id_access_csr_addr_csrs,
+    input wire  [11:0]  id_read_csr_addr_csrs,
+    input wire          id_read_en_csrs,
+    input wire  [11:0]  id_write_csr_addr_csrs,
     input wire          id_write_en_csrs,
     input wire  [31:0]  id_write_data_csrs,
 
@@ -104,18 +106,22 @@ end
 // Design: instruction write csrs register
 //--------------------------------------------------------------------------
 always @(*) begin: read_csrs
-    case(id_access_csr_addr_csrs)
-        MVENDORID_ADDR:  csrs_read_csr_data <= mvendorid;
-        MARCHID_ADDR:    csrs_read_csr_data <= marchid;
-        MIMPID_ADDR:     csrs_read_csr_data <= mimpid;
-        MHARTID_ADDR:    csrs_read_csr_data <= mhartid;
-        MCONFIGPTR_ADDR: csrs_read_csr_data <= mconfigptr;
-        default: begin
-            /* but a value of 0 can be returned to indicate that
-             * the field is not implemented.*/
-            csrs_read_csr_data <= 32'h0000_0000;
-        end
-    endcase
+    if (id_read_en_csrs) begin
+        case(id_access_csr_addr_csrs)
+            MVENDORID_ADDR:  csrs_read_csr_data <= mvendorid;
+            MARCHID_ADDR:    csrs_read_csr_data <= marchid;
+            MIMPID_ADDR:     csrs_read_csr_data <= mimpid;
+            MHARTID_ADDR:    csrs_read_csr_data <= mhartid;
+            MCONFIGPTR_ADDR: csrs_read_csr_data <= mconfigptr;
+            default: begin
+                /* but a value of 0 can be returned to indicate that
+                 * the field is not implemented.*/
+                csrs_read_csr_data <= 32'h0000_0000;
+            end
+        endcase
+    end else begin
+        csrs_read_csr_data <= 32'h0000_0000;
+    end
 end
 
 endmodule

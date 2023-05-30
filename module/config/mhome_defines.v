@@ -83,6 +83,16 @@
 `define RS2_SHAMT_DISABLE  1'b0
 `define RS2_SHAMT_ENABLE   1'b1
 
+// write and read csr control
+`define PP_REWAD_CSR_ENABLE   1'b1
+`define PP_REWAD_CSR_DISABLE  1'b0
+`define PP_WRITE_CSR_ENABLE   1'b1
+`define PP_WRITE_CSR_DISABLE  1'b0
+
+// rs1 as uimm for csr instruction
+`define RS1_UIMM_ENABLE      1'b1
+`define RS1_UIMM_DISABLE     1'b0
+
 // produce immediates by base instruction formats
 `define R_TYPE_INST      3'b000
 `define I_TYPE_INST      3'b001
@@ -102,7 +112,8 @@
 `define OPCODE_ALU_I         7'b0010011
 `define OPCODE_ALU_R         7'b0110011
 `define OPCODE_FENCE_I       7'b0001111
-`define OPCODE_EXTEN_I       7'b1110011    // ECALL EBREAK CSRRXX
+`define OPCODE_SYS_I         7'b1110011    // ECALL EBREAK CSRRXX
+`define OPCODE_MULD_R        7'b0110011
 
 // RV32I Base Instruction Set, Reserve 256 instruction
 `define RV32_BASE_INST_LUI               8'h01
@@ -152,6 +163,15 @@
 `define RV32_ZICSR_STAND_INST_CSRRWI     8'h2D
 `define RV32_ZICSR_STAND_INST_CSRRSI     8'h2E
 `define RV32_ZICSR_STAND_INST_CSRRCI     8'h2F
+`define RV32_M_STAND_INST_MUL            8'h30
+`define RV32_M_STAND_INST_MULH           8'h31
+`define RV32_M_STAND_INST_MULHSU         8'h32
+`define RV32_M_STAND_INST_MULHU          8'h33
+`define RV32_M_STAND_INST_DIV            8'h34
+`define RV32_M_STAND_INST_DIVU           8'h35
+`define RV32_M_STAND_INST_REM            8'h36
+`define RV32_M_STAND_INST_REMU           8'h37
+
 `define RV32_ILLEGAL_INST                8'hFF
 
 //RV32/RV64 Zicsr Standard Extension

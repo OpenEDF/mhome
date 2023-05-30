@@ -58,6 +58,9 @@ module if_id_stage
     input wire [4:0]   dm_access_gprs_index_hart,
     input wire [31:0]  dm_write_gprs_data_hart,
     input wire         dm_write_gprs_en_hart,
+    input wire         ex_write_csr_en_id,
+    input wire         ex_write_csr_addr_id,
+    input wire [31:0]  ex_write_csr_data_id,
 
     // outputs
     output reg [31:0]  id_cycle_count_ex,
@@ -79,6 +82,10 @@ module if_id_stage
     output reg [4:0]   id_inst_rs1_ex,
     output reg [4:0]   id_inst_rs2_ex,
     output wire [31:0] hart_result_read_gprs_dm,
+    output reg [31:0]  id_csr_read_data_ex,
+    output reg [11:0]  id_csr_write_addr_ex,
+    output reg         id_csr_write_en_ex,
+    output reg [4:0]   id_rs1_uimm_ex,
     output reg [8*3:1] id_inst_debug_str_ex
 );
 
@@ -105,12 +112,20 @@ wire        id_pc_jump_en_w;
 wire        id_pc_branch_en_w;
 reg [31:0]  id_read_rs1_data_hazard_r;
 reg [31:0]  id_read_rs2_data_hazard_r;
+wire        id_csr_read_en_w;
+wire        id_csr_write_en_w;
+wire        id_rs1_uimm_en_w;
+wire [11:0] id_csr_read_addr_w;
+wire [11:0] id_csr_write_addr_w;
+wire [31:0] csrs_read_csr_data_w;
 reg  [8*3:1] id_inst_debug_str_r;
 
 assign id_inst_rs1_w = if_instruction_id[19:15];
 assign id_inst_rs2_w = if_instruction_id[24:20];
 assign id_write_dest_register_index_ex_w = if_instruction_id[11:7];
 assign inst = if_instruction_id;
+assign id_csr_read_addr_w = if_instruction_id[31:20];
+assign id_csr_write_addr_w = if_instruction_id[31:20];
 
 localparam R_TYPE = `R_TYPE_INST;
 localparam I_TYPE = `I_TYPE_INST;
@@ -219,6 +234,16 @@ always @(id_rs2_shamt_en_w or id_inst_rs2_w) begin
 end
 
 //--------------------------------------------------------------------------
+// Design: output the shamt for SLLI/SRLI/SRAI
+//--------------------------------------------------------------------------
+always @(id_rs1_uimm_en_w or id_inst_rs1_w) begin
+    if (id_rs1_uimm_en_w)
+        id_rs1_uimm_ex_r <= id_inst_rs1_w;
+    else
+        id_rs1_uimm_ex_r <= 5'b00000;
+end
+
+//--------------------------------------------------------------------------
 // Design: write back clock hazard rs1, rs1 == 5'b0
 //--------------------------------------------------------------------------
 always @(*)begin
@@ -264,21 +289,22 @@ register_file register_file_u(
 rv_csrs rv_csrs_u(
     .clk                         (clk),
     .rst_n                       (rst_n),
-    .id_access_csr_addr_csrs     (),
-    .id_write_en_csrs            (),
-    .id_write_data_csrs          (),
+    .id_read_csr_addr_csrs       (id_csr_read_addr_w),
+    .id_read_en_csrs             (id_csr_read_en_w),
+    .id_write_csr_addr_csrs      (ex_write_csr_addr_id),
+    .id_write_en_csrs            (ex_write_csr_en_id),
+    .id_write_data_csrs          (ex_write_csr_data_id),
 
-    .csrs_read_csr_data          ()
+    .csrs_read_csr_data          (csrs_read_csr_data_w) // O
 );
-
 
 //--------------------------------------------------------------------------
 // Design: instantiate riscv pipeline control module
 //--------------------------------------------------------------------------
 pipeline_ctrl pipeline_ctrl_u(
-    .id_instruction_ctrl    (if_instruction_id),
+    .id_instruction_ctrl    (if_instruction_id),          // I
 
-    .id_imm_src_ctrl        (id_imm_exten_src_w),
+    .id_imm_src_ctrl        (id_imm_exten_src_w),         // O
     .id_write_register_en   (id_write_register_en_ex_w),
     .id_inst_encoding       (id_inst_encoding_ex_w),
     .id_mem_write_en        (id_mem_write_en_ex_w),
@@ -288,6 +314,9 @@ pipeline_ctrl pipeline_ctrl_u(
     .id_sel_imm_rs2data_alu (id_sel_imm_rs2data_alu_w),
     .id_pc_jump_en          (id_pc_jump_en_w),
     .id_pc_branch_en        (id_pc_branch_en_w)
+    .id_csr_read_en         (id_csr_read_en_w),
+    .id_csr_write_en        (id_csr_write_en_w),
+    .id_rs1_uimm_en         (id_rs1_uimm_en_w)
 );
 
 //--------------------------------------------------------------------------
@@ -312,6 +341,10 @@ always @(posedge clk or negedge rst_n) begin
         id_pc_branch_en_ex <= `PP_BRANCH_DISABLE;
         id_inst_rs1_ex <= 5'b00000;
         id_inst_rs2_ex <= 5'b00000;
+        id_csr_read_data_ex  <= 32'h0000_0000;
+        id_csr_write_addr_ex <= 12'h000;
+        id_csr_write_en_ex  <= `PP_WRITE_CSR_DISABLE;
+        id_rs1_uimm_ex      <= 5'b00000;
         id_inst_debug_str_ex <= "adi";
     end else begin
         if (hazard_flush_id_ex_reg) begin
@@ -332,6 +365,10 @@ always @(posedge clk or negedge rst_n) begin
             id_pc_branch_en_ex <= `PP_BRANCH_DISABLE;
             id_inst_rs1_ex <= 5'b00000;
             id_inst_rs2_ex <= 5'b00000;
+            id_csr_read_data_ex <= 32'h0000_0000;
+            id_csr_write_addr_ex <= 12'h000;
+            id_csr_write_en_ex  <= `PP_WRITE_CSR_DISABLE;
+            id_rs1_uimm_ex      <= 5'b00000;
             id_inst_debug_str_ex <= "adi";
         end else begin
             id_pc_plus4_ex <= if_pc_plus4_id;
@@ -351,6 +388,10 @@ always @(posedge clk or negedge rst_n) begin
             id_pc_branch_en_ex <= id_pc_branch_en_w;
             id_inst_rs1_ex <= id_inst_rs1_w;
             id_inst_rs2_ex <= id_inst_rs2_w;
+            id_csr_read_data_ex  <= csrs_read_csr_data_w;
+            id_csr_write_addr_ex <= id_csr_write_addr_w;
+            id_csr_write_en_ex   <= id_csr_write_en_w;
+            id_rs1_uimm_ex       <= id_rs1_uimm_ex_r;
             id_inst_debug_str_ex <= id_inst_debug_str_r;
         end
     end

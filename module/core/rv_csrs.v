@@ -90,7 +90,7 @@ always @(posedge clk or negedge rst_n) begin
         mhartid      <= 32'h0000_0001;
         mconfigptr   <= 32'h0000_0000;
     end else if (id_write_en_csrs) begin: write_csrs
-        case (id_access_csr_addr_csrs)
+        case (id_write_csr_addr_csrs)
             MARCHID_ADDR: mimpid <= id_write_data_csrs;
             default: begin
             end
@@ -107,7 +107,7 @@ end
 //--------------------------------------------------------------------------
 always @(*) begin: read_csrs
     if (id_read_en_csrs) begin
-        case(id_access_csr_addr_csrs)
+        case(id_read_csr_addr_csrs)
             MVENDORID_ADDR:  csrs_read_csr_data <= mvendorid;
             MARCHID_ADDR:    csrs_read_csr_data <= marchid;
             MIMPID_ADDR:     csrs_read_csr_data <= mimpid;

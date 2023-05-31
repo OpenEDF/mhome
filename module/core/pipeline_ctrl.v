@@ -255,9 +255,10 @@ always @(id_instruction_ctrl or inst_funct3 or inst_opcode or inst_30bit or inst
         `OPCODE_SYS_I: begin
             id_imm_src_ctrl      <= `I_TYPE_INST;
             id_write_register_en <= `PP_WRITE_DEST_REG_ENABLE;
-            id_csr_read_en       <= `PP_REWAD_CSR_ENABLE;
-            id_csr_write_en      <= `PP_WRITE_CSR_ENABLE;
+            id_csr_write_en      <= `PP_WRITE_CSR_DISABLE;
+            id_csr_read_en       <= `PP_REWAD_CSR_DISABLE;
             id_rs1_uimm_en       <= `RS1_UIMM_DISABLE;
+            id_wb_result_src     <= `WB_SEL_ALU_RESULT;
             case(inst_funct3)
                 3'b000: begin
                     id_write_register_en <= `PP_WRITE_DEST_REG_DISABLE;
@@ -320,10 +321,6 @@ always @(id_instruction_ctrl or inst_funct3 or inst_opcode or inst_30bit or inst
                 end
                 default: begin
                     id_inst_encoding <= `RV32_ILLEGAL_INST;
-                    id_csr_write_en  <= `PP_WRITE_CSR_DISABLE;
-                    id_csr_read_en   <= `PP_REWAD_CSR_DISABLE;
-                    id_rs1_uimm_en   <= `RS1_UIMM_DISABLE;
-                    id_write_register_en <= `PP_WRITE_DEST_REG_DISABLE; //TODO: think
                 end
             endcase
         end
@@ -343,7 +340,6 @@ always @(id_instruction_ctrl or inst_funct3 or inst_opcode or inst_30bit or inst
             id_csr_read_en  <= `PP_REWAD_CSR_DISABLE;
             id_csr_write_en <= `PP_WRITE_CSR_DISABLE;
             id_rs1_uimm_en  <= `RS1_UIMM_DISABLE;
-            id_csr_write_en <= `PP_WRITE_CSR_DISABLE;
            i d_csr_read_en  <= `PP_REWAD_CSR_DISABLE;
         end
     endcase

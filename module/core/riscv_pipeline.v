@@ -89,6 +89,10 @@ wire         id_pc_jump_en_ex_w;            /* pipeline jump enable */
 wire         id_pc_branch_en_ex_w;          /* pipeline branch enable */
 wire [4:0]   id_inst_rs1_w;                 /* instruction register port1 */
 wire [4:0]   id_inst_rs2_w;                 /* instruction register port2 */
+wire [31:0]  id_csr_read_data_ex_w;         /* csr old data */
+wire [31:0]  id_csr_write_addr_ex_w;        /* crs write address */
+wire         id_csr_write_en_ex_w;          /* csr write enable */
+wire [31:0]  id_rs1_uimm_ex_w;              /* csr immediated operand extend data */
 wire [8*3:1] id_inst_debug_str_ex_w;        /* riscv instruction debug string name */
 
 // execute stage
@@ -105,6 +109,9 @@ wire         ex_pc_jump_en_pc_mux_w;               /* pipeline enable jump */
 wire [31:0]  ex_jump_new_pc_pc_mux_w;              /* pipeline jump to new pc */
 wire [4:0]   ex_inst_rs1_hazard_w;                 /* instruction register port1 to hazard*/
 wire [4:0]   ex_inst_rs2_hazard_w;                 /* instruction register port2 to hazard */
+wire         ex_write_csr_en_id_w;                 /* write csr enable */
+wire [31:0]  ex_write_csr_addr_id_w;               /* write csr address */
+wire [31:0]  ex_write_csr_data_id_w;               /* write csr data */
 wire [8*3:1] ex_inst_debug_str_mem_w;              /* riscv instruction debug string name */
 
 // access memory stage
@@ -195,6 +202,9 @@ if_id_stage if_id_stage_u(
     .dm_access_gprs_index_hart   (dm_access_gprs_index_hart),
     .dm_write_gprs_data_hart     (dm_write_gprs_data_hart),
     .dm_write_gprs_en_hart       (dm_write_gprs_en_hart),
+    .ex_write_csr_en_id          (ex_write_csr_en_id_w),
+    .ex_write_csr_addr_id        (ex_write_csr_addr_id_w),
+    .ex_write_csr_data_id        (ex_write_csr_data_id_w),
 
     .id_cycle_count_ex     (id_cycle_count_ex_w),
     .id_pc_plus4_ex        (id_pc_plus4_ex_w),
@@ -215,6 +225,10 @@ if_id_stage if_id_stage_u(
     .id_inst_rs1_ex            (id_inst_rs1_w),
     .id_inst_rs2_ex            (id_inst_rs2_w),
     .hart_result_read_gprs_dm  (hart_result_read_gprs_dm),
+    .id_csr_read_data_ex       (id_csr_read_data_ex_w),
+    .id_csr_write_addr_ex      (id_csr_write_addr_ex_w),
+    .id_csr_write_en_ex        (id_csr_write_en_ex_w),
+    .id_rs1_uimm_ex            (id_rs1_uimm_ex_w),
     .id_inst_debug_str_ex      (id_inst_debug_str_ex_w)
 
 );
@@ -248,6 +262,10 @@ id_ex_stage id_ex_stage_u(
     .hazard_ctrl_ex_rs2data_sel_src    (hazard_ctrl_ex_rs2data_sel_src_w),
     .id_inst_rs1_ex                    (id_inst_rs1_w),
     .id_inst_rs2_ex                    (id_inst_rs2_w),
+    .id_csr_read_data_ex               (id_csr_read_data_ex_w),
+    .id_csr_write_addr_ex              (id_csr_write_addr_ex_w),
+    .id_csr_write_en_ex                (id_csr_write_en_ex_w),
+    .id_rs1_uimm_ex                    (id_rs1_uimm_ex_w),
 
     .ex_cycle_count_mem    (ex_cycle_count_mem_w),
     .ex_pc_plus4_mem       (ex_pc_plus4_mem_w),
@@ -262,6 +280,9 @@ id_ex_stage id_ex_stage_u(
     .ex_jump_new_pc_pc_mux               (ex_jump_new_pc_pc_mux_w),
     .ex_inst_rs1_hazard                  (ex_inst_rs1_hazard_w),
     .ex_inst_rs2_hazard                  (ex_inst_rs2_hazard_w),
+    .ex_write_csr_en_id                  (ex_write_csr_en_id_w),
+    .ex_write_csr_addr_id                (ex_write_csr_addr_id_w),
+    .ex_write_csr_data_id                (ex_write_csr_data_id_w),
 
     .ex_inst_debug_str_mem               (ex_inst_debug_str_mem_w)
 

@@ -59,7 +59,7 @@ module if_id_stage
     input wire [31:0]  dm_write_gprs_data_hart,
     input wire         dm_write_gprs_en_hart,
     input wire         ex_write_csr_en_id,
-    input wire         ex_write_csr_addr_id,
+    input wire [11:0]  ex_write_csr_addr_id,
     input wire [31:0]  ex_write_csr_data_id,
 
     // outputs
@@ -85,7 +85,7 @@ module if_id_stage
     output reg [31:0]  id_csr_read_data_ex,
     output reg [11:0]  id_csr_write_addr_ex,
     output reg         id_csr_write_en_ex,
-    output reg [4:0]   id_rs1_uimm_ex,
+    output reg [31:0]  id_rs1_uimm_ex,
     output reg [8*3:1] id_inst_debug_str_ex
 );
 
@@ -118,6 +118,7 @@ wire        id_rs1_uimm_en_w;
 wire [11:0] id_csr_read_addr_w;
 wire [11:0] id_csr_write_addr_w;
 wire [31:0] csrs_read_csr_data_w;
+reg  [31:0] id_rs1_uimm_ex_r;
 reg  [8*3:1] id_inst_debug_str_r;
 
 assign id_inst_rs1_w = if_instruction_id[19:15];
@@ -234,13 +235,13 @@ always @(id_rs2_shamt_en_w or id_inst_rs2_w) begin
 end
 
 //--------------------------------------------------------------------------
-// Design: output the shamt for SLLI/SRLI/SRAI
+// Design: output the uimm for CSR immediate operand
 //--------------------------------------------------------------------------
 always @(id_rs1_uimm_en_w or id_inst_rs1_w) begin
     if (id_rs1_uimm_en_w)
-        id_rs1_uimm_ex_r <= id_inst_rs1_w;
+        id_rs1_uimm_ex_r <= {{27{1'b0}}, id_inst_rs1_w};
     else
-        id_rs1_uimm_ex_r <= 5'b00000;
+        id_rs1_uimm_ex_r <= 32'h0000_0000;
 end
 
 //--------------------------------------------------------------------------
@@ -344,7 +345,7 @@ always @(posedge clk or negedge rst_n) begin
         id_csr_read_data_ex  <= 32'h0000_0000;
         id_csr_write_addr_ex <= 12'h000;
         id_csr_write_en_ex  <= `PP_WRITE_CSR_DISABLE;
-        id_rs1_uimm_ex      <= 5'b00000;
+        id_rs1_uimm_ex      <= 32'h0000_0000;
         id_inst_debug_str_ex <= "adi";
     end else begin
         if (hazard_flush_id_ex_reg) begin
@@ -368,7 +369,7 @@ always @(posedge clk or negedge rst_n) begin
             id_csr_read_data_ex <= 32'h0000_0000;
             id_csr_write_addr_ex <= 12'h000;
             id_csr_write_en_ex  <= `PP_WRITE_CSR_DISABLE;
-            id_rs1_uimm_ex      <= 5'b00000;
+            id_rs1_uimm_ex      <= 32'h0000_0000;
             id_inst_debug_str_ex <= "adi";
         end else begin
             id_pc_plus4_ex <= if_pc_plus4_id;

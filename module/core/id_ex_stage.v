@@ -69,6 +69,10 @@ module id_ex_stage
     input wire [1:0]   hazard_ctrl_ex_rs2data_sel_src,
     input wire [4:0]   id_inst_rs1_ex,
     input wire [4:0]   id_inst_rs2_ex,
+    input wire [31:0]  id_csr_read_data_ex,
+    input wire [11:0]  id_csr_write_addr_ex,
+    input wire         id_csr_write_en_ex,
+    input wire [31:0]  id_rs1_uimm_ex,
     input wire [8*3:1] id_inst_debug_str_ex,
 
     // outputs
@@ -85,6 +89,9 @@ module id_ex_stage
     output reg [31:0]  ex_jump_new_pc_pc_mux,
     output wire [4:0]  ex_inst_rs1_hazard,
     output wire [4:0]  ex_inst_rs2_hazard,
+    output reg         ex_write_csr_en_id,
+    output reg [11:0]  ex_write_csr_addr_id,
+    output reg [31:0]  ex_write_csr_data_id,
 
     output reg [8*3:1] ex_inst_debug_str_mem
 );
@@ -192,6 +199,9 @@ always @(*) begin
         ex_jump_new_pc_pc_mux <= 32'h0000_0000;
         ex_alu_addr_calcul_result_mem_r <= 32'h0000_0000;
         ex_branch_comp_ctrl <= `PP_BRANCH_COMP_DISABLE;
+        ex_write_csr_en_id   <= id_csr_write_en_ex;
+        ex_write_csr_addr_id <= id_csr_write_addr_ex;
+        ex_write_csr_data_id <= 32'h0000_0000;
     end
     case (id_inst_encoding_ex)
         `RV32_BASE_INST_LUI:
@@ -256,6 +266,44 @@ always @(*) begin
         `RV32_BASE_INST_SRL: ex_alu_addr_calcul_result_mem_r <= ex_alu_oper_src1_data >> ex_alu_oper_src2_data[4:0];
         `RV32_BASE_INST_SRAI:  ex_alu_addr_calcul_result_mem_r <= ex_alu_oper_src1_data >>> shamt;
         `RV32_BASE_INST_SRA: ex_alu_addr_calcul_result_mem_r <= ex_alu_oper_src1_data >>> ex_alu_oper_src2_data[4:0];
+        `RV32_ZICSR_STAND_INST_CSRRW: begin
+            ex_alu_addr_calcul_result_mem_r <= id_csr_read_data_ex;
+            if (id_csr_write_en_ex) begin
+                ex_write_csr_data_id <= ex_alu_oper_src1_data;
+            end else begin /* TODO: spyglass check deleted else... */
+                ex_write_csr_data_id <= 32'h0000_0000;
+            end
+        end
+        `RV32_ZICSR_STAND_INST_CSRRS: begin
+            ex_alu_addr_calcul_result_mem_r <= id_csr_read_data_ex;
+            if (id_csr_write_en_ex) begin
+                ex_write_csr_data_id <= id_csr_read_data_ex | ex_alu_oper_src1_data;
+            end
+        end
+        `RV32_ZICSR_STAND_INST_CSRRC: begin
+            ex_alu_addr_calcul_result_mem_r <= id_csr_read_data_ex;
+            if (id_csr_write_en_ex) begin
+                ex_write_csr_data_id <= id_csr_read_data_ex & ex_alu_oper_src1_data;
+            end
+        end
+        `RV32_ZICSR_STAND_INST_CSRRWI: begin
+            ex_alu_addr_calcul_result_mem_r <= id_csr_read_data_ex;
+            if (id_csr_write_en_ex) begin
+                ex_write_csr_data_id <= id_rs1_uimm_ex;
+            end
+        end
+        `RV32_ZICSR_STAND_INST_CSRRSI: begin
+            ex_alu_addr_calcul_result_mem_r <= id_csr_read_data_ex;
+            if (id_csr_write_en_ex) begin
+                ex_write_csr_data_id <= id_csr_read_data_ex | id_rs1_uimm_ex;
+            end
+        end
+        `RV32_ZICSR_STAND_INST_CSRRCI: begin
+            ex_alu_addr_calcul_result_mem_r <= id_csr_read_data_ex;
+            if (id_csr_write_en_ex) begin
+                ex_write_csr_data_id <= id_csr_read_data_ex & id_rs1_uimm_ex;
+            end
+        end
         default: begin
             ex_alu_addr_calcul_result_mem_r <= 32'h0000_0000;
             ex_jump_new_pc_pc_mux <= 32'h0000_0000;

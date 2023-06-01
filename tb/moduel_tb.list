@@ -5,12 +5,17 @@ src/id_ex_stage.v
 src/single_port_ram.v
 src/register_file.v
 src/pipeline_ctrl.v
+src/rv_csrs.v
 src/if_id_stage.v
 src/mem_wb_stage.v
 src/mhome_soc_top.v
 src/pc_gen.v
 src/pc_if_stage.v
 src/hazard_unit.v
+src/jtag_tap.v
+src/dm_csrs.v
+src/dmi_intf.v
+src/debug_top.v
 src/riscv_pipeline.v
 
 # testbech file

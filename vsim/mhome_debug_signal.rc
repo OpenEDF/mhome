@@ -2,7 +2,7 @@ Magic 271485
 Revision Verdi_O-2018.09-SP2
 
 ; Window Layout <x> <y> <width> <height> <signalwidth> <valuewidth>
-viewPort 0 27 1278 612 273 116
+viewPort 0 27 1278 563 273 116
 
 ; File list:
 ; openDirFile [-d delimiter] [-s time_offset] [-rf auto_bus_rule_file] path_name file_name
@@ -17,15 +17,15 @@ signalSpacing 5
 ; windowTimeUnit is used for zoom, cursor & marker
 ; waveform viewport range
 zoom 0.000000 110.752246
-cursor 0.000000
+cursor 50.000000
 marker 0.000000
 
 ; user define markers
 ; userMarker time_pos marker_name color linestyle
 ; visible top row signal index
-top 20
+top 30
 ; marker line index
-markerPos 24
+markerPos 48
 
 ; counter signal list
 ; addCounterSig -Rising|-Falling|-AnyChange signal
@@ -95,7 +95,7 @@ addSignal -h 15 -UNSIGNED -UDEC -holdScope id_inst_rs2_w[4:0]
 addSignal -h 15 -UNSIGNED -HEX -holdScope id_read_rs1_data_ex[31:0]
 addSignal -h 15 -UNSIGNED -HEX -holdScope id_read_rs2_data_ex[31:0]
 addSignal -c ID_PURPLE5 -ls solid -lw 1 -h 15 -holdScope id_imm_exten_data_ex[31:0]
-addSignal -c ID_YELLOW5 -ls solid -lw 1 -h 15 -holdScope id_write_dest_register_index_ex[4:0]
+addSignal -c ID_YELLOW5 -ls solid -lw 1 -h 15 -UNSIGNED -UDEC -holdScope id_write_dest_register_index_ex[4:0]
 addSignal -h 15 -holdScope id_write_register_en_ex
 addSignal -h 15 -holdScope id_mem_write_en_ex
 addSignal -h 15 -holdScope id_mem_oper_size_ex[1:0]
@@ -106,6 +106,16 @@ addSignal -h 15 -holdScope id_sel_imm_rs2data_alu_ex
 addSignal -h 15 -holdScope id_pc_jump_en_ex
 addSignal -h 15 -holdScope id_pc_branch_en_ex
 addSignal -h 15 /mhome_soc_tb/mhome_soc_top_u/riscv_pipeline_u/id_ex_stage_u/ex_branch_comp_ctrl
+addSignal -h 15 /mhome_soc_tb/mhome_soc_top_u/riscv_pipeline_u/if_id_stage_u/id_csr_read_data_ex[31:0]
+addSignal -h 15 -holdScope id_csr_write_addr_ex[11:0]
+addSignal -h 15 -holdScope id_csr_write_en_ex
+addSignal -h 15 -holdScope id_rs1_uimm_ex[31:0]
+addSignal -h 15 -UNSIGNED -HEX -holdScope id_csr_read_addr_w[11:0]
+addSignal -h 15 -holdScope id_csr_read_en_w
+addSignal -h 15 -holdScope ex_write_csr_en_id
+addSignal -h 15 -holdScope ex_write_csr_addr_id[11:0]
+addSignal -h 15 -holdScope ex_write_csr_data_id[31:0]
+addSignal -h 15 /mhome_soc_tb/mhome_soc_top_u/riscv_pipeline_u/if_id_stage_u/rv_csrs_u/mstatus[31:0]
 addGroup "id_ex_stage" -e FALSE
 addSignal -h 15 /mhome_soc_tb/mhome_soc_top_u/riscv_pipeline_u/id_ex_stage_u/ex_pc_jump_en_pc_mux
 addSignal -c ID_GREEN5 -ls solid -lw 1 -h 15 -UNSIGNED -ASC -holdScope ex_inst_debug_str_mem[24:1]

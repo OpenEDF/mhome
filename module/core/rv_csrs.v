@@ -60,12 +60,15 @@ module rv_csrs
 //--------------------------------------------------------------------------
 // Design: csrs register
 //--------------------------------------------------------------------------
-// Machine Information Registers
-reg [31:0] mvendorid;   //RO
+// Machine Information Registers. MRO
+reg [31:0] mvendorid;   //MRO
 reg [31:0] marchid;
 reg [31:0] mimpid;
 reg [31:0] mhartid;
-reg [31:0] mconfigptr;
+//reg [31:0] mconfigptr;
+
+// Machine Trap Setup. MRW
+reg [31:0] mstatus;
 
 //TODO: add other register
 
@@ -77,6 +80,7 @@ localparam MARCHID_ADDR    = 12'hF12;
 localparam MIMPID_ADDR     = 12'hF13;
 localparam MHARTID_ADDR    = 12'hF14;
 localparam MCONFIGPTR_ADDR = 12'hF15;
+localparam MSTATUS_ADDR    = 12'h300;
 
 //--------------------------------------------------------------------------
 // Design: instruction read csrs register
@@ -86,12 +90,13 @@ always @(posedge clk or negedge rst_n) begin
         /* default value */
         mvendorid    <= 32'h1234_5678;      /* TODO: modify */
         marchid      <= 32'h0000_0001;
-        mimpid       <= 32'h0000_0001;
-        mhartid      <= 32'h0000_0001;
-        mconfigptr   <= 32'h0000_0000;
+        mimpid       <= 32'h0000_0002;
+        mhartid      <= 32'h0000_0003;
+        //mconfigptr   <= 32'h0000_0000;    /* TODO: toolchain not support */
+        mstatus      <= 32'h0000_0004;
     end else if (id_write_en_csrs) begin: write_csrs
         case (id_write_csr_addr_csrs)
-            MARCHID_ADDR: mimpid <= id_write_data_csrs;
+            MSTATUS_ADDR: mstatus <= id_write_data_csrs;
             default: begin
             end
         endcase
@@ -99,6 +104,11 @@ always @(posedge clk or negedge rst_n) begin
         /* The registers are change and modified according to the signals
         * inside the module */
        // if () mamm = xxx; ?
+        mvendorid    <= 32'h1234_5678;      /* TODO: modify */
+        marchid      <= 32'h0000_0001;
+        mimpid       <= 32'h0000_0002;
+        mhartid      <= 32'h0000_0003;
+        mstatus      <= mstatus;
     end
 end
 
@@ -112,7 +122,8 @@ always @(*) begin: read_csrs
             MARCHID_ADDR:    csrs_read_csr_data <= marchid;
             MIMPID_ADDR:     csrs_read_csr_data <= mimpid;
             MHARTID_ADDR:    csrs_read_csr_data <= mhartid;
-            MCONFIGPTR_ADDR: csrs_read_csr_data <= mconfigptr;
+            MSTATUS_ADDR:    csrs_read_csr_data <= mstatus;
+         // MCONFIGPTR_ADDR: csrs_read_csr_data <= mconfigptr;
             default: begin
                 /* but a value of 0 can be returned to indicate that
                  * the field is not implemented.*/

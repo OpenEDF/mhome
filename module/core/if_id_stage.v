@@ -314,7 +314,7 @@ pipeline_ctrl pipeline_ctrl_u(
     .id_wb_result_src       (id_wb_result_src_w),
     .id_sel_imm_rs2data_alu (id_sel_imm_rs2data_alu_w),
     .id_pc_jump_en          (id_pc_jump_en_w),
-    .id_pc_branch_en        (id_pc_branch_en_w)
+    .id_pc_branch_en        (id_pc_branch_en_w),
     .id_csr_read_en         (id_csr_read_en_w),
     .id_csr_write_en        (id_csr_write_en_w),
     .id_rs1_uimm_en         (id_rs1_uimm_en_w)

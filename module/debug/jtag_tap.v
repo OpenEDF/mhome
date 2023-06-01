@@ -375,14 +375,14 @@ end
 always @(posedge tck or negedge trst_n) begin
     if (!trst_n) begin
         idcode <= {`IDCODE_VERSION, `IDCODE_PART_NUMBER, `IDCODE_MANUFID, 1'b1};
-        dtmcs  <= {14'b0, 1'b0, 1'b0, 1'b0, 2'b00, 2'b00, DMI_ABITS[5:0], DTM_VERSION_013_AND_10};
+        dtmcs  <= {14'b0, 1'b0, 1'b0, 1'b0, 3'b000, 2'b00, DMI_ABITS[5:0], DTM_VERSION_013_AND_10};
         dmi    <= {DMI_BITS{1'b0}};
         bypass0 <= 1'b0;
         bypass1 <= 1'b0;
         dmi_dtm_response_ready <= 1'b0;
     end else if (test_logic_reset | dmihardreset) begin
         idcode <= {`IDCODE_VERSION, `IDCODE_PART_NUMBER, `IDCODE_MANUFID, 1'b1};
-        dtmcs  <= {14'b0, 1'b0, 1'b0, 1'b0, 2'b00, 2'b00, DMI_ABITS[5:0], DTM_VERSION_013_AND_10};
+        dtmcs  <= {14'b0, 1'b0, 1'b0, 1'b0, 3'b000, 2'b00, DMI_ABITS[5:0], DTM_VERSION_013_AND_10};
         dmi    <= {DMI_BITS{1'b0}};
         bypass0 <= 1'b0;
         bypass1 <= 1'b0;
@@ -557,12 +557,12 @@ end
 //--------------------------------------------------------------------------
 always @(posedge tck or negedge trst_n) begin
     if (!trst_n) begin
-        dmi_addr       <= 6'b000000;
+        dmi_addr       <= 8'h00;
         dmi_write_data <= 32'h0000_0000;
         dmi_write_en   <= 1'b0;
         dmi_request    <= 1'b0;
     end else if (dmihardreset) begin
-        dmi_addr       <= 6'b000000;
+        dmi_addr       <= 8'h00;
         dmi_write_data <= 32'h0000_0000;
         dmi_write_en   <= 1'b0;
         dmi_request    <= 1'b0;
@@ -573,7 +573,7 @@ always @(posedge tck or negedge trst_n) begin
             dmi_write_en   <= dmi_write_en_w;
             dmi_request    <= dmi_request_w;
         end else begin
-            dmi_addr       <= 6'b000000;
+            dmi_addr       <= 8'h00;
             dmi_write_data <= 32'h0000_0000;
             dmi_write_en   <= 1'b0;
             dmi_request    <= 1'b0;

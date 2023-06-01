@@ -4,7 +4,7 @@
 #  This is a software generated project file. Manual edits to this file could be lost during the next save operation
 #  Copyright Synopsys Inc.
 #  Last Updated By: SpyGlass SpyGlass_vL-2016.06
-#  Last Updated On Mon May 29 08:40:46 2023
+#  Last Updated On Thu Jun  1 08:15:46 2023
 #
 #  -------------------------------------------------------------------
 
@@ -51,6 +51,7 @@ current_methodology $SPYGLASS_HOME/GuideWare/latest/block/rtl_handoff
 
 current_goal adv_lint/adv_lint_verify -top mhome_soc_top
 set_goal_option report_incr_messages yes
+set_goal_option sdc2sgdc yes
 
 
 current_goal connectivity_verify/connectivity_verification -top mhome_soc_top

@@ -90,7 +90,7 @@ wire         id_pc_branch_en_ex_w;          /* pipeline branch enable */
 wire [4:0]   id_inst_rs1_w;                 /* instruction register port1 */
 wire [4:0]   id_inst_rs2_w;                 /* instruction register port2 */
 wire [31:0]  id_csr_read_data_ex_w;         /* csr old data */
-wire [31:0]  id_csr_write_addr_ex_w;        /* crs write address */
+wire [11:0]  id_csr_write_addr_ex_w;        /* crs write address */
 wire         id_csr_write_en_ex_w;          /* csr write enable */
 wire [31:0]  id_rs1_uimm_ex_w;              /* csr immediated operand extend data */
 wire [8*3:1] id_inst_debug_str_ex_w;        /* riscv instruction debug string name */
@@ -110,7 +110,7 @@ wire [31:0]  ex_jump_new_pc_pc_mux_w;              /* pipeline jump to new pc */
 wire [4:0]   ex_inst_rs1_hazard_w;                 /* instruction register port1 to hazard*/
 wire [4:0]   ex_inst_rs2_hazard_w;                 /* instruction register port2 to hazard */
 wire         ex_write_csr_en_id_w;                 /* write csr enable */
-wire [31:0]  ex_write_csr_addr_id_w;               /* write csr address */
+wire [11:0]  ex_write_csr_addr_id_w;               /* write csr address */
 wire [31:0]  ex_write_csr_data_id_w;               /* write csr data */
 wire [8*3:1] ex_inst_debug_str_mem_w;              /* riscv instruction debug string name */
 

@@ -99,18 +99,18 @@ single_port_ram #(.RAM_SIZE(1024)) single_port_ram_u (
 always @(posedge clk or negedge rst_n) begin
     if (!rst_n) begin
         if_instruction_id <= `RV32I_NOP;
-        if_pc_plus4_id <= 32'h0000_0000;
-        if_current_pc_id <= `MHOME_START_PC;
+        if_pc_plus4_id    <= 32'h0000_0000;
+        if_current_pc_id  <= `MHOME_START_PC;
     end
     else begin
         if (hazard_flush_if_id_reg) begin
             if_instruction_id <= `RV32I_NOP;
-            if_pc_plus4_id <= 32'h0000_0000;
-            if_current_pc_id <= `MHOME_START_PC;
+            if_pc_plus4_id    <= 32'h0000_0000;
+            if_current_pc_id  <= `MHOME_START_PC;
         end else begin
             if_instruction_id <= if_instruction_id_w;
-            if_pc_plus4_id <= if_pc_plus4_id_w;
-            if_current_pc_id <= pc_source_pc_gen_if;
+            if_pc_plus4_id    <= if_pc_plus4_id_w;
+            if_current_pc_id  <= pc_source_pc_gen_if;
         end
     end
 end

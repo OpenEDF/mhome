@@ -9,9 +9,11 @@ y:  .word 0x00abcdef
 	.globl  _start
 _start:
 rv32mi_csrrw:
-    li a0, 0x12345678 
-    csrr  a1, mstatus
-    csrrw a2, mstatus, a0
-    csrr  a3, mstatus
-    csrr  a4, mstatus
+    li a0, 0x12345678
+    li a1, 0x1234abcd
+    csrr  a2, mstatus
+    csrrw a3, mstatus, a0
+    csrrw a4, mstatus, a1
+    csrr  a5, mstatus
+    csrr  a6, mstatus
     .end

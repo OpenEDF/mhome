@@ -86,6 +86,8 @@ module if_id_stage
     output reg [11:0]  id_csr_write_addr_ex,
     output reg         id_csr_write_en_ex,
     output reg [31:0]  id_rs1_uimm_ex,
+    output wire        id_csr_write_en_hazard,
+    output wire        id_csr_write_done_hazard,
     output reg [8*3:1] id_inst_debug_str_ex
 );
 
@@ -119,6 +121,7 @@ wire [11:0] id_csr_read_addr_w;
 wire [11:0] id_csr_write_addr_w;
 wire [31:0] csrs_read_csr_data_w;
 reg  [31:0] id_rs1_uimm_ex_r;
+wire        id_csr_write_done_hazard_w;
 reg  [8*3:1] id_inst_debug_str_r;
 
 assign id_inst_rs1_w = if_instruction_id[19:15];
@@ -127,6 +130,8 @@ assign id_write_dest_register_index_ex_w = if_instruction_id[11:7];
 assign inst = if_instruction_id;
 assign id_csr_read_addr_w = if_instruction_id[31:20];
 assign id_csr_write_addr_w = if_instruction_id[31:20];
+assign id_csr_write_en_hazard = id_csr_write_en_w;
+assign id_csr_write_done_hazard = id_csr_write_done_hazard_w;
 
 localparam R_TYPE = `R_TYPE_INST;
 localparam I_TYPE = `I_TYPE_INST;
@@ -296,7 +301,8 @@ rv_csrs rv_csrs_u(
     .id_write_en_csrs            (ex_write_csr_en_id),
     .id_write_data_csrs          (ex_write_csr_data_id),
 
-    .csrs_read_csr_data          (csrs_read_csr_data_w) // O
+    .csrs_read_csr_data          (csrs_read_csr_data_w), // O
+    .csr_write_done              (id_csr_write_done_hazard_w)
 );
 
 //--------------------------------------------------------------------------

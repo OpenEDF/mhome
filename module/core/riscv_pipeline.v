@@ -93,6 +93,8 @@ wire [31:0]  id_csr_read_data_ex_w;         /* csr old data */
 wire [11:0]  id_csr_write_addr_ex_w;        /* crs write address */
 wire         id_csr_write_en_ex_w;          /* csr write enable */
 wire [31:0]  id_rs1_uimm_ex_w;              /* csr immediated operand extend data */
+wire         id_csr_write_en_hazard_w;      /* csr write enable signal to hazard */
+wire         id_csr_write_done_hazard_w;    /* csr write done siganl to hazard */
 wire [8*3:1] id_inst_debug_str_ex_w;        /* riscv instruction debug string name */
 
 // execute stage
@@ -140,6 +142,7 @@ wire         wb_write_register_en_hazard_w;         /* data hazard connect rd en
 // hazard unit
 wire         hazard_flush_if_id_reg_w;      /* hazard flush if id register */
 wire         hazard_flush_id_ex_reg_w;      /* hazard flush id ex register */
+wire         hazard_stall_pc_if_reg_w;      /* hazard stall pipeline pc if register*/
 wire [1:0]   hazard_ctrl_ex_rs1data_sel_src_w;    /* hazards control execute satge rs1 input data sources */
 wire [1:0]   hazard_ctrl_ex_rs2data_sel_src_w;    /* hazards control execute satge rs2 input data sources */
 
@@ -163,6 +166,7 @@ pc_gen pc_gen_u(
     .if_pc_plus4_pc_src           (if_pc_plus4_pc_gen_w),
     .ex_pc_jump_en_pc_mux         (ex_pc_jump_en_pc_mux_w),
     .ex_jump_new_pc_pc_mux        (ex_jump_new_pc_pc_mux_w),
+    .hazard_stall_pc_if_reg       (hazard_stall_pc_if_reg_w),
 
     .cycle_count_pc_gen_start     (pc_gen_start_cycle_count_if_w),
     .source_pc_gen_if             (source_pc_gen_if_w)
@@ -229,6 +233,8 @@ if_id_stage if_id_stage_u(
     .id_csr_write_addr_ex      (id_csr_write_addr_ex_w),
     .id_csr_write_en_ex        (id_csr_write_en_ex_w),
     .id_rs1_uimm_ex            (id_rs1_uimm_ex_w),
+    .id_csr_write_en_hazard    (id_csr_write_en_hazard_w),
+    .id_csr_write_done_hazard  (id_csr_write_done_hazard_w),
     .id_inst_debug_str_ex      (id_inst_debug_str_ex_w)
 
 );
@@ -355,9 +361,12 @@ hazard_unit hazard_unit_u(
     .mem_write_dest_en_hazard    (mem_write_register_en_hazard_w),
     .wb_rd_index_hazard          (wb_write_dest_register_index_hazard_w),
     .wb_write_dest_en_hazard     (wb_write_register_en_hazard_w),
+    .id_csr_write_en_hazard      (id_csr_write_en_hazard_w),
+    .id_csr_write_done_hazard    (id_csr_write_done_hazard_w),
 
     .hazard_flush_if_id_reg      (hazard_flush_if_id_reg_w),
     .hazard_flush_id_ex_reg      (hazard_flush_id_ex_reg_w),
+    .hazard_stall_pc_if_reg      (hazard_stall_pc_if_reg_w),
     .hazard_ctrl_ex_rs1data_sel_src    (hazard_ctrl_ex_rs1data_sel_src_w),
     .hazard_ctrl_ex_rs2data_sel_src    (hazard_ctrl_ex_rs2data_sel_src_w)
 );

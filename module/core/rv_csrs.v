@@ -54,7 +54,8 @@ module rv_csrs
     input wire  [31:0]  id_write_data_csrs,
 
     // outputs
-    output reg  [31:0]  csrs_read_csr_data
+    output reg  [31:0]  csrs_read_csr_data,
+    output reg          csr_write_done
 );
 
 //--------------------------------------------------------------------------
@@ -94,7 +95,9 @@ always @(posedge clk or negedge rst_n) begin
         mhartid      <= 32'h0000_0003;
         //mconfigptr   <= 32'h0000_0000;    /* TODO: toolchain not support */
         mstatus      <= 32'h0000_0004;
+        csr_write_done <= 1'b0;
     end else if (id_write_en_csrs) begin: write_csrs
+        csr_write_done <= 1'b1;
         case (id_write_csr_addr_csrs)
             MSTATUS_ADDR: mstatus <= id_write_data_csrs;
             default: begin
@@ -109,6 +112,7 @@ always @(posedge clk or negedge rst_n) begin
         mimpid       <= 32'h0000_0002;
         mhartid      <= 32'h0000_0003;
         mstatus      <= mstatus;
+        csr_write_done <= 1'b0;
     end
 end
 

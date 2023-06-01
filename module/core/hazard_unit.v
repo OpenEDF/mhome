@@ -52,10 +52,13 @@ module hazard_unit
     input wire         mem_write_dest_en_hazard,
     input wire [4:0]   wb_rd_index_hazard,
     input wire         wb_write_dest_en_hazard,
+    input wire         id_csr_write_en_hazard,
+    input wire         id_csr_write_done_hazard,
 
     // Outputs
     output reg        hazard_flush_if_id_reg,
     output reg        hazard_flush_id_ex_reg,
+    output reg        hazard_stall_pc_if_reg,       // pc_gen swquential always
     output reg [1:0]  hazard_ctrl_ex_rs1data_sel_src,
     output reg [1:0]  hazard_ctrl_ex_rs2data_sel_src
 );
@@ -66,13 +69,28 @@ module hazard_unit
 //--------------------------------------------------------------------------
 //assign hazard_flush_if_id_reg = ex_pc_jump_en_pc_mux ? `PP_FLUSH_IF_ID_REG_ENABLE : `PP_FLUSH_IF_ID_DISABLE;
 //assign hazard_flush_id_ex_reg = ex_pc_jump_en_pc_mux ? `PP_FLUSH_ID_EX_REG_ENABLE : `PP_FLUSH_IF_ID_DISABLE;
-always @(ex_pc_jump_en_pc_mux) begin
+always @(ex_pc_jump_en_pc_mux
+        or id_csr_write_en_hazard
+        or id_csr_write_done_hazard) begin
+        /* TODO: modify the design */
+    begin: hazard_def_val
+        hazard_flush_if_id_reg <= `PP_FLUSH_IF_ID_REG_DISABLE;
+        hazard_flush_id_ex_reg <= `PP_FLUSH_ID_EX_REG_DISABLE;
+        hazard_stall_pc_if_reg <= `PP_STALL_PC_IF_REG_DISABLE;
+    end
     if (ex_pc_jump_en_pc_mux) begin
         hazard_flush_if_id_reg <= `PP_FLUSH_IF_ID_REG_ENABLE;
         hazard_flush_id_ex_reg <= `PP_FLUSH_ID_EX_REG_ENABLE;
+    end else if (id_csr_write_en_hazard) begin
+        hazard_flush_if_id_reg <= `PP_FLUSH_IF_ID_REG_ENABLE;
+        hazard_stall_pc_if_reg <= `PP_STALL_PC_IF_REG_ENABLE;
+    end else if (id_csr_write_done_hazard) begin
+        hazard_flush_if_id_reg <= `PP_FLUSH_IF_ID_REG_DISABLE;
+        hazard_stall_pc_if_reg <= `PP_STALL_PC_IF_REG_DISABLE;
     end else begin
         hazard_flush_if_id_reg <= `PP_FLUSH_IF_ID_REG_DISABLE;
         hazard_flush_id_ex_reg <= `PP_FLUSH_ID_EX_REG_DISABLE;
+        hazard_stall_pc_if_reg <= `PP_STALL_PC_IF_REG_DISABLE;
     end
 end
 

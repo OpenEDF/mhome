@@ -73,6 +73,8 @@
 `define PP_FLUSH_IF_ID_REG_DISABLE    1'b0
 `define PP_FLUSH_ID_EX_REG_ENABLE     1'b1
 `define PP_FLUSH_ID_EX_REG_DISABLE    1'b0
+`define PP_STALL_PC_IF_REG_ENABLE     1'b1
+`define PP_STALL_PC_IF_REG_DISABLE    1'b0
 
 // pipeline data hazards slove with forwarding
 `define PP_FORWARD_EX_RSXDATA_SEL_ID     2'b00

@@ -1,0 +1,5 @@
+alias alias_2
+ONE     5'h00
+THREE   5'h0A
+DEFAULT others
+endalias

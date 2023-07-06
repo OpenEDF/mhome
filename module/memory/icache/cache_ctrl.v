@@ -39,7 +39,7 @@
 //--------------------------------------------------------------------------
 // Module
 //--------------------------------------------------------------------------
-module cache_ctrl 
+module cache_ctrl
 //--------------------------------------------------------------------------
 // Ports
 //--------------------------------------------------------------------------
@@ -47,17 +47,69 @@ module cache_ctrl
     // inputs
     input wire         clk,
     input wire         rst_n,
+    input wire  [31:0] cpu_if_pc_cache,
+    input wire         cpu_write_en_cache,
+    input wire         cpu_read_en_cache,
 
     // outputs
+    output wire        cache_miss_cpu,
+    output wire [31:0] cache_inst_data_cpu
 );
 
 //--------------------------------------------------------------------------
-// Design: cache FSM
+// Design: cache controller siganl
 //--------------------------------------------------------------------------
+localparam RESET          = 8'b0000_0001;
+localparam REQ_FROM_CPU   = 8'b0000_0010;
+localparam WRITE_CACHE    = 8'b0000_0100;
+localparam WRITE_MAIN_MEM = 8'b0000_1000;
+localparam READ_CACHE     = 8'b0001_0000;
+localparam READ_MAIN_MEM  = 8'b0010_0000;
+localparam BRING_DATA     = 8'b0100_0000;
+localparam RET_TO_CPU     = 8'b1000_0000;
+
+//--------------------------------------------------------------------------
+// Design: cache FSM, one always sequential logic register output
+//--------------------------------------------------------------------------
+always @(posedge clk or negedge rst_n) begin
+    if (!rst_n) begin
+        cur_state  <= RESET;
+    end else begin
+        cur_state  <= REQ_FROM_CPU;
+        case(cache_state)
+            REQ_FROM_CPU: begin
+                /* compare the cpu address tag and cache line tag */
+                if (write_hit) begin
+                    cur_state <= WRITE_CACHE;
+                end
+            end
+            WRITE_CACHE:
+            WRITE_MAIN_MEM:
+            READ_CACHE:
+            READ_MAIN_MEM:
+            BRING_DATA:
+            RET_TO_CPU:
+            default:
+        endcase
+    end
+end
 
 //--------------------------------------------------------------------------
 // Design: compare the cpu address tag and cache line tag
 //--------------------------------------------------------------------------
+
+//--------------------------------------------------------------------------
+// Design: cache write data
+//--------------------------------------------------------------------------
+
+//--------------------------------------------------------------------------
+// Design: cache read data
+//--------------------------------------------------------------------------
+
+//--------------------------------------------------------------------------
+// Design: read cache miss
+//--------------------------------------------------------------------------
+
 
 endmodule
 //--------------------------------------------------------------------------

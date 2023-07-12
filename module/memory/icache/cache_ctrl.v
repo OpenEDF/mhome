@@ -99,6 +99,7 @@ localparam RET_DATA       = 8'b1000_0000;
 
 reg [31:0] ret_data;
 reg [31:0] write_back_data;
+reg [31:0] miss_count;
 
 wire [TAG_WIDTH-1:0] cpu_addr_tag;
 wire [SET_WIDTH-1:0] cpu_addr_set;
@@ -297,8 +298,19 @@ always @(posedge clk or negedge rst_n) begin
 end
 
 //--------------------------------------------------------------------------
-// Design: read cache miss
+// Design: debug register for cache miss counter
 //--------------------------------------------------------------------------
+always @(posedge clk or negedge rst_n) begin
+    if (!rst_n) begin
+        miss_count <= 32'h0000_0000;
+    end else begin
+        if (hit_miss) begin
+            miss_count <= miss_count + 1'b1;
+        end else begin
+            miss_count <= miss_count;
+        end
+    end
+end
 
 endmodule
 //--------------------------------------------------------------------------

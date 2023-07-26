@@ -27,7 +27,8 @@
 
 //--------------------------------------------------------------------------
 // Designer: macro
-// Brief:
+// Brief: this algorithm uses subtraction and shift operation to calculate
+//        the quotient and remainder.
 /*
 *       110
 *    --------------
@@ -89,21 +90,78 @@
 //--------------------------------------------------------------------------
 // Module
 //--------------------------------------------------------------------------
-module div
+module sequ_div
 //--------------------------------------------------------------------------
 // Ports
 //--------------------------------------------------------------------------
 (
     // inputs
-    input wire         clk,
-    input wire         rst_n,
+    input wire        clk,
+    input wire        rst_n,
+    input wire [31:0] divider,
+    input wire [31:0] dividend,
+    input wire        start,
 
     // outputs
+    output reg [31:0] quotient,
+    output reg [31:0] remainder,
+    output reg        ready,
+    output reg        illegal_divider_zero 
 );
 
 //--------------------------------------------------------------------------
-// Design:
+// Design: divider opeartion temp signal
 //--------------------------------------------------------------------------
+reg [32:0] sub_diff;
+reg [63:0] quotient_remainder;
+reg [5:0]  shift_count;
 
+//--------------------------------------------------------------------------
+// Design: divider opeartion using sequential circuits
+//--------------------------------------------------------------------------
+always @(posedge clk or negedge rst_n) begin
+    if (!rst_n) begin
+        quotient_remainder <= 64'h0000_0000_0000_0000; 
+        shift_count        <= 6'd0;            
+        sub_diff           <= 33'b0;
+        quotient  <= 32'h0000_0000; 
+        remainder <= 32'h0000_0000;
+        ready                <= 1'b0;
+        illegal_divider_zero <= 1'b0;
+    end else begin
+        if (start || ~ready) begin
+            quotient_remainder <= {32'h0000_0000, dividend};
+            shift_count        <= 6'd32;            
+            sub_diff           <= 33'b0;
+            illegal_divider_zero <= 1'b0;
+            reday                <= 1'b1;
+        end else if (divider == 32'h0000_0000) begin
+            quotient  <= 32'h0000_0000; 
+            remainder <= 32'h0000_0000;
+            ready     <= 1'b1;
+            illegal_divider_zero <= 1'b1;
+        end else if (dividend < divider) begin
+            quotient  <= 32'h0000_0000; 
+            remainder <= dividend;
+            ready     <= 1'b1;
+        end else if (dividend == divider) begin
+            quotient  <= 32'h0000_0001; 
+            remainder <= 32'h0000_0000;
+            ready     <= 1'b1;
+        end else if (shift_count == 6'd0) begin
+            quotient  <= quotient_remainder[31:0];
+            remainder <= quotient_remainder[63:32];
+            ready     <= 1'b1;
+        end else  begin
+            sub_diff = quotient_remainder[63:31] - {1'b0, divider};
+            if (sub_diff[32]) begin
+                quotient_remainder = {quotient_remainder[62:0], 1'b0};        
+            end else begin
+                quotient_remainder = {sub_diff[31:0], quotient_remainder[62:0], 1'b1};        
+            end
+            shift_count <= shift_count - 1;
+        end 
+    end
+end
 endmodule
 //--------------------------------------------------------------------------

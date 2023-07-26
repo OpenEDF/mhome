@@ -27,7 +27,7 @@
 
 //--------------------------------------------------------------------------
 // Designer: macro
-// Brief:
+// Brief:i multipiler is use shif-add algorithm and sequential circuits
 /*
 *     10111 [23]
 *     x
@@ -58,7 +58,7 @@
 //--------------------------------------------------------------------------
 // Module
 //--------------------------------------------------------------------------
-module multi
+module sequ_multi
 //--------------------------------------------------------------------------
 // Ports
 //--------------------------------------------------------------------------
@@ -66,13 +66,53 @@ module multi
     // inputs
     input wire         clk,
     input wire         rst_n,
+    input wire [31:0]  multiplier,
+    input wire [31:0]  multiplicand,
+    input wire         start,
 
     // outputs
+    output reg [31:0]  product,
+    output reg         ready
 );
 
 //--------------------------------------------------------------------------
-// Design:
+// Design:temp register 
 //--------------------------------------------------------------------------
+reg [63:0] partial_product;
+reg [31:0] multipiler_copy;
+reg [63:0] multipilcand_copy;
+reg [5:0]  shift_count;
 
+//--------------------------------------------------------------------------
+// Design: sequential multiplier shift version of multiplier and 
+//         multoplicand
+//--------------------------------------------------------------------------
+always @(posedge clk or negedge rst_n) begin
+    if (!rst_n) begin
+        product           <= 32'h0000_0000;
+        ready             <= 1'b0;
+        partial_product   <= 64'h0000_0000_0000_0000;
+        multiplier_copy   <= 32'h0000_0000;
+        multipilcand_copy <= 32'h0000_0000;
+        shift_count       <= 6'd32;
+    end else begin
+        if (start || ~ready) begin
+            multipilcand_copy <= {32'h0000_0000, multoplicand};
+            multiplier_copy   <= multiplier;
+            shift_count       <= 6'd32;
+            ready   <= 1'b1;
+        end else if (shift_count == 5'b00000) begin
+            product <= partial_product[31:0];    
+            ready   <= 1'b0;
+        end else begin
+            if (multiplier_copy[0] == 1'b1) begin
+                partial_product <= partial_product + multipilcand_copy;
+            end
+            multipilcand_copy <= multipilcand_copy << 1;
+            multiplier_copy <= multiplier_copy >> 1;
+            shift_count     <= shift_count - 1;
+        end
+    end
+end
 endmodule
 //--------------------------------------------------------------------------

@@ -102,7 +102,7 @@ install:
 com_sim: com sim
 
 # compiler verilog module file
-com:
+com: install
 	vcs $(VCS_FLAGS)
 
 # VCS -R FLAG will start simv sutomatic

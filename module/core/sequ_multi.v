@@ -175,7 +175,7 @@ always @(posedge clk or negedge rst_n) begin
                     end
                     multiplier_copy   <= multiplier_copy >> 1;
                     multiplicand_copy <= multiplicand_copy << 1;
-                    shift_count       <= shift_count - 1;
+                    shift_count       <= shift_count - 1'b1;
                     /* update state */
                     state <= MULTI_CALCUL;
                 end

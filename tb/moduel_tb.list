@@ -16,6 +16,7 @@ src/jtag_tap.v
 src/dm_csrs.v
 src/dmi_intf.v
 src/debug_top.v
+src/sequ_multi.v
 src/riscv_pipeline.v
 
 # testbech file

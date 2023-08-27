@@ -2,7 +2,7 @@ Magic 271485
 Revision Verdi_O-2018.09-SP2
 
 ; Window Layout <x> <y> <width> <height> <signalwidth> <valuewidth>
-viewPort 0 27 2560 772 273 116
+viewPort 0 27 2560 499 273 116
 
 ; File list:
 ; openDirFile [-d delimiter] [-s time_offset] [-rf auto_bus_rule_file] path_name file_name
@@ -16,16 +16,16 @@ signalSpacing 5
 
 ; windowTimeUnit is used for zoom, cursor & marker
 ; waveform viewport range
-zoom 0.000000 1010.000000
-cursor 50.000000
+zoom 0.000000 1020.100000
+cursor 120.000000
 marker 0.000000
 
 ; user define markers
 ; userMarker time_pos marker_name color linestyle
 ; visible top row signal index
-top 59
+top 78
 ; marker line index
-markerPos 64
+markerPos 114
 
 ; counter signal list
 ; addCounterSig -Rising|-Falling|-AnyChange signal
@@ -65,6 +65,26 @@ COMPLEX_EVENT_END
 ; curSTATUS search_type
 curSTATUS ByChange
 
+
+aliasmapname sequ_multi.state
+nalias MULTI_START		7'b0000010		NULL
+nalias MULTI_ER_ONE		7'b0001000		NULL
+nalias MULTI_CALCUL		7'b0100000		NULL
+nalias MULTI_IDLE		7'b0000001		NULL
+nalias MULTI_ER_CAND_ZERO		7'b0000100		NULL
+nalias MULTI_OUTPUT		7'b1000000		NULL
+nalias MULTI_CAND_ONE		7'b0010000		NULL
+
+aliasmapname sequ_div.cur_state
+nalias DIV_DIVIDEND_ST_DIVIDER		9'b001000000		NULL
+nalias DIV_DIVIDER_ONE		9'b000010000		NULL
+nalias DIV_OUTPUT		9'b100000000		NULL
+nalias DIV_DIVIDER_ZERO		9'b000000100		NULL
+nalias DIV_IDLE		9'b000000001		NULL
+nalias DIV_DIVIDEND_BT_DIVIDER		9'b010000000		NULL
+nalias DIV_DIVIDER_EQU_DIVIDEND		9'b000100000		NULL
+nalias DIV_DIVIDEND_ZERO		9'b000001000		NULL
+nalias DIV_START		9'b000000010		NULL
 
 addGroup "clock" -e FALSE
 activeDirFile "" "/home/macro/github/mhome/vsim/mhome_soc_tb.fsdb"
@@ -145,7 +165,7 @@ addSignal -c ID_GREEN5 -ls solid -lw 1 -h 15 -UNSIGNED -ASC /mhome_soc_tb/mhome_
 addSignal -h 15 -UNSIGNED -UDEC -holdScope wb_write_dest_register_index_id[4:0]
 addSignal -h 15 -holdScope wb_write_register_en_id
 addSignal -h 15 -holdScope wb_sel_result_to_register_id[31:0]
-addGroup "hazard_unit"
+addGroup "hazard_unit" -e FALSE
 addSignal -h 15 -UNSIGNED -UDEC /mhome_soc_tb/mhome_soc_top_u/riscv_pipeline_u/hazard_unit_u/ex_rs1_index_hazard[4:0]
 addSignal -h 15 -UNSIGNED -UDEC -holdScope ex_rs2_index_hazard[4:0]
 addSignal -h 15 -UNSIGNED -UDEC -holdScope mem_rd_index_hazard[4:0]
@@ -167,9 +187,9 @@ addSignal -h 15 -holdScope ex_write_rs2_data_mem[31:0]
 addSignal -h 15 -holdScope ex_mem_write_en_mem
 addSignal -h 15 -holdScope ex_mem_oper_size_mem[1:0]
 addSignal -h 15 -holdScope mem_read_mem_data_wb_w[31:0]
-addGroup "multiplier"
+addGroup "multiplier" -e FALSE
 addSignal -h 15 /mhome_soc_tb/mhome_soc_top_u/riscv_pipeline_u/id_ex_stage_u/sequ_multi_u/multiplier[31:0]
-addSignal -h 15 -holdScope multiplicand[31:0]
+addSignal -h 15 -UNSIGNED -HEX -holdScope multiplicand[31:0]
 addSignal -h 15 -holdScope start
 addSignal -h 15 -holdScope product_l[31:0]
 addSignal -h 15 -holdScope product_h[31:0]
@@ -179,8 +199,25 @@ addSignal -h 15 -holdScope multiplier_copy[31:0]
 addSignal -h 15 -holdScope multiplicand_copy[63:0]
 addSignal -h 15 -holdScope shift_count[5:0]
 addSignal -h 15 -holdScope lsb
-addSignal -h 15 -holdScope state[6:0]
-addGroup "G14"
+aliasname sequ_multi.state
+addSignal -h 15 -UNSIGNED -HEX -holdScope state[6:0]
+addGroup "divider"
+addSignal -h 15 /mhome_soc_tb/mhome_soc_top_u/riscv_pipeline_u/id_ex_stage_u/sequ_div_u/start
+addSignal -h 15 -holdScope divider[31:0]
+addSignal -h 15 -holdScope dividend[31:0]
+addSignal -h 15 -holdScope ready
+addSignal -h 15 -holdScope quotient[31:0]
+addSignal -h 15 -holdScope remainder[31:0]
+addSignal -h 15 -holdScope illegal_divider_zero
+addSignal -h 15 -holdScope sub_diff[32:0]
+addSignal -h 15 -holdScope remainder_quotient[63:0]
+addSignal -h 15 -holdScope shift_count[4:0]
+aliasname sequ_div.cur_state
+addSignal -h 15 -UNSIGNED -HEX -holdScope cur_state[8:0]
+aliasname sequ_div.cur_state
+addSignal -h 15 -UNSIGNED -HEX -holdScope next_state[8:0]
+addSignal -h 15 -holdScope illegal
+addGroup "G15"
 
 ; getSignalForm Scope Hierarchy Status
 ; active file of getSignalForm

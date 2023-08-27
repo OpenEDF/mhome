@@ -54,11 +54,19 @@ module hazard_unit
     input wire         wb_write_dest_en_hazard,
     input wire         id_csr_write_en_hazard,
     input wire         id_csr_write_done_hazard,
+    input wire         ex_mul_div_pp_stall_hazard,
 
     // Outputs
+    output reg        hazard_flush_pc_if_reg,
     output reg        hazard_flush_if_id_reg,
     output reg        hazard_flush_id_ex_reg,
+    output reg        hazard_flush_ex_mem_reg,
+    output reg        hazard_flush_mem_wb_reg,
     output reg        hazard_stall_pc_if_reg,       // pc_gen swquential always
+    output reg        hazard_stall_if_id_reg,
+    output reg        hazard_stall_id_ex_reg,
+    output reg        hazard_stall_ex_mem_reg,
+    output reg        hazard_stall_mem_wb_reg,
     output reg [1:0]  hazard_ctrl_ex_rs1data_sel_src,
     output reg [1:0]  hazard_ctrl_ex_rs2data_sel_src
 );
@@ -71,26 +79,41 @@ module hazard_unit
 //assign hazard_flush_id_ex_reg = ex_pc_jump_en_pc_mux ? `PP_FLUSH_ID_EX_REG_ENABLE : `PP_FLUSH_IF_ID_DISABLE;
 always @(ex_pc_jump_en_pc_mux
         or id_csr_write_en_hazard
-        or id_csr_write_done_hazard) begin
+        or id_csr_write_done_hazard
+        or ex_mul_div_pp_stall_hazard) begin
         /* TODO: modify the design */
     begin: hazard_def_val
-        hazard_flush_if_id_reg <= `PP_FLUSH_IF_ID_REG_DISABLE;
-        hazard_flush_id_ex_reg <= `PP_FLUSH_ID_EX_REG_DISABLE;
-        hazard_stall_pc_if_reg <= `PP_STALL_PC_IF_REG_DISABLE;
+        hazard_flush_pc_if_reg  <= `PP_FLUSH_PC_IF_REG_DISABLE;
+        hazard_flush_if_id_reg  <= `PP_FLUSH_IF_ID_REG_DISABLE;
+        hazard_flush_id_ex_reg  <= `PP_FLUSH_ID_EX_REG_DISABLE;
+        hazard_flush_ex_mem_reg <= `PP_FLUSH_EX_MEM_REG_DISABLE;
+        hazard_flush_mem_wb_reg <= `PP_FLUSH_MEM_WB_REG_DISABLE;
+        hazard_stall_pc_if_reg  <= `PP_STALL_PC_IF_REG_DISABLE;
+        hazard_stall_if_id_reg  <= `PP_STALL_IF_ID_REG_DISABLE;
+        hazard_stall_id_ex_reg  <= `PP_STALL_ID_EX_REG_DISABLE;
+        hazard_stall_ex_mem_reg <= `PP_STALL_EX_MEM_REG_DISABLE;
+        hazard_stall_mem_wb_reg <= `PP_STALL_MEM_WB_REG_DISABLE;
     end
     if (ex_pc_jump_en_pc_mux) begin
-        hazard_flush_if_id_reg <= `PP_FLUSH_IF_ID_REG_ENABLE;
-        hazard_flush_id_ex_reg <= `PP_FLUSH_ID_EX_REG_ENABLE;
+        hazard_flush_if_id_reg  <= `PP_FLUSH_IF_ID_REG_ENABLE;
+        hazard_flush_id_ex_reg  <= `PP_FLUSH_ID_EX_REG_ENABLE;
     end else if (id_csr_write_en_hazard) begin
-        hazard_flush_if_id_reg <= `PP_FLUSH_IF_ID_REG_ENABLE;
-        hazard_stall_pc_if_reg <= `PP_STALL_PC_IF_REG_ENABLE;
+        hazard_flush_if_id_reg  <= `PP_FLUSH_IF_ID_REG_ENABLE;
+        hazard_stall_pc_if_reg  <= `PP_STALL_PC_IF_REG_ENABLE;
     end else if (id_csr_write_done_hazard) begin
-        hazard_flush_if_id_reg <= `PP_FLUSH_IF_ID_REG_DISABLE;
-        hazard_stall_pc_if_reg <= `PP_STALL_PC_IF_REG_DISABLE;
+        hazard_flush_if_id_reg  <= `PP_FLUSH_IF_ID_REG_DISABLE;
+        hazard_stall_pc_if_reg  <= `PP_STALL_PC_IF_REG_DISABLE;
+    end else if (ex_mul_div_pp_stall_hazard) begin
+        hazard_stall_pc_if_reg  <= `PP_STALL_PC_IF_REG_ENABLE;
+        hazard_stall_if_id_reg  <= `PP_STALL_IF_ID_REG_ENABLE;
+        hazard_stall_id_ex_reg  <= `PP_STALL_ID_EX_REG_ENABLE;
+        hazard_stall_ex_mem_reg <= `PP_STALL_EX_MEM_REG_ENABLE;
+        hazard_stall_mem_wb_reg <= `PP_STALL_MEM_WB_REG_ENABLE;
     end else begin
-        hazard_flush_if_id_reg <= `PP_FLUSH_IF_ID_REG_DISABLE;
-        hazard_flush_id_ex_reg <= `PP_FLUSH_ID_EX_REG_DISABLE;
-        hazard_stall_pc_if_reg <= `PP_STALL_PC_IF_REG_DISABLE;
+        hazard_flush_if_id_reg  <= `PP_FLUSH_IF_ID_REG_DISABLE;
+        hazard_flush_id_ex_reg  <= `PP_FLUSH_ID_EX_REG_DISABLE;
+        hazard_stall_pc_if_reg  <= `PP_STALL_PC_IF_REG_DISABLE;
+        hazard_stall_if_id_reg  <= `PP_STALL_IF_ID_REG_DISABLE;
     end
 end
 

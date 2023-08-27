@@ -51,6 +51,7 @@ module pc_gen
     input wire         ex_pc_jump_en_pc_mux,
     input wire [31:0]  ex_jump_new_pc_pc_mux,
     input wire         hazard_stall_pc_if_reg,
+    input wire         hazard_flush_pc_if_reg,
 
     // outputs
     output reg [31:0]  cycle_count_pc_gen_start,
@@ -100,6 +101,8 @@ always @(posedge clk or negedge rst_n) begin
     end else begin
         if (hazard_stall_pc_if_reg) begin
             source_pc_gen_if <= source_pc_gen_if;
+        end else if (hazard_flush_pc_if_reg) begin
+            source_pc_gen_if <= `MHOME_START_PC;
         end else begin
             source_pc_gen_if <= tmp_pc_src;
         end

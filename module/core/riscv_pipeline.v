@@ -95,6 +95,7 @@ wire         id_csr_write_en_ex_w;          /* csr write enable */
 wire [31:0]  id_rs1_uimm_ex_w;              /* csr immediated operand extend data */
 wire         id_csr_write_en_hazard_w;      /* csr write enable signal to hazard */
 wire         id_csr_write_done_hazard_w;    /* csr write done siganl to hazard */
+wire         id_mul_div_pp_stall_ex_w;      /* multiplier and divider hazard control signal */
 wire [8*3:1] id_inst_debug_str_ex_w;        /* riscv instruction debug string name */
 
 // execute stage
@@ -109,11 +110,12 @@ wire [1:0]   ex_mem_oper_size_mem_w;               /* memory opearation size wor
 wire [1:0]   ex_wb_result_src_mem_w;               /* wb stage select data write to register */
 wire         ex_pc_jump_en_pc_mux_w;               /* pipeline enable jump */
 wire [31:0]  ex_jump_new_pc_pc_mux_w;              /* pipeline jump to new pc */
-wire [4:0]   ex_inst_rs1_hazard_w;                 /* instruction register port1 to hazard*/
+wire [4:0]   ex_inst_rs1_hazard_w;                 /* instruction register port1 to hazard */
 wire [4:0]   ex_inst_rs2_hazard_w;                 /* instruction register port2 to hazard */
 wire         ex_write_csr_en_id_w;                 /* write csr enable */
 wire [11:0]  ex_write_csr_addr_id_w;               /* write csr address */
 wire [31:0]  ex_write_csr_data_id_w;               /* write csr data */
+wire         ex_mul_div_pp_stall_hazard_w;         /* hazards signal for multipiler and divider */
 wire [8*3:1] ex_inst_debug_str_mem_w;              /* riscv instruction debug string name */
 
 // access memory stage
@@ -140,11 +142,18 @@ wire [4:0]   wb_write_dest_register_index_hazard_w; /* data hazard connect regis
 wire         wb_write_register_en_hazard_w;         /* data hazard connect rd enable to hazard */
 
 // hazard unit
+wire         hazard_flush_pc_if_reg_w;      /* hazard flush pc if stage register */
 wire         hazard_flush_if_id_reg_w;      /* hazard flush if id register */
 wire         hazard_flush_id_ex_reg_w;      /* hazard flush id ex register */
+wire         hazard_flush_ex_mem_reg_w;     /* hazard fluse ex mem stage register */
+wire         hazard_flush_mem_wb_reg_w;     /* hazard fluse mem wb stage register */
 wire         hazard_stall_pc_if_reg_w;      /* hazard stall pipeline pc if register*/
 wire [1:0]   hazard_ctrl_ex_rs1data_sel_src_w;    /* hazards control execute satge rs1 input data sources */
 wire [1:0]   hazard_ctrl_ex_rs2data_sel_src_w;    /* hazards control execute satge rs2 input data sources */
+wire         hazard_stall_if_id_reg_w;            /* hazards for flush id ex stage register */
+wire         hazard_stall_id_ex_reg_w;            /* hazards for stall id ex stage register */
+wire         hazard_stall_ex_mem_reg_w;           /* hazards for stall ex mem stage register */
+wire         hazard_stall_mem_wb_reg_w;           /* hazards for stall mem wb stage register */
 
 //--------------------------------------------------------------------------
 // Design: led test logic show core state
@@ -167,6 +176,7 @@ pc_gen pc_gen_u(
     .ex_pc_jump_en_pc_mux         (ex_pc_jump_en_pc_mux_w),
     .ex_jump_new_pc_pc_mux        (ex_jump_new_pc_pc_mux_w),
     .hazard_stall_pc_if_reg       (hazard_stall_pc_if_reg_w),
+    .hazard_flush_pc_if_reg       (hazard_flush_pc_if_reg_w),
 
     .cycle_count_pc_gen_start     (pc_gen_start_cycle_count_if_w),
     .source_pc_gen_if             (source_pc_gen_if_w)
@@ -181,6 +191,7 @@ pc_if_stage pc_if_stage_u(
     .pc_gen_start_cycle_count_if  (pc_gen_start_cycle_count_if_w),
     .pc_source_pc_gen_if          (source_pc_gen_if_w),
     .hazard_flush_if_id_reg       (hazard_flush_if_id_reg_w),
+    .hazard_stall_if_id_reg       (hazard_stall_if_id_reg_w),
 
     .if_cycle_count_id            (if_cycle_count_id_w),
     .if_instruction_id            (if_instruction_id_w),
@@ -209,6 +220,7 @@ if_id_stage if_id_stage_u(
     .ex_write_csr_en_id          (ex_write_csr_en_id_w),
     .ex_write_csr_addr_id        (ex_write_csr_addr_id_w),
     .ex_write_csr_data_id        (ex_write_csr_data_id_w),
+    .hazard_stall_id_ex_reg      (hazard_stall_id_ex_reg_w),
 
     .id_cycle_count_ex     (id_cycle_count_ex_w),
     .id_pc_plus4_ex        (id_pc_plus4_ex_w),
@@ -235,6 +247,7 @@ if_id_stage if_id_stage_u(
     .id_rs1_uimm_ex            (id_rs1_uimm_ex_w),
     .id_csr_write_en_hazard    (id_csr_write_en_hazard_w),
     .id_csr_write_done_hazard  (id_csr_write_done_hazard_w),
+    .id_mul_div_pp_stall_ex    (id_mul_div_pp_stall_ex_w),
     .id_inst_debug_str_ex      (id_inst_debug_str_ex_w)
 
 );
@@ -261,7 +274,6 @@ id_ex_stage id_ex_stage_u(
     .id_sel_imm_rs2data_alu_ex (id_sel_imm_rs2data_alu_ex_w),
     .id_pc_jump_en_ex          (id_pc_jump_en_ex_w),
     .id_pc_branch_en_ex        (id_pc_branch_en_ex_w),
-    .id_inst_debug_str_ex      (id_inst_debug_str_ex_w),
     .mem_alu_addr_calcul_result_mem_ex (mem_alu_addr_calcul_result_mem_ex_w),
     .wb_sel_result_to_register_ex      (wb_sel_result_to_register_ex_w),
     .hazard_ctrl_ex_rs1data_sel_src    (hazard_ctrl_ex_rs1data_sel_src_w),
@@ -272,6 +284,11 @@ id_ex_stage id_ex_stage_u(
     .id_csr_write_addr_ex              (id_csr_write_addr_ex_w),
     .id_csr_write_en_ex                (id_csr_write_en_ex_w),
     .id_rs1_uimm_ex                    (id_rs1_uimm_ex_w),
+    .id_mul_div_pp_stall_ex            (id_mul_div_pp_stall_ex_w),
+    .hazard_flush_ex_mem_reg           (hazard_flush_ex_mem_reg_w),
+    .hazard_stall_ex_mem_reg           (hazard_stall_ex_mem_reg_w),
+
+    .id_inst_debug_str_ex      (id_inst_debug_str_ex_w),
 
     .ex_cycle_count_mem    (ex_cycle_count_mem_w),
     .ex_pc_plus4_mem       (ex_pc_plus4_mem_w),
@@ -289,6 +306,7 @@ id_ex_stage id_ex_stage_u(
     .ex_write_csr_en_id                  (ex_write_csr_en_id_w),
     .ex_write_csr_addr_id                (ex_write_csr_addr_id_w),
     .ex_write_csr_data_id                (ex_write_csr_data_id_w),
+    .ex_mul_div_pp_stall_hazard          (ex_mul_div_pp_stall_hazard_w),
 
     .ex_inst_debug_str_mem               (ex_inst_debug_str_mem_w)
 
@@ -309,6 +327,8 @@ ex_mem_stage ex_mem_stage_u(
     .ex_mem_write_en_mem               (ex_mem_write_en_mem_w),
     .ex_mem_oper_size_mem              (ex_mem_oper_size_mem_w),
     .ex_wb_result_src_mem              (ex_wb_result_src_mem_w),
+    .hazard_stall_mem_wb_reg           (hazard_stall_mem_wb_reg_w),
+    .hazard_flush_mem_wb_reg           (hazard_flush_mem_wb_reg_w),
 
     .ex_inst_debug_str_mem             (ex_inst_debug_str_mem_w),
 
@@ -363,10 +383,18 @@ hazard_unit hazard_unit_u(
     .wb_write_dest_en_hazard     (wb_write_register_en_hazard_w),
     .id_csr_write_en_hazard      (id_csr_write_en_hazard_w),
     .id_csr_write_done_hazard    (id_csr_write_done_hazard_w),
+    .ex_mul_div_pp_stall_hazard  (ex_mul_div_pp_stall_hazard_w),        // I
 
+    .hazard_flush_pc_if_reg      (hazard_flush_pc_if_reg_w),            // 0
     .hazard_flush_if_id_reg      (hazard_flush_if_id_reg_w),
     .hazard_flush_id_ex_reg      (hazard_flush_id_ex_reg_w),
+    .hazard_flush_ex_mem_reg     (hazard_flush_ex_mem_reg_w),
+    .hazard_flush_mem_wb_reg     (hazard_flush_mem_wb_reg_w),
     .hazard_stall_pc_if_reg      (hazard_stall_pc_if_reg_w),
+    .hazard_stall_if_id_reg      (hazard_stall_if_id_reg_w),           // O
+    .hazard_stall_id_ex_reg      (hazard_stall_id_ex_reg_w),           // O
+    .hazard_stall_ex_mem_reg     (hazard_stall_ex_mem_reg_w),          // 0
+    .hazard_stall_mem_wb_reg     (hazard_stall_mem_wb_reg_w),          // O
     .hazard_ctrl_ex_rs1data_sel_src    (hazard_ctrl_ex_rs1data_sel_src_w),
     .hazard_ctrl_ex_rs2data_sel_src    (hazard_ctrl_ex_rs2data_sel_src_w)
 );

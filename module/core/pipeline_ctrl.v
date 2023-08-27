@@ -60,7 +60,8 @@ module pipeline_ctrl
     output reg         id_pc_branch_en,
     output reg         id_csr_read_en,
     output reg         id_csr_write_en,
-    output reg         id_rs1_uimm_en
+    output reg         id_rs1_uimm_en,
+    output reg         id_mul_div_pp_stall
 );
 
 //--------------------------------------------------------------------------
@@ -73,6 +74,7 @@ wire [4:0] inst_rs1;
 //wire [4:0] inst_rs2;
 //wire [6:0] inst_funct7;
 wire       inst_30bit;
+wire       inst_25bit;
 wire       inst_20bit_exten;
 
 assign inst_opcode = id_instruction_ctrl[6:0];
@@ -82,6 +84,7 @@ assign inst_rs1 = id_instruction_ctrl[19:15];
 //assign inst_rs2 = id_instruction_ctrl[24:20];
 //assign inst_funct7 = id_instruction_ctrl[31:25];
 assign inst_30bit = id_instruction_ctrl[30];
+assign inst_25bit = id_instruction_ctrl[25];
 assign inst_20bit_exten = id_instruction_ctrl[20];
 
 //--------------------------------------------------------------------------
@@ -94,7 +97,8 @@ always @(id_instruction_ctrl
          or inst_30bit
          or inst_20bit_exten
          or inst_rd
-         or inst_rs1) begin
+         or inst_rs1
+         or inst_25bit) begin
     /* default value, TODO: deleted it */
     begin: def_val
         id_imm_src_ctrl <= `R_TYPE_INST;
@@ -110,6 +114,7 @@ always @(id_instruction_ctrl
         id_csr_read_en  <= `PP_REWAD_CSR_DISABLE;
         id_csr_write_en <= `PP_WRITE_CSR_DISABLE;
         id_rs1_uimm_en  <= `RS1_UIMM_DISABLE;
+        id_mul_div_pp_stall <= `INST_MUL_DIV_PP_STALL_DISABLE;
     end
     case (inst_opcode)
         `OPCODE_LUI_U: begin
@@ -238,18 +243,51 @@ always @(id_instruction_ctrl
             id_write_register_en <= `PP_WRITE_DEST_REG_ENABLE;
             id_wb_result_src <= `WB_SEL_ALU_RESULT;
             id_sel_imm_rs2data_alu <= `ALU_SEL_RS2DATA_INPUT;
-            case ({inst_30bit, inst_funct3})
-                4'b0000: id_inst_encoding <= `RV32_BASE_INST_ADD;
-                4'b1000: id_inst_encoding <= `RV32_BASE_INST_SUB;
-                4'b0001: id_inst_encoding <= `RV32_BASE_INST_SLL;
-                4'b0010: id_inst_encoding <= `RV32_BASE_INST_SLT;
-                4'b0011: id_inst_encoding <= `RV32_BASE_INST_SLTU;
-                4'b0100: id_inst_encoding <= `RV32_BASE_INST_XOR;
-                4'b0101: id_inst_encoding <= `RV32_BASE_INST_SRL;
-                4'b1101: id_inst_encoding <= `RV32_BASE_INST_SRA;
-                4'b0110: id_inst_encoding <= `RV32_BASE_INST_OR;
-                4'b0111: id_inst_encoding <= `RV32_BASE_INST_AND;
-                default: id_inst_encoding <= `RV32_ILLEGAL_INST;
+            case ({inst_30bit, inst_25bit, inst_funct3})
+                5'b00000: id_inst_encoding  <= `RV32_BASE_INST_ADD;
+                5'b10000: id_inst_encoding  <= `RV32_BASE_INST_SUB;
+                5'b00001: id_inst_encoding  <= `RV32_BASE_INST_SLL;
+                5'b00010: id_inst_encoding  <= `RV32_BASE_INST_SLT;
+                5'b00011: id_inst_encoding  <= `RV32_BASE_INST_SLTU;
+                5'b00100: id_inst_encoding  <= `RV32_BASE_INST_XOR;
+                5'b00101: id_inst_encoding  <= `RV32_BASE_INST_SRL;
+                5'b10101: id_inst_encoding  <= `RV32_BASE_INST_SRA;
+                5'b00110: id_inst_encoding  <= `RV32_BASE_INST_OR;
+                5'b00111: id_inst_encoding  <= `RV32_BASE_INST_AND;
+                /* TODO: optimization */
+                5'b01000: begin
+                    id_inst_encoding        <= `RV32_M_STAND_INST_MUL;
+                    id_mul_div_pp_stall     <= `INST_MUL_DIV_PP_STALL_ENABLE;
+                end
+                5'b01001: begin
+                    id_inst_encoding        <= `RV32_M_STAND_INST_MULH;
+                    id_mul_div_pp_stall     <= `INST_MUL_DIV_PP_STALL_ENABLE;
+                end
+                5'b01010: begin
+                    id_inst_encoding        <= `RV32_M_STAND_INST_MULHSU;
+                    id_mul_div_pp_stall     <= `INST_MUL_DIV_PP_STALL_ENABLE;
+                end
+                5'b01011: begin
+                    id_inst_encoding        <= `RV32_M_STAND_INST_MULHU;
+                    id_mul_div_pp_stall     <= `INST_MUL_DIV_PP_STALL_ENABLE;
+                end
+                5'b01100: begin
+                    id_inst_encoding        <= `RV32_M_STAND_INST_DIV;
+                    id_mul_div_pp_stall     <= `INST_MUL_DIV_PP_STALL_ENABLE;
+                end
+                5'b01101: begin
+                    id_inst_encoding        <= `RV32_M_STAND_INST_DIVU;
+                    id_mul_div_pp_stall     <= `INST_MUL_DIV_PP_STALL_ENABLE;
+                end
+                5'b01110: begin
+                    id_inst_encoding        <= `RV32_M_STAND_INST_REM;
+                    id_mul_div_pp_stall     <= `INST_MUL_DIV_PP_STALL_ENABLE;
+                end
+                5'b01111: begin
+                    id_inst_encoding        <= `RV32_M_STAND_INST_REMU;
+                    id_mul_div_pp_stall     <= `INST_MUL_DIV_PP_STALL_ENABLE;
+                end
+                default:  id_inst_encoding  <= `RV32_ILLEGAL_INST;
             endcase
         end
         `OPCODE_FENCE_I: begin
@@ -330,8 +368,6 @@ always @(id_instruction_ctrl
                 end
             endcase
         end
-        //`OPCODE_MULD_R: begin
-        //end
         default: begin
             id_imm_src_ctrl <= `R_TYPE_INST;
             id_write_register_en <= `PP_WRITE_DEST_REG_DISABLE;
@@ -347,6 +383,7 @@ always @(id_instruction_ctrl
             id_csr_write_en <= `PP_WRITE_CSR_DISABLE;
             id_rs1_uimm_en  <= `RS1_UIMM_DISABLE;
             id_csr_read_en  <= `PP_REWAD_CSR_DISABLE;
+            id_mul_div_pp_stall <= `INST_MUL_DIV_PP_STALL_DISABLE;
         end
     endcase
 end

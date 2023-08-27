@@ -61,6 +61,7 @@ module if_id_stage
     input wire         ex_write_csr_en_id,
     input wire [11:0]  ex_write_csr_addr_id,
     input wire [31:0]  ex_write_csr_data_id,
+    input wire         hazard_stall_id_ex_reg,
 
     // outputs
     output reg [31:0]  id_cycle_count_ex,
@@ -88,6 +89,7 @@ module if_id_stage
     output reg [31:0]  id_rs1_uimm_ex,
     output wire        id_csr_write_en_hazard,
     output wire        id_csr_write_done_hazard,
+    output reg         id_mul_div_pp_stall_ex,
     output reg [8*3:1] id_inst_debug_str_ex
 );
 
@@ -122,6 +124,7 @@ wire [11:0] id_csr_write_addr_w;
 wire [31:0] csrs_read_csr_data_w;
 reg  [31:0] id_rs1_uimm_ex_r;
 wire        id_csr_write_done_hazard_w;
+wire        id_mul_div_pp_stall_w;
 reg  [8*3:1] id_inst_debug_str_r;
 
 assign id_inst_rs1_w = if_instruction_id[19:15];
@@ -225,6 +228,14 @@ always @(id_inst_encoding_ex_w) begin
         `RV32_ZICSR_STAND_INST_CSRRWI:      id_inst_debug_str_r = "cwi";
         `RV32_ZICSR_STAND_INST_CSRRSI:      id_inst_debug_str_r = "csi";
         `RV32_ZICSR_STAND_INST_CSRRCI:      id_inst_debug_str_r = "cci";
+        `RV32_M_STAND_INST_MUL:             id_inst_debug_str_r = "mul";
+        `RV32_M_STAND_INST_MULH:            id_inst_debug_str_r = "muh";
+        `RV32_M_STAND_INST_MULHSU:          id_inst_debug_str_r = "msu";
+        `RV32_M_STAND_INST_MULHU:           id_inst_debug_str_r = "mhu";
+        `RV32_M_STAND_INST_DIV:             id_inst_debug_str_r = "div";
+        `RV32_M_STAND_INST_DIVU:            id_inst_debug_str_r = "diu";
+        `RV32_M_STAND_INST_REM:             id_inst_debug_str_r = "rem";
+        `RV32_M_STAND_INST_REMU:            id_inst_debug_str_r = "reu";
         default:                            id_inst_debug_str_r = "nop";
     endcase
 end
@@ -323,7 +334,8 @@ pipeline_ctrl pipeline_ctrl_u(
     .id_pc_branch_en        (id_pc_branch_en_w),
     .id_csr_read_en         (id_csr_read_en_w),
     .id_csr_write_en        (id_csr_write_en_w),
-    .id_rs1_uimm_en         (id_rs1_uimm_en_w)
+    .id_rs1_uimm_en         (id_rs1_uimm_en_w),
+    .id_mul_div_pp_stall    (id_mul_div_pp_stall_w)
 );
 
 //--------------------------------------------------------------------------
@@ -352,6 +364,7 @@ always @(posedge clk or negedge rst_n) begin
         id_csr_write_addr_ex <= 12'h000;
         id_csr_write_en_ex  <= `PP_WRITE_CSR_DISABLE;
         id_rs1_uimm_ex      <= 32'h0000_0000;
+        id_mul_div_pp_stall_ex <= `INST_MUL_DIV_PP_STALL_DISABLE;
         id_inst_debug_str_ex <= "adi";
     end else begin
         if (hazard_flush_id_ex_reg) begin
@@ -376,7 +389,32 @@ always @(posedge clk or negedge rst_n) begin
             id_csr_write_addr_ex <= 12'h000;
             id_csr_write_en_ex  <= `PP_WRITE_CSR_DISABLE;
             id_rs1_uimm_ex      <= 32'h0000_0000;
+            id_mul_div_pp_stall_ex <= `INST_MUL_DIV_PP_STALL_DISABLE;
             id_inst_debug_str_ex <= "adi";
+        end else if (hazard_stall_id_ex_reg) begin
+            id_pc_plus4_ex       <= id_pc_plus4_ex;
+            id_read_rs1_data_ex  <= id_read_rs1_data_ex;
+            id_read_rs2_data_ex  <= id_read_rs2_data_ex;
+            id_imm_exten_data_ex <= id_imm_exten_data_ex;
+            id_inst_encoding_ex  <= id_inst_encoding_ex;
+            id_write_register_en_ex         <= id_write_register_en_ex;
+            id_write_dest_register_index_ex <= id_write_dest_register_index_ex;
+            id_mem_write_en_ex        <= id_mem_write_en_ex;
+            id_mem_oper_size_ex       <= id_mem_oper_size_ex;
+            id_current_pc_ex          <= id_current_pc_ex;
+            id_rs2_shamt_ex           <= id_rs2_shamt_ex;
+            id_wb_result_src_ex       <= id_wb_result_src_ex;
+            id_sel_imm_rs2data_alu_ex <= id_sel_imm_rs2data_alu_ex;
+            id_pc_jump_en_ex          <= id_pc_jump_en_ex;
+            id_pc_branch_en_ex        <= id_pc_branch_en_ex;
+            id_inst_rs1_ex            <= id_inst_rs1_ex;
+            id_inst_rs2_ex            <= id_inst_rs2_ex;
+            id_csr_read_data_ex       <= id_csr_read_data_ex;
+            id_csr_write_addr_ex      <= id_csr_write_addr_ex;
+            id_csr_write_en_ex        <= id_csr_write_en_ex;
+            id_rs1_uimm_ex            <= id_rs1_uimm_ex;
+            id_mul_div_pp_stall_ex    <= id_mul_div_pp_stall_ex;
+            id_inst_debug_str_ex      <= id_inst_debug_str_ex;
         end else begin
             id_pc_plus4_ex <= if_pc_plus4_id;
             id_read_rs1_data_ex  <= id_read_rs1_data_hazard_r;
@@ -399,6 +437,7 @@ always @(posedge clk or negedge rst_n) begin
             id_csr_write_addr_ex <= id_csr_write_addr_w;
             id_csr_write_en_ex   <= id_csr_write_en_w;
             id_rs1_uimm_ex       <= id_rs1_uimm_ex_r;
+            id_mul_div_pp_stall_ex <= id_mul_div_pp_stall_w;
             id_inst_debug_str_ex <= id_inst_debug_str_r;
         end
     end

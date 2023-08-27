@@ -73,6 +73,9 @@ module id_ex_stage
     input wire [11:0]  id_csr_write_addr_ex,
     input wire         id_csr_write_en_ex,
     input wire [31:0]  id_rs1_uimm_ex,
+    input wire         id_mul_div_pp_stall_ex,
+    input wire         hazard_flush_ex_mem_reg,
+    input wire         hazard_stall_ex_mem_reg,
     input wire [8*3:1] id_inst_debug_str_ex,
 
     // outputs
@@ -92,6 +95,7 @@ module id_ex_stage
     output reg         ex_write_csr_en_id,
     output reg [11:0]  ex_write_csr_addr_id,
     output reg [31:0]  ex_write_csr_data_id,
+    output reg         ex_mul_div_pp_stall_hazard,
 
     output reg [8*3:1] ex_inst_debug_str_mem
 );
@@ -133,6 +137,21 @@ assign ex_load_address = ex_alu_oper_src1_data + id_imm_exten_data_ex;
 // TODO: LBU LHU
 //wire [31:0] ex_load_address_u;
 //assign ex_load_address_u = ex_alu_oper_src1_data + $unsigned(id_imm_exten_data_ex);
+
+//--------------------------------------------------------------------------
+// Design: multipiler and divider signal
+//--------------------------------------------------------------------------
+reg  mul_start_r;
+reg  [31:0] multiplier_r;
+reg  [31:0] multiplicand_r;
+wire [31:0] product_l_w;
+wire [31:0] product_h_w;
+wire mul_ready_w;
+wire mul_div_ready;
+
+// TODO: add divider mdoule
+wire div_ready_w;
+assign mul_div_ready = mul_ready_w; //| div_ready_w;
 
 //--------------------------------------------------------------------------
 // Design: pipeline cycle counter logic
@@ -178,6 +197,18 @@ always @(hazard_ctrl_ex_rs2data_sel_src or id_read_rs2_data_ex or mem_alu_addr_c
 end
 
 //--------------------------------------------------------------------------
+// Design: hazard for multiplier and divider, stall pipeline until ready is
+//         high level
+//--------------------------------------------------------------------------
+always @(id_mul_div_pp_stall_ex or mul_div_ready) begin
+    if (id_mul_div_pp_stall_ex && ~mul_div_ready) begin
+        ex_mul_div_pp_stall_hazard <= `EX_MUL_DIV_PP_STALL_ENABLE;
+    end else begin
+        ex_mul_div_pp_stall_hazard <= `EX_MUL_DIV_PP_STALL_DISABLE;
+    end
+end
+
+//--------------------------------------------------------------------------
 // Design: ALU operational data source control
 //--------------------------------------------------------------------------
 always @(id_sel_imm_rs2data_alu_ex or ex_alu_oper_src2_data_pre or id_imm_exten_data_ex) begin
@@ -202,6 +233,9 @@ always @(*) begin
         ex_write_csr_en_id   <= id_csr_write_en_ex;
         ex_write_csr_addr_id <= id_csr_write_addr_ex;
         ex_write_csr_data_id <= 32'h0000_0000;
+        mul_start_r          <= 1'b0;
+        multiplier_r         <= 32'h0000_0000;
+        multiplicand_r       <= 32'h0000_0000;
     end
     case (id_inst_encoding_ex)
         `RV32_BASE_INST_LUI:
@@ -304,12 +338,49 @@ always @(*) begin
                 ex_write_csr_data_id <= id_csr_read_data_ex & id_rs1_uimm_ex;
             end
         end
+        `RV32_M_STAND_INST_MUL: begin
+            multiplier_r                    <= ex_alu_oper_src1_data;
+            multiplicand_r                  <= ex_alu_oper_src2_data;
+            if (mul_ready_w) begin
+                ex_alu_addr_calcul_result_mem_r <= product_l_w;
+                mul_start_r                     <= 1'b0;
+            end else begin
+                ex_alu_addr_calcul_result_mem_r <= 32'h0000_0000;
+                mul_start_r                     <= 1'b1;
+            end
+        end
+        `RV32_M_STAND_INST_MULH: begin
+            multiplier_r                    <= ex_alu_oper_src1_data;
+            multiplicand_r                  <= ex_alu_oper_src2_data;
+            if (mul_ready_w) begin
+                ex_alu_addr_calcul_result_mem_r <= product_h_w;
+                mul_start_r                     <= 1'b0;
+            end else begin
+                ex_alu_addr_calcul_result_mem_r <= 32'h0000_0000;
+                mul_start_r                     <= 1'b1;
+            end
+        end
         default: begin
             ex_alu_addr_calcul_result_mem_r <= 32'h0000_0000;
             ex_jump_new_pc_pc_mux <= 32'h0000_0000;
         end
     endcase
 end
+
+//--------------------------------------------------------------------------
+// Design: instance myltipiler module
+//--------------------------------------------------------------------------
+sequ_multi sequ_multi_u (
+    .clk              (clk),             // I
+    .rst_n            (rst_n),           // I
+    .multiplier       (multiplier_r),    // I [31:0]
+    .multiplicand     (multiplicand_r),  // I [31:0]
+    .start            (mul_start_r),     // I
+
+    .product_l        (product_l_w),     // O [31:0]
+    .product_h        (product_h_w),     // O [31:0]
+    .ready            (mul_ready_w)      // O
+);
 
 //--------------------------------------------------------------------------
 // Design: pipeline update the ex_mem stage register
@@ -326,15 +397,37 @@ always @(posedge clk or negedge rst_n) begin
         ex_wb_result_src_mem <= `WB_SEL_ALU_RESULT;
         ex_inst_debug_str_mem <= "adi";
     end else begin
-        ex_pc_plus4_mem <= id_pc_plus4_ex;
-        ex_write_dest_register_index_mem <= id_write_dest_register_index_ex;
-        ex_write_register_en_mem <= id_write_register_en_ex;
-        ex_write_rs2_data_mem <= ex_alu_oper_src2_data_pre;
-        ex_alu_addr_calcul_result_mem <= ex_alu_addr_calcul_result_mem_r;
-        ex_mem_write_en_mem <= id_mem_write_en_ex;
-        ex_mem_oper_size_mem <= id_mem_oper_size_ex;
-        ex_wb_result_src_mem <= id_wb_result_src_ex;
-        ex_inst_debug_str_mem <= id_inst_debug_str_ex;
+        if (hazard_flush_ex_mem_reg) begin
+            ex_pc_plus4_mem <= 32'h0000_0000;
+            ex_write_dest_register_index_mem <= 5'b00000;
+            ex_write_register_en_mem <= `PP_WRITE_DEST_REG_ENABLE;
+            ex_write_rs2_data_mem <= 32'h0000_0000;
+            ex_alu_addr_calcul_result_mem <= 32'h0000_0000;
+            ex_mem_write_en_mem <= `MEM_READ;
+            ex_mem_oper_size_mem <= `MEM_OPER_WORD;
+            ex_wb_result_src_mem <= `WB_SEL_ALU_RESULT;
+            ex_inst_debug_str_mem <= "adi";
+        end else if (hazard_stall_ex_mem_reg) begin
+            ex_pc_plus4_mem <= ex_pc_plus4_mem;
+            ex_write_dest_register_index_mem <= ex_write_dest_register_index_mem;
+            ex_write_register_en_mem <= ex_write_register_en_mem;
+            ex_write_rs2_data_mem <= ex_write_rs2_data_mem;
+            ex_alu_addr_calcul_result_mem <= ex_alu_addr_calcul_result_mem;
+            ex_mem_write_en_mem <= ex_mem_write_en_mem;
+            ex_mem_oper_size_mem <= ex_mem_oper_size_mem;
+            ex_wb_result_src_mem <= ex_wb_result_src_mem;
+            ex_inst_debug_str_mem <= ex_inst_debug_str_mem;
+        end else begin
+            ex_pc_plus4_mem <= id_pc_plus4_ex;
+            ex_write_dest_register_index_mem <= id_write_dest_register_index_ex;
+            ex_write_register_en_mem <= id_write_register_en_ex;
+            ex_write_rs2_data_mem <= ex_alu_oper_src2_data_pre;
+            ex_alu_addr_calcul_result_mem <= ex_alu_addr_calcul_result_mem_r;
+            ex_mem_write_en_mem <= id_mem_write_en_ex;
+            ex_mem_oper_size_mem <= id_mem_oper_size_ex;
+            ex_wb_result_src_mem <= id_wb_result_src_ex;
+            ex_inst_debug_str_mem <= id_inst_debug_str_ex;
+        end
     end
 end
 

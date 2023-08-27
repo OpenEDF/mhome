@@ -68,14 +68,6 @@
 `define PP_WRITE_DEST_REG_ENABLE  1'b1
 `define PP_WRITE_DEST_REG_DISABLE 1'b0
 
-// pipeline flush control enable and disable
-`define PP_FLUSH_IF_ID_REG_ENABLE     1'b1
-`define PP_FLUSH_IF_ID_REG_DISABLE    1'b0
-`define PP_FLUSH_ID_EX_REG_ENABLE     1'b1
-`define PP_FLUSH_ID_EX_REG_DISABLE    1'b0
-`define PP_STALL_PC_IF_REG_ENABLE     1'b1
-`define PP_STALL_PC_IF_REG_DISABLE    1'b0
-
 // pipeline data hazards slove with forwarding
 `define PP_FORWARD_EX_RSXDATA_SEL_ID     2'b00
 `define PP_FORWARD_EX_RSXDATA_SEL_MEM    2'b01
@@ -94,6 +86,44 @@
 // rs1 as uimm for csr instruction
 `define RS1_UIMM_ENABLE      1'b1
 `define RS1_UIMM_DISABLE     1'b0
+
+// multipiler and divider need stall pipeline
+`define INST_MUL_DIV_PP_STALL_ENABLE   1'b1
+`define INST_MUL_DIV_PP_STALL_DISABLE  1'b0
+
+// flush stall pc if stage control
+`define PP_STALL_PC_IF_REG_ENABLE     1'b1
+`define PP_STALL_PC_IF_REG_DISABLE    1'b0
+`define PP_FLUSH_PC_IF_REG_ENABLE     1'b1
+`define PP_FLUSH_PC_IF_REG_DISABLE    1'b0
+
+// flush stall if_id stage control
+`define PP_STALL_IF_ID_REG_ENABLE     1'b1
+`define PP_STALL_IF_ID_REG_DISABLE    1'b0
+`define PP_FLUSH_IF_ID_REG_ENABLE     1'b1
+`define PP_FLUSH_IF_ID_REG_DISABLE    1'b0
+
+// flush stall id ex stage control
+`define PP_STALL_ID_EX_REG_ENABLE     1'b1
+`define PP_STALL_ID_EX_REG_DISABLE    1'b0
+`define PP_FLUSH_ID_EX_REG_ENABLE     1'b1
+`define PP_FLUSH_ID_EX_REG_DISABLE    1'b0
+
+// flush stall ex mem stage control
+`define PP_STALL_EX_MEM_REG_ENABLE     1'b1
+`define PP_STALL_EX_MEM_REG_DISABLE    1'b0
+`define PP_FLUSH_EX_MEM_REG_ENABLE     1'b1
+`define PP_FLUSH_EX_MEM_REG_DISABLE    1'b0
+
+// flush stall mem wb stage control
+`define PP_STALL_MEM_WB_REG_ENABLE     1'b1
+`define PP_STALL_MEM_WB_REG_DISABLE    1'b0
+`define PP_FLUSH_MEM_WB_REG_ENABLE     1'b1
+`define PP_FLUSH_MEM_WB_REG_DISABLE    1'b0
+
+// multiplier and divider stall control
+`define EX_MUL_DIV_PP_STALL_ENABLE     1'b1
+`define EX_MUL_DIV_PP_STALL_DISABLE    1'b0
 
 // produce immediates by base instruction formats
 `define R_TYPE_INST      3'b000
@@ -115,7 +145,7 @@
 `define OPCODE_ALU_R         7'b0110011
 `define OPCODE_FENCE_I       7'b0001111
 `define OPCODE_SYS_I         7'b1110011    // ECALL EBREAK CSRRXX
-`define OPCODE_MULD_R        7'b0110011
+//`define OPCODE_MULD_R        7'b0110011
 
 // RV32I Base Instruction Set, Reserve 256 instruction
 `define RV32_BASE_INST_LUI               8'h01

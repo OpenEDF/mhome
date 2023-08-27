@@ -4,7 +4,7 @@
 #  This is a software generated project file. Manual edits to this file could be lost during the next save operation
 #  Copyright Synopsys Inc.
 #  Last Updated By: SpyGlass SpyGlass_vL-2016.06
-#  Last Updated On Thu Jun  1 08:15:46 2023
+#  Last Updated On Sat Aug 26 10:55:36 2023
 #
 #  -------------------------------------------------------------------
 
@@ -29,6 +29,7 @@ read_file -type verilog src/dmi_intf.v
 read_file -type verilog src/debug_top.v
 read_file -type verilog src/dm_csrs.v
 read_file -type verilog src/rv_csrs.v
+read_file -type verilog src/sequ_multi.v
 
 ##Common Options Section
 

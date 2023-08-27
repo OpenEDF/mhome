@@ -85,7 +85,6 @@
 //--------------------------------------------------------------------------
 // Include File
 //--------------------------------------------------------------------------
-`include "mhome_defines.v"
 
 //--------------------------------------------------------------------------
 // Module
@@ -106,62 +105,193 @@ module sequ_div
     output reg [31:0] quotient,
     output reg [31:0] remainder,
     output reg        ready,
-    output reg        illegal_divider_zero 
+    output reg        illegal_divider_zero
 );
+
+//--------------------------------------------------------------------------
+// Design: FSM state one hot localparameter
+//--------------------------------------------------------------------------
+localparam DIV_IDLE                 = 9'b000000001,
+           DIV_START                = 9'b000000010,
+           DIV_DIVIDER_ZERO         = 9'b000000100,
+           DIV_DIVIDEND_ZERO        = 9'b000001000,
+           DIV_DIVIDER_ONE          = 9'b000010000,
+           DIV_DIVIDER_EQU_DIVIDEND = 9'b000100000,
+           DIV_DIVIDEND_ST_DIVIDER  = 9'b001000000,
+           DIV_DIVIDEND_BT_DIVIDER  = 9'b010000000,
+           DIV_OUTPUT               = 9'b100000000;
 
 //--------------------------------------------------------------------------
 // Design: divider opeartion temp signal
 //--------------------------------------------------------------------------
 reg [32:0] sub_diff;
-reg [63:0] quotient_remainder;
-reg [5:0]  shift_count;
+reg [63:0] remainder_quotient;
+reg [4:0]  shift_count;
+reg        illegal;
+reg [8:0]  cur_state;
+reg [8:0]  next_state;
 
 //--------------------------------------------------------------------------
-// Design: divider opeartion using sequential circuits
+// Design: divider opeartion using sequential circuits FSM
 //--------------------------------------------------------------------------
 always @(posedge clk or negedge rst_n) begin
     if (!rst_n) begin
-        quotient_remainder <= 64'h0000_0000_0000_0000; 
-        shift_count        <= 6'd0;            
-        sub_diff           <= 33'b0;
-        quotient  <= 32'h0000_0000; 
-        remainder <= 32'h0000_0000;
-        ready                <= 1'b0;
-        illegal_divider_zero <= 1'b0;
+        cur_state   <= DIV_IDLE;
     end else begin
-        if (start || ~ready) begin
-            quotient_remainder <= {32'h0000_0000, dividend};
-            shift_count        <= 6'd32;            
-            sub_diff           <= 33'b0;
-            illegal_divider_zero <= 1'b0;
-            reday                <= 1'b1;
-        end else if (divider == 32'h0000_0000) begin
-            quotient  <= 32'h0000_0000; 
-            remainder <= 32'h0000_0000;
-            ready     <= 1'b1;
-            illegal_divider_zero <= 1'b1;
-        end else if (dividend < divider) begin
-            quotient  <= 32'h0000_0000; 
-            remainder <= dividend;
-            ready     <= 1'b1;
-        end else if (dividend == divider) begin
-            quotient  <= 32'h0000_0001; 
-            remainder <= 32'h0000_0000;
-            ready     <= 1'b1;
-        end else if (shift_count == 6'd0) begin
-            quotient  <= quotient_remainder[31:0];
-            remainder <= quotient_remainder[63:32];
-            ready     <= 1'b1;
-        end else  begin
-            sub_diff = quotient_remainder[63:31] - {1'b0, divider};
-            if (sub_diff[32]) begin
-                quotient_remainder = {quotient_remainder[62:0], 1'b0};        
-            end else begin
-                quotient_remainder = {sub_diff[31:0], quotient_remainder[62:0], 1'b1};        
-            end
-            shift_count <= shift_count - 1;
-        end 
+        cur_state   <= next_state;
     end
 end
+
+//--------------------------------------------------------------------------
+// Design: divider FSM
+//--------------------------------------------------------------------------
+always @(*) begin
+    case (cur_state)
+        DIV_IDLE: begin
+            /* update state */
+            if (start) begin
+                next_state <= DIV_START;
+            end else begin
+                next_state <= DIV_IDLE;
+            end
+        end
+        DIV_START: begin
+            /* update state */
+            next_state <= DIV_DIVIDER_ZERO;
+        end
+        DIV_DIVIDER_ZERO: begin
+            if (divider == 32'h0000_0000) begin
+                /* update state */
+                next_state <= DIV_OUTPUT;
+            end else begin
+                next_state <= DIV_DIVIDEND_ZERO;
+            end
+        end
+        DIV_DIVIDEND_ZERO: begin
+            if (dividend == 32'h0000_0000) begin
+                /* update state */
+                next_state <= DIV_OUTPUT;
+            end else begin
+                next_state <= DIV_DIVIDER_ONE;
+            end
+        end
+        DIV_DIVIDER_ONE: begin
+            if (divider == 32'h0000_0001) begin
+                /* update state */
+                next_state <= DIV_OUTPUT;
+            end else begin
+                next_state <= DIV_DIVIDER_EQU_DIVIDEND;
+            end
+        end
+        DIV_DIVIDER_EQU_DIVIDEND: begin
+            if (divider == dividend) begin
+                /* update state */
+                next_state <= DIV_OUTPUT;
+            end else begin
+                next_state <= DIV_DIVIDEND_ST_DIVIDER;
+            end
+        end
+        DIV_DIVIDEND_ST_DIVIDER: begin
+            if (divider > dividend) begin
+                /* update state */
+                next_state <= DIV_OUTPUT;
+            end else begin
+                next_state <= DIV_DIVIDEND_BT_DIVIDER;
+            end
+        end
+        DIV_DIVIDEND_BT_DIVIDER: begin
+            if (shift_count == 5'b00000) begin
+                /* update state */
+                next_state  <= DIV_OUTPUT;
+            end else begin
+                next_state  <= DIV_DIVIDEND_BT_DIVIDER;
+            end
+        end
+        DIV_OUTPUT: begin
+            /* update state */
+            next_state <= DIV_IDLE;
+        end
+        default: begin
+            /* update state */
+            next_state <= DIV_IDLE;
+        end
+    endcase
+end
+
+//--------------------------------------------------------------------------
+// Design: divider FSM output
+//--------------------------------------------------------------------------
+always @(posedge clk or negedge rst_n) begin
+    if (!rst_n) begin
+        quotient             <= 32'h0000_0000;
+        remainder            <= 32'h0000_0000;
+        ready                <= 1'b0;
+        illegal_divider_zero <= 1'b0;
+        shift_count          <= 5'b00000;
+        remainder_quotient   <= 64'h0000_0000_0000_0000;
+        sub_diff             =  33'h0000_0000;
+        illegal              <= 1'b0;
+    end else begin
+        case(cur_state)
+            DIV_START: begin
+                remainder_quotient <= {32'h0000_0000, dividend};
+                illegal            <= 1'b0;
+                shift_count        <= 5'b11111;
+            end
+            DIV_DIVIDER_ZERO: begin
+                if (divider == 32'h0000_0000) begin
+                    remainder_quotient <= {32'h0000_0000, 32'h0000_0000};
+                    illegal            <= 1'b1;
+                end
+            end
+            DIV_DIVIDEND_ZERO: begin
+                if (dividend == 32'h0000_0000) begin
+                    remainder_quotient <= {32'h0000_0000, 32'h0000_0000};
+                end
+            end
+            DIV_DIVIDER_ONE: begin
+                if (divider == 32'h0000_0001) begin
+                    remainder_quotient <= {32'h0000_0000, dividend};
+                end
+            end
+            DIV_DIVIDER_EQU_DIVIDEND: begin
+                if (divider == dividend) begin
+                    remainder_quotient <= {32'h0000_0000, 32'h0000_0001};
+                end
+            end
+            DIV_DIVIDEND_ST_DIVIDER: begin
+                if (divider > dividend) begin
+                    remainder_quotient <= {dividend, 32'h0000_0000};
+                end
+            end
+            DIV_DIVIDEND_BT_DIVIDER: begin
+                /* sub */
+                sub_diff = remainder_quotient[63:31] - {1'b0, divider};
+                /* check the most siginficant bit of diff */
+                if (sub_diff[32]) begin
+                    /* shift remainder_quotient */
+                    remainder_quotient <= {remainder_quotient[62:0],  1'b0};
+                end else begin
+                    /* restoring */
+                    remainder_quotient <= {sub_diff[31:0], remainder_quotient[30:0], 1'b1};
+                end
+                shift_count <= shift_count - 1'b1;
+            end
+            DIV_OUTPUT: begin
+                quotient             <= remainder_quotient[31:0];
+                remainder            <= remainder_quotient[63:32];
+                illegal_divider_zero <= illegal;
+                ready                <= 1'b1;
+            end
+            default: begin
+                quotient             <= 32'h0000_0000;
+                remainder            <= 32'h0000_0000;
+                illegal_divider_zero <= 1'b0;
+                ready                <= 1'b0;
+            end
+        endcase
+    end
+end
+
 endmodule
 //--------------------------------------------------------------------------

@@ -147,11 +147,16 @@ reg  [31:0] multiplicand_r;
 wire [31:0] product_l_w;
 wire [31:0] product_h_w;
 wire mul_ready_w;
-wire mul_div_ready;
-
-// TODO: add divider mdoule
+reg  div_start_r;
+reg  [31:0] divider_r;
+reg  [31:0] dividend_r;
+wire [31:0] quotient_w;
+wire [31:0] remainder_w;
+wire illegal_divider_zero_w; //TODO: interrupt
 wire div_ready_w;
-assign mul_div_ready = mul_ready_w; //| div_ready_w;
+
+wire mul_div_ready;
+assign mul_div_ready = mul_ready_w | div_ready_w;
 
 //--------------------------------------------------------------------------
 // Design: pipeline cycle counter logic
@@ -236,6 +241,9 @@ always @(*) begin
         mul_start_r          <= 1'b0;
         multiplier_r         <= 32'h0000_0000;
         multiplicand_r       <= 32'h0000_0000;
+        div_start_r          <= 1'b0;
+        divider_r            <= 32'h0000_0000;
+        dividend_r           <= 32'h0000_0000;
     end
     case (id_inst_encoding_ex)
         `RV32_BASE_INST_LUI:
@@ -362,6 +370,30 @@ always @(*) begin
                 mul_start_r                     <= 1'b1;
             end
         end
+        `RV32_M_STAND_INST_DIV,
+        `RV32_M_STAND_INST_DIVU: begin
+            divider_r  <= ex_alu_oper_src1_data;
+            dividend_r <= ex_alu_oper_src2_data;
+            if (div_ready_w) begin
+                ex_alu_addr_calcul_result_mem_r <= quotient_w;
+                div_start_r                     <= 1'b0;
+            end else begin
+                ex_alu_addr_calcul_result_mem_r <= 32'h0000_0000;
+                div_start_r                     <= 1'b1;
+            end
+        end
+        `RV32_M_STAND_INST_REM,
+        `RV32_M_STAND_INST_REMU: begin
+            divider_r  <= ex_alu_oper_src1_data;
+            dividend_r <= ex_alu_oper_src2_data;
+            if (div_ready_w) begin
+                ex_alu_addr_calcul_result_mem_r <= remainder_w;
+                div_start_r                     <= 1'b0;
+            end else begin
+                ex_alu_addr_calcul_result_mem_r <= 32'h0000_0000;
+                div_start_r                     <= 1'b1;
+            end
+        end
         default: begin
             ex_alu_addr_calcul_result_mem_r <= 32'h0000_0000;
             ex_jump_new_pc_pc_mux <= 32'h0000_0000;
@@ -370,7 +402,7 @@ always @(*) begin
 end
 
 //--------------------------------------------------------------------------
-// Design: instance myltipiler module
+// Design: instance multipiler module
 //--------------------------------------------------------------------------
 sequ_multi sequ_multi_u (
     .clk              (clk),             // I
@@ -382,6 +414,22 @@ sequ_multi sequ_multi_u (
     .product_l        (product_l_w),     // O [31:0]
     .product_h        (product_h_w),     // O [31:0]
     .ready            (mul_ready_w)      // O
+);
+
+//--------------------------------------------------------------------------
+// Design: instance divider module
+//--------------------------------------------------------------------------
+sequ_div sequ_div_u (
+    .clk            (clk),              // I
+    .rst_n          (rst_n),            // I
+    .divider        (divider_r),        // I [31:0]
+    .dividend       (dividend_r),       // I [31:0]
+    .start          (div_start_r),
+
+    .quotient       (quotient_w),       // O [31:0]
+    .remainder      (remainder_w),      // O [31:0]
+    .ready          (div_ready_w),      // O
+    .illegal_divider_zero (illegal_divider_zero_w)  // TODO: interrupt and exception
 );
 
 //--------------------------------------------------------------------------

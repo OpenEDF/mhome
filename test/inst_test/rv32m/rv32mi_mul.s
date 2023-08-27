@@ -9,7 +9,9 @@ y:  .word 20
 	.globl  _start
 _start:
 rv32mi_mul:
-    li  a0, -100
-    li  a1, 1025
+    li  a0, 0x81234567
+    li  a1, 0XFFFFFFFF
     mul a2, a0, a1
+    li  a3, 0x7edcba99
+    li  a4, 0x81234566
     .end

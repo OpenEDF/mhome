@@ -349,7 +349,9 @@ always @(*) begin
                 mul_start_r                     <= 1'b1;
             end
         end
-        `RV32_M_STAND_INST_MULH: begin
+        `RV32_M_STAND_INST_MULH,   /* TODO: optimization unsgined and signed */
+        `RV32_M_STAND_INST_MULHU,
+        `RV32_M_STAND_INST_MULHSU: begin
             multiplier_r                    <= ex_alu_oper_src1_data;
             multiplicand_r                  <= ex_alu_oper_src2_data;
             if (mul_ready_w) begin

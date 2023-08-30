@@ -49,43 +49,43 @@ build: $(build_inst)
 
 %.elf : $(SRC_BASE_B_DIR)/%.s
 	@$(RISCV_GCC) $(RV32_OPTS) $(RISCV_GCC_OPTS) $(RISCV_CFLAGS) $< -o $@
-	@echo Generated file $@
+	@echo [CE] $@
 
 %.elf : $(SRC_BASE_I_DIR)/%.s
 	@$(RISCV_GCC) $(RV32_OPTS) $(RISCV_GCC_OPTS) $(RISCV_CFLAGS) $< -o $@
-	@echo Generated file $@
+	@echo [CE] $@
 
 %.elf : $(SRC_BASE_J_DIR)/%.s
 	@$(RISCV_GCC) $(RV32_OPTS) $(RISCV_GCC_OPTS) $(RISCV_CFLAGS) $< -o $@
-	@echo Generated file $@
+	@echo [CE] $@
 
 %.elf : $(SRC_BASE_R_DIR)/%.s
 	@$(RISCV_GCC) $(RV32_OPTS) $(RISCV_GCC_OPTS) $(RISCV_CFLAGS) $< -o $@
-	@echo Generated file $@
+	@echo [CE] $@
 
 %.elf : $(SRC_BASE_S_DIR)/%.s
 	@$(RISCV_GCC) $(RV32_OPTS) $(RISCV_GCC_OPTS) $(RISCV_CFLAGS) $< -o $@
-	@echo Generated file $@
+	@echo [CE] $@
 
 %.elf : $(SRC_BASE_U_DIR)/%.s
 	@$(RISCV_GCC) $(RV32_OPTS) $(RISCV_GCC_OPTS) $(RISCV_CFLAGS) $< -o $@
-	@echo Generated file $@
+	@echo [CE] $@
 
 %.elf : $(SRC_M_DIR)/%.s
 	@$(RISCV_GCC) $(RV32_OPTS) $(RISCV_GCC_OPTS) $(RISCV_CFLAGS) $< -o $@
-	@echo Generated file $@
+	@echo [CE] $@
 
 %.elf : $(SRC_ZICSR_DIR)/%.s
 	@$(RISCV_GCC) $(RV32_OPTS) $(RISCV_GCC_OPTS) $(RISCV_CFLAGS) $< -o $@
-	@echo Generated file $@
+	@echo [CE] $@
 
 %.dump : %.elf
 	@$(RISCV_OBJDUMP) $< >$@
-	@echo Generated file $@
+	@echo [CM] $@
 
 %.verilog : %.elf
 	@$(RISCV_OBJCOPY) $< $@
-	@echo Generated file $@
+	@echo [CV] $@
 
 # clean up
 clean:

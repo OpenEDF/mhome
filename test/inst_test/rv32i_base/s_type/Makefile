@@ -4,8 +4,8 @@
 # date: 2023/08/30
 # changelog:
 #=======================================================================
-rv32mi_test_inst += rv32mi_sb.verilog
-rv32mi_test_inst += rv32mi_sh.verilog
-rv32mi_test_inst += rv32mi_sw.verilog
+rv32mi_test_inst += rv32mi_sb
+rv32mi_test_inst += rv32mi_sh
+rv32mi_test_inst += rv32mi_sw
 
 #=======================================================================

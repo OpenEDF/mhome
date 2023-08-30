@@ -4,7 +4,7 @@
 # date: 2023/08/30
 # changelog:
 #=======================================================================
-rv32mi_test_inst += rv32mi_auipc.verilog
-rv32mi_test_inst += rv32mi_lui.verilog
+rv32mi_test_inst += rv32mi_auipc
+rv32mi_test_inst += rv32mi_lui
 
 #=======================================================================

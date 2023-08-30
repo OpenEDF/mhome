@@ -4,7 +4,7 @@
 # date: 2023/08/30
 # changelog:
 #=======================================================================
-rv32mi_test_inst += rv32mi_csrr.verilog
-rv32mi_test_inst += rv32mi_csrrw.verilog
+rv32mi_test_inst += rv32mi_csrr
+rv32mi_test_inst += rv32mi_csrrw
 
 #=======================================================================

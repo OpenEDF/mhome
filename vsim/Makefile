@@ -143,11 +143,12 @@ html:
 # run case
 run: install $(run_cases)
 	@echo instruction test finish, case: $(run_cases)
+	@cat mhome_inst_test.rpt
 
 define execute-command =
 $(1):
 	cp ${PWD}/../test/inst_test/rv32mi_$(strip $(1)).verilog ${PWD}/inst_test.verilog
-	vcs $(VCS_FLAGS)
+	vcs $(VCS_FLAGS) +define+INST_NAME=\"$(strip $(1))\"
 	./$(OUTPUT) $(SIM_FLAGS)
 	@echo instruction test case:$(1)
 endef
@@ -160,7 +161,7 @@ clean:
 	rm -rf csrc *simv *.daidir *.log *.key $(OUTPUT) *.vpd DVEfiles *.fsdb \
 	verdiLog novas.* *.vdb urgReport vdCovLog output $(VSIM_DIR) \
 	build usage_statistics_webtalk.* *.jou *.log rtl module.list inst.hex \
-	mhome_spy *.out xsim.dir *.pb *.verilog spyglass-1
+	mhome_spy *.out xsim.dir *.pb *.verilog spyglass-1 mhome_inst_test.rpt
 
 ### ------------------------------------------------------------------------------------------
 # display the help information

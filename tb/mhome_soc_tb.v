@@ -137,6 +137,7 @@ endtask
 // Design: system run and check
 //--------------------------------------------------------------------------
 initial begin
+    integer fd;
     /* init data memory */
     init_data_mem();
     /* load memory */
@@ -146,6 +147,8 @@ initial begin
     sys_rst_n = 1'b1;
     #1000
     $display("[mhome OK]: end running...");
+    /* open the test report */
+    fd = $fopen("mhome_inst_test.rpt", "a+b");
     if (sys_led == 1'b1) begin
         $display("~~~~~~~~~~~~~~~~~~~ TEST_PASS ~~~~~~~~~~~~~~~~~~~");
         $display("~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~");
@@ -156,6 +159,8 @@ initial begin
         $display("~~~~~~~~~ #       #    #  #    #  #    #~~~~~~~~~");
         $display("~~~~~~~~~ #       #    #   ####    #### ~~~~~~~~~");
         $display("~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~");
+        /* write the test report */
+        $fdisplay(fd, "mhome inst test: %s ... OK", `INST_NAME);
     end else begin
         $display("~~~~~~~~~~~~~~~~~~~ TEST_FAIL ~~~~~~~~~~~~~~~~~~~~");
         $display("~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~");
@@ -166,9 +171,14 @@ initial begin
         $display("~~~~~~~~~~#       #    #     #    #     ~~~~~~~~~~");
         $display("~~~~~~~~~~#       #    #     #    ######~~~~~~~~~~");
         $display("~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~");
+        /* write the test report */
+        $fdisplay(fd, "mhome inst test: %s ... FAIL", `INST_NAME);
     end
     /* dump rv32 register file */
     rv32_dump_register_file();
+
+    /* close the test report */
+    $fclose(fd);
     $finish();
 end
 

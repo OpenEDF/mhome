@@ -34,6 +34,31 @@ COV_DIR = -cm_dir ./$(OUTPUT).vdb
 # Dve and Verdi Coverage command
 DVE_COV_CMD = dve -full64 -covdir $(OUTPUT).vdb &
 
+# vcs run case
+case := add
+inst_test_set += add sub div
+ifeq ($(case), alls)
+run_cases := $(inst_test_set)
+else
+run_cases := $(case)
+endif
+
+# install sources  file
+VSIM_DIR = src
+
+define INSTALL_COPY_CMD =
+	@mkdir -p ${PWD}/${VSIM_DIR}
+	make -C ${PWD}/../test/inst_test build
+	@cp ${PWD}/../module/core/*                 ${VSIM_DIR}/
+	@cp ${PWD}/../module/config/*               ${VSIM_DIR}/
+	@cp ${PWD}/../module/soc/*                  ${VSIM_DIR}/
+	@cp ${PWD}/../module/memory/*               ${VSIM_DIR}/
+	@cp ${PWD}/../module/debug/*                ${VSIM_DIR}/
+	@cp ${PWD}/../tb/mhome_soc_tb.v             ${VSIM_DIR}/mhome_soc_tb.v
+	@cp ${PWD}/../tb/moduel_tb.list             module.list
+	@cp ${PWD}/../test/inst_test/rv32mi_add.verilog ${PWD}/inst_test.verilog
+	@tree ${VSIM_DIR}
+endef
 
 # Compile command and flags
 VCS_FLAGS = -f $(MODULE_FLIES) -sverilog \
@@ -85,21 +110,8 @@ SPY_FLAGS = -project $(SPYGLASS_PRJ)
 all: clean install com sim wave
 
 # install file
-VSIM_DIR = src
-case := "add"
-
 install:
-	@mkdir -p ${PWD}/${VSIM_DIR}
-	make -C ${PWD}/../test/inst_test build
-	@cp ${PWD}/../module/core/*                 ${VSIM_DIR}/
-	@cp ${PWD}/../module/config/*               ${VSIM_DIR}/
-	@cp ${PWD}/../module/soc/*                  ${VSIM_DIR}/
-	@cp ${PWD}/../module/memory/*               ${VSIM_DIR}/
-	@cp ${PWD}/../module/debug/*                ${VSIM_DIR}/
-	@cp ${PWD}/../tb/mhome_soc_tb.v             ${VSIM_DIR}/mhome_soc_tb.v
-	@cp ${PWD}/../tb/moduel_tb.list             module.list
-	@cp ${PWD}/../test/inst_test/build/rv32mi_$(case).verilog ${PWD}/inst_test.verilog
-	@tree ${VSIM_DIR}
+	$(INSTALL_COPY_CMD)
 
 # only com and sim
 com_sim: com sim
@@ -128,15 +140,18 @@ spy:
 html:
 	urg -dir $(OUTPUT).vdb -dbname merge &
 
-#inst_set = add sub mul rem div
-#define execute-command
-#	$$(1) : install com sim
-#endef
-#$(foreach prog, $(inst_set), $(eval $(call execute-command, $(prog))))
-
 # run case
-run: clean install com sim
-	@echo instruction test finish, case: $(case)
+run: install $(run_cases)
+	@echo instruction test finish, case: $(run_cases)
+
+define execute-command =
+$(1):
+	cp ${PWD}/../test/inst_test/rv32mi_$(strip $(1)).verilog ${PWD}/inst_test.verilog
+	vcs $(VCS_FLAGS)
+	./$(OUTPUT) $(SIM_FLAGS)
+	@echo instruction test case:$(1)
+endef
+$(foreach prog, $(run_cases), $(eval $(call execute-command, $(prog))))
 
 # clean the compiler-time file
 .PHONY: clean all com_sim com sim cov wave html install spy run

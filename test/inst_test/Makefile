@@ -46,10 +46,7 @@ build_inst += $(rv32mi_test_inst_verilog) \
 
 # build
 build: $(build_inst)
-	@mkdir -p build
-	@mv *.verilog build
-	@mv *.elf build
-	@mv *.dump build
+	@ echo "generate file finish!"
 
 define execute-command
 %.elf : $(1)/%.s
@@ -69,7 +66,7 @@ $(foreach prog, $(SRC_DIRS), $(eval $(call execute-command, $(prog))))
 
 # clean up
 clean:
-	@rm -rf build
+	@rm -rf *.dump *.elf *.verilog
 	@echo clean temp file ...
 
 #=======================================================================

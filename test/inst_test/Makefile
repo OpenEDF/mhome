@@ -34,7 +34,7 @@ RISCV_GCC ?= $(RISCV_PREFIX)gcc
 RISCV_GCC_OPTS ?= -static -mcmodel=medany -fvisibility=hidden -nostdlib -nostartfiles
 RISCV_OBJDUMP ?= $(RISCV_PREFIX)objdump -d --section=.text --section=.text.init --section=.data
 RISCV_OBJCOPY ?= $(RISCV_PREFIX)objcopy -O verilog
-RISCV_CFLAGS ?= -march=rv32im -mabi=ilp32 -T env/link.ld
+RISCV_CFLAGS ?= -march=rv32im -mabi=ilp32 -T env/link.ld -Imacros
 
 rv32mi_test_inst_verilog = $(addsuffix .verilog, $(rv32mi_test_inst))
 rv32mi_test_inst_elf = $(addsuffix .elf, $(rv32mi_test_inst))
@@ -49,7 +49,7 @@ build: $(build_inst)
 	@ echo "generate file finish!"
 
 define execute-command
-%.elf : $(1)/%.s
+%.elf : $(1)/%.S
 	@$(RISCV_GCC) $(RV32_OPTS) $(RISCV_GCC_OPTS) $(RISCV_CFLAGS) $$< -o $$@
 	@echo [CE] $$@
 endef

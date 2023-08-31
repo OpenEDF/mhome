@@ -163,7 +163,8 @@ clean:
 	rm -rf csrc *simv *.daidir *.log *.key $(OUTPUT) *.vpd DVEfiles *.fsdb \
 	verdiLog novas.* *.vdb urgReport vdCovLog output $(VSIM_DIR) \
 	build usage_statistics_webtalk.* *.jou *.log rtl module.list inst.hex \
-	mhome_spy *.out xsim.dir *.pb *.verilog spyglass-1 mhome_inst_test.rpt
+	mhome_spy *.out xsim.dir *.pb *.verilog spyglass-1 mhome_inst_test.rpt \
+	stack.info.*
 
 ### ------------------------------------------------------------------------------------------
 # display the help information

@@ -36,7 +36,9 @@ DVE_COV_CMD = dve -full64 -covdir $(OUTPUT).vdb &
 
 # vcs run case
 case := add
-inst_test_set += add sub div
+inst_test_set +=
+include Makefile.mk
+
 ifeq ($(case), alls)
 run_cases := $(inst_test_set)
 else

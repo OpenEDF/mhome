@@ -34,6 +34,7 @@ COV_DIR = -cm_dir ./$(OUTPUT).vdb
 # Dve and Verdi Coverage command
 DVE_COV_CMD = dve -full64 -covdir $(OUTPUT).vdb &
 
+
 # Compile command and flags
 VCS_FLAGS = -f $(MODULE_FLIES) -sverilog \
             -full64                      \
@@ -85,9 +86,11 @@ all: clean install com sim wave
 
 # install file
 VSIM_DIR = src
+case := "add"
 
 install:
 	@mkdir -p ${PWD}/${VSIM_DIR}
+	make -C ${PWD}/../test/inst_test build
 	@cp ${PWD}/../module/core/*                 ${VSIM_DIR}/
 	@cp ${PWD}/../module/config/*               ${VSIM_DIR}/
 	@cp ${PWD}/../module/soc/*                  ${VSIM_DIR}/
@@ -95,7 +98,7 @@ install:
 	@cp ${PWD}/../module/debug/*                ${VSIM_DIR}/
 	@cp ${PWD}/../tb/mhome_soc_tb.v             ${VSIM_DIR}/mhome_soc_tb.v
 	@cp ${PWD}/../tb/moduel_tb.list             module.list
-	@cp ${PWD}/../test/inst_test/inst_test.verilog ${PWD}/inst_test.verilog
+	@cp ${PWD}/../test/inst_test/build/rv32mi_$(case).verilog ${PWD}/inst_test.verilog
 	@tree ${VSIM_DIR}
 
 # only com and sim
@@ -125,8 +128,19 @@ spy:
 html:
 	urg -dir $(OUTPUT).vdb -dbname merge &
 
+#inst_set = add sub mul rem div
+#define execute-command
+#	$$(1) : install com sim
+#endef
+#$(foreach prog, $(inst_set), $(eval $(call execute-command, $(prog))))
+
+# run case
+run: clean install com sim
+	@echo instruction test finish, case: $(case)
+
 # clean the compiler-time file
-.PHONY: clean all com_sim com sim cov wave html install spy
+.PHONY: clean all com_sim com sim cov wave html install spy run
+
 clean:
 	rm -rf csrc *simv *.daidir *.log *.key $(OUTPUT) *.vpd DVEfiles *.fsdb \
 	verdiLog novas.* *.vdb urgReport vdCovLog output $(VSIM_DIR) \
@@ -148,6 +162,7 @@ help:
 	@echo "make cov    : only execute coverage."
 	@echo "make wave   : start the verdi and execute debug the waveform."
 	@echo "make html   : view coverage report by html file."
+	@echo "make run case=xxx  : execute instruction test."
 	@echo "make help   : print the all command and use method."
 	@echo --------------------------------- Help  ---------------------------------
 ### ------------------------------------------------------------------------------------------

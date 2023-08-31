@@ -14,6 +14,10 @@ SRC_BASE_U_DIR = rv32i_base/u_type
 SRC_M_DIR = rv32i_m
 SRC_ZICSR_DIR = rv32i_zicsr
 
+SRC_DIRS := $(SRC_BASE_B_DIR) $(SRC_BASE_I_DIR) $(SRC_BASE_J_DIR) \
+	        $(SRC_BASE_R_DIR) $(SRC_BASE_S_DIR) $(SRC_BASE_U_DIR) \
+			$(SRC_M_DIR) $(SRC_ZICSR_DIR)
+
 # include other makefile
 include $(SRC_BASE_B_DIR)/Makefile
 include $(SRC_BASE_I_DIR)/Makefile
@@ -47,37 +51,13 @@ build: $(build_inst)
 	@mv *.elf build
 	@mv *.dump build
 
-%.elf : $(SRC_BASE_B_DIR)/%.s
-	@$(RISCV_GCC) $(RV32_OPTS) $(RISCV_GCC_OPTS) $(RISCV_CFLAGS) $< -o $@
-	@echo [CE] $@
+define execute-command
+%.elf : $(1)/%.s
+	@$(RISCV_GCC) $(RV32_OPTS) $(RISCV_GCC_OPTS) $(RISCV_CFLAGS) $$< -o $$@
+	@echo [CE] $$@
+endef
 
-%.elf : $(SRC_BASE_I_DIR)/%.s
-	@$(RISCV_GCC) $(RV32_OPTS) $(RISCV_GCC_OPTS) $(RISCV_CFLAGS) $< -o $@
-	@echo [CE] $@
-
-%.elf : $(SRC_BASE_J_DIR)/%.s
-	@$(RISCV_GCC) $(RV32_OPTS) $(RISCV_GCC_OPTS) $(RISCV_CFLAGS) $< -o $@
-	@echo [CE] $@
-
-%.elf : $(SRC_BASE_R_DIR)/%.s
-	@$(RISCV_GCC) $(RV32_OPTS) $(RISCV_GCC_OPTS) $(RISCV_CFLAGS) $< -o $@
-	@echo [CE] $@
-
-%.elf : $(SRC_BASE_S_DIR)/%.s
-	@$(RISCV_GCC) $(RV32_OPTS) $(RISCV_GCC_OPTS) $(RISCV_CFLAGS) $< -o $@
-	@echo [CE] $@
-
-%.elf : $(SRC_BASE_U_DIR)/%.s
-	@$(RISCV_GCC) $(RV32_OPTS) $(RISCV_GCC_OPTS) $(RISCV_CFLAGS) $< -o $@
-	@echo [CE] $@
-
-%.elf : $(SRC_M_DIR)/%.s
-	@$(RISCV_GCC) $(RV32_OPTS) $(RISCV_GCC_OPTS) $(RISCV_CFLAGS) $< -o $@
-	@echo [CE] $@
-
-%.elf : $(SRC_ZICSR_DIR)/%.s
-	@$(RISCV_GCC) $(RV32_OPTS) $(RISCV_GCC_OPTS) $(RISCV_CFLAGS) $< -o $@
-	@echo [CE] $@
+$(foreach prog, $(SRC_DIRS), $(eval $(call execute-command, $(prog))))
 
 %.dump : %.elf
 	@$(RISCV_OBJDUMP) $< >$@

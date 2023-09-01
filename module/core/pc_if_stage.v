@@ -83,7 +83,7 @@ end
 // Design: instantiate a ram model
 // TODO: use the ram ip on xilinx FPGA
 //--------------------------------------------------------------------------
-single_port_ram #(.RAM_SIZE(1024)) single_port_ram_u (
+single_port_ram #(.RAM_SIZE(2048)) single_port_ram_u (
     .clk   (clk),
     .rst_n (rst_n),
     .ram_addr_in     (pc_source_pc_gen_if),

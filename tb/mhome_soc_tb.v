@@ -107,7 +107,7 @@ endtask
 //--------------------------------------------------------------------------
 // Design: load hex file to memory
 //--------------------------------------------------------------------------
-`define RAM_SIZE 256
+`define RAM_SIZE 512
 task load_hex_to_mem;
 begin: load_hex
     reg [31:0] temp_mem[`RAM_SIZE-1:0];
@@ -145,11 +145,11 @@ initial begin
     $display("[mhome OK]: start running...");
     #10
     sys_rst_n = 1'b1;
-    #1000
+    #100000
     $display("[mhome OK]: end running...");
     /* open the test report */
     fd = $fopen("mhome_inst_test.rpt", "a+b");
-    if (sys_led == 1'b1) begin
+    if (mhome_soc_top_u.riscv_pipeline_u.if_id_stage_u.register_file_u.rv32_register[17] == 32'h0000_005D) begin
         $display("~~~~~~~~~~~~~~~~~~~ TEST_PASS ~~~~~~~~~~~~~~~~~~~");
         $display("~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~");
         $display("~~~~~~~~~ #####     ##     ####    #### ~~~~~~~~~");
@@ -171,6 +171,7 @@ initial begin
         $display("~~~~~~~~~~#       #    #     #    #     ~~~~~~~~~~");
         $display("~~~~~~~~~~#       #    #     #    ######~~~~~~~~~~");
         $display("~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~");
+        $display("test faild num: %d ", mhome_soc_top_u.riscv_pipeline_u.if_id_stage_u.register_file_u.rv32_register[3]);
         /* write the test report */
         $fdisplay(fd, "mhome inst test: %s ... FAIL", `INST_NAME);
     end

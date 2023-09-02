@@ -1,26 +1,73 @@
-	.data
-    .align 2
-x:  .word 10
-y:  .word 20
+# See LICENSE for license details.
 
-    .globl _start
-_start:
+#*****************************************************************************
+# beq.S
+#-----------------------------------------------------------------------------
+#
+# Test beq instruction.
+#
 
-    .text
-    .align 2
-rv32mi_beq:
-    lui a0, 0x000FFF02
-    lui a1, 0x000FFF02
-    beq a0, a1, func2
-    
-func1:
-    lui a3, 0x000FFF03
-    lui a4, 0x000FFF04
- 
-func2:
-    lui a5, 0x000FFF05
-    lui a6, 0x000FFF06
-    
-end:
-	lui a7, 0x000FFF07
-    .end
+#include "riscv_test.h"
+#include "test_macros.h"
+
+RVTEST_RV64U
+RVTEST_CODE_BEGIN
+
+  #-------------------------------------------------------------
+  # Branch tests
+  #-------------------------------------------------------------
+
+  # Each test checks both forward and backward branches
+
+  TEST_BR2_OP_TAKEN( 2, beq,  0,  0 );
+  TEST_BR2_OP_TAKEN( 3, beq,  1,  1 );
+  TEST_BR2_OP_TAKEN( 4, beq, -1, -1 );
+
+  TEST_BR2_OP_NOTTAKEN( 5, beq,  0,  1 );
+  TEST_BR2_OP_NOTTAKEN( 6, beq,  1,  0 );
+  TEST_BR2_OP_NOTTAKEN( 7, beq, -1,  1 );
+  TEST_BR2_OP_NOTTAKEN( 8, beq,  1, -1 );
+
+  #-------------------------------------------------------------
+  # Bypassing tests
+  #-------------------------------------------------------------
+
+  TEST_BR2_SRC12_BYPASS( 9,  0, 0, beq, 0, -1 );
+  TEST_BR2_SRC12_BYPASS( 10, 0, 1, beq, 0, -1 );
+  TEST_BR2_SRC12_BYPASS( 11, 0, 2, beq, 0, -1 );
+  TEST_BR2_SRC12_BYPASS( 12, 1, 0, beq, 0, -1 );
+  TEST_BR2_SRC12_BYPASS( 13, 1, 1, beq, 0, -1 );
+  TEST_BR2_SRC12_BYPASS( 14, 2, 0, beq, 0, -1 );
+
+  TEST_BR2_SRC12_BYPASS( 15, 0, 0, beq, 0, -1 );
+  TEST_BR2_SRC12_BYPASS( 16, 0, 1, beq, 0, -1 );
+  TEST_BR2_SRC12_BYPASS( 17, 0, 2, beq, 0, -1 );
+  TEST_BR2_SRC12_BYPASS( 18, 1, 0, beq, 0, -1 );
+  TEST_BR2_SRC12_BYPASS( 19, 1, 1, beq, 0, -1 );
+  TEST_BR2_SRC12_BYPASS( 20, 2, 0, beq, 0, -1 );
+
+  #-------------------------------------------------------------
+  # Test delay slot instructions not executed nor bypassed
+  #-------------------------------------------------------------
+
+  TEST_CASE( 21, x1, 3, \
+    li  x1, 1; \
+    beq x0, x0, 1f; \
+    addi x1, x1, 1; \
+    addi x1, x1, 1; \
+    addi x1, x1, 1; \
+    addi x1, x1, 1; \
+1:  addi x1, x1, 1; \
+    addi x1, x1, 1; \
+  )
+
+  TEST_PASSFAIL
+
+RVTEST_CODE_END
+
+  .data
+RVTEST_DATA_BEGIN
+
+  TEST_DATA
+
+RVTEST_DATA_END

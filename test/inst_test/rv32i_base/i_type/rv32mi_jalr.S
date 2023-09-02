@@ -1,25 +1,86 @@
-    .data
-	.align 2
-x:  .word 10
-y:  .word 20
+# See LICENSE for license details.
 
-	.text
-	.align 2
-	.globl _start
-    .globl func1
-    .globl rv32mi_jalr
-_start:
-rv32mi_jal:
-    lui zero, 0x000FFF00
-    lui a0, 0x000000
-    lui a1, 0x000FFF02
-    jalr ra, a0, 0x14 
-    lui a2, 0x000FFF03
+#*****************************************************************************
+# jalr.S
+#-----------------------------------------------------------------------------
+#
+# Test jalr instruction.
+#
 
-func1:
-    lui a3, 0x000FFF04
-    lui a4, 0x000FFF05
-    lui a5, 0x000FFF06
-    lui a6, 0x000FFF07
-    lui a7, 0x000FFF08
-    .end
+#include "riscv_test.h"
+#include "test_macros.h"
+
+RVTEST_RV64U
+RVTEST_CODE_BEGIN
+
+  #-------------------------------------------------------------
+  # Test 2: Basic test
+  #-------------------------------------------------------------
+
+test_2:
+  li  TESTNUM, 2
+  li  t0, 0
+  la  t1, target_2
+
+  jalr t0, t1, 0
+linkaddr_2:
+  j fail
+
+target_2:
+  la  t1, linkaddr_2
+  bne t0, t1, fail
+
+  #-------------------------------------------------------------
+  # Test 3: Basic test2, rs = rd
+  #-------------------------------------------------------------
+
+test_3:
+  li  TESTNUM, 3
+  la  t0, target_3
+
+  jalr t0, t0, 0
+linkaddr_3:
+  j fail
+
+target_3:
+  la  t1, linkaddr_3
+  bne t0, t1, fail
+
+  #-------------------------------------------------------------
+  # Bypassing tests
+  #-------------------------------------------------------------
+
+  TEST_JALR_SRC1_BYPASS( 4, 0, jalr );
+  TEST_JALR_SRC1_BYPASS( 5, 1, jalr );
+  TEST_JALR_SRC1_BYPASS( 6, 2, jalr );
+
+  #-------------------------------------------------------------
+  # Test delay slot instructions not executed nor bypassed
+  #-------------------------------------------------------------
+
+  .option push
+  .align 2
+  .option norvc
+  TEST_CASE( 7, t0, 4, \
+    li  t0, 1; \
+    la  t1, 1f; \
+    jr  t1, -4; \
+    addi t0, t0, 1; \
+    addi t0, t0, 1; \
+    addi t0, t0, 1; \
+    addi t0, t0, 1; \
+1:  addi t0, t0, 1; \
+    addi t0, t0, 1; \
+  )
+  .option pop
+
+  TEST_PASSFAIL
+
+RVTEST_CODE_END
+
+  .data
+RVTEST_DATA_BEGIN
+
+  TEST_DATA
+
+RVTEST_DATA_END

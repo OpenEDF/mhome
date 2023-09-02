@@ -1,31 +1,59 @@
-    .data
-	.align 2
-x:  .word 10
-y:  .word 20
+# See LICENSE for license details.
 
-	.text
-	.align 2
-	.globl _start
-    .globl func2
-    .globl func1
-    .globl rv32mi_jal
-_start:
-rv32mi_jal:
-    lui zero, 0x000FFF00
-    lui a0, 0x000FFF01
-    lui a1, 0x000FFF02
-    lui a2, 0x000FFF03
-    jal ra, func2
+#*****************************************************************************
+# jal.S
+#-----------------------------------------------------------------------------
+#
+# Test jal instruction.
+#
 
-func1:
-    lui a3, 0x000FFF04
-    lui a4, 0x000FFF05
-    lui a5, 0x000FFF06
-    lui a6, 0x000FFF07
-    lui a7, 0x000FFF08
+#include "riscv_test.h"
+#include "test_macros.h"
 
-func2:
-    lui s0, 0x000FFF09
-    lui s1, 0x000FFF0A
-    jal ra, func1
-    .end
+RVTEST_RV64U
+RVTEST_CODE_BEGIN
+
+  #-------------------------------------------------------------
+  # Test 2: Basic test
+  #-------------------------------------------------------------
+
+test_2:
+  li  TESTNUM, 2
+  li  ra, 0
+
+  jal x4, target_2
+linkaddr_2:
+  nop
+  nop
+
+  j fail
+
+target_2:
+  la  x2, linkaddr_2
+  bne x2, x4, fail
+
+  #-------------------------------------------------------------
+  # Test delay slot instructions not executed nor bypassed
+  #-------------------------------------------------------------
+
+  TEST_CASE( 3, ra, 3, \
+    li  ra, 1; \
+    jal x0, 1f; \
+    addi ra, ra, 1; \
+    addi ra, ra, 1; \
+    addi ra, ra, 1; \
+    addi ra, ra, 1; \
+1:  addi ra, ra, 1; \
+    addi ra, ra, 1; \
+  )
+
+  TEST_PASSFAIL
+
+RVTEST_CODE_END
+
+  .data
+RVTEST_DATA_BEGIN
+
+  TEST_DATA
+
+RVTEST_DATA_END

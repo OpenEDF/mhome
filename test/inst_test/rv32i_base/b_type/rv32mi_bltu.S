@@ -1,26 +1,73 @@
-	.data
-    .align 2
-x:  .word 10
-y:  .word 20
+# See LICENSE for license details.
 
-    .globl _start
-_start:
+#*****************************************************************************
+# bltu.S
+#-----------------------------------------------------------------------------
+#
+# Test bltu instruction.
+#
 
-    .text
-    .align 2
-rv32mi_beq:
-    lui a0, 0x000FFF01
-    lui a1, 0x000FFF08
-    bltu a0, a1, func2
-    
-func1:
-    lui a3, 0x000FFF03
-    lui a4, 0x000FFF04
- 
-func2:
-    lui a5, 0x000FFF05
-    lui a6, 0x000FFF06
-    
-end:
-	lui a7, 0x000FFF07
-    .end
+#include "riscv_test.h"
+#include "test_macros.h"
+
+RVTEST_RV64U
+RVTEST_CODE_BEGIN
+
+  #-------------------------------------------------------------
+  # Branch tests
+  #-------------------------------------------------------------
+
+  # Each test checks both forward and backward branches
+
+  TEST_BR2_OP_TAKEN( 2, bltu, 0x00000000, 0x00000001 );
+  TEST_BR2_OP_TAKEN( 3, bltu, 0xfffffffe, 0xffffffff );
+  TEST_BR2_OP_TAKEN( 4, bltu, 0x00000000, 0xffffffff );
+
+  TEST_BR2_OP_NOTTAKEN( 5, bltu, 0x00000001, 0x00000000 );
+  TEST_BR2_OP_NOTTAKEN( 6, bltu, 0xffffffff, 0xfffffffe );
+  TEST_BR2_OP_NOTTAKEN( 7, bltu, 0xffffffff, 0x00000000 );
+  TEST_BR2_OP_NOTTAKEN( 8, bltu, 0x80000000, 0x7fffffff );
+
+  #-------------------------------------------------------------
+  # Bypassing tests
+  #-------------------------------------------------------------
+
+  TEST_BR2_SRC12_BYPASS( 9,  0, 0, bltu, 0xf0000000, 0xefffffff );
+  TEST_BR2_SRC12_BYPASS( 10, 0, 1, bltu, 0xf0000000, 0xefffffff );
+  TEST_BR2_SRC12_BYPASS( 11, 0, 2, bltu, 0xf0000000, 0xefffffff );
+  TEST_BR2_SRC12_BYPASS( 12, 1, 0, bltu, 0xf0000000, 0xefffffff );
+  TEST_BR2_SRC12_BYPASS( 13, 1, 1, bltu, 0xf0000000, 0xefffffff );
+  TEST_BR2_SRC12_BYPASS( 14, 2, 0, bltu, 0xf0000000, 0xefffffff );
+
+  TEST_BR2_SRC12_BYPASS( 15, 0, 0, bltu, 0xf0000000, 0xefffffff );
+  TEST_BR2_SRC12_BYPASS( 16, 0, 1, bltu, 0xf0000000, 0xefffffff );
+  TEST_BR2_SRC12_BYPASS( 17, 0, 2, bltu, 0xf0000000, 0xefffffff );
+  TEST_BR2_SRC12_BYPASS( 18, 1, 0, bltu, 0xf0000000, 0xefffffff );
+  TEST_BR2_SRC12_BYPASS( 19, 1, 1, bltu, 0xf0000000, 0xefffffff );
+  TEST_BR2_SRC12_BYPASS( 20, 2, 0, bltu, 0xf0000000, 0xefffffff );
+
+  #-------------------------------------------------------------
+  # Test delay slot instructions not executed nor bypassed
+  #-------------------------------------------------------------
+
+  TEST_CASE( 21, x1, 3, \
+    li  x1, 1; \
+    bltu x0, x1, 1f; \
+    addi x1, x1, 1; \
+    addi x1, x1, 1; \
+    addi x1, x1, 1; \
+    addi x1, x1, 1; \
+1:  addi x1, x1, 1; \
+    addi x1, x1, 1; \
+  )
+
+  TEST_PASSFAIL
+
+RVTEST_CODE_END
+
+  .data
+RVTEST_DATA_BEGIN
+
+  TEST_DATA
+
+RVTEST_DATA_END

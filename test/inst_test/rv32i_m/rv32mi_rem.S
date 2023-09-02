@@ -1,17 +1,41 @@
-    .data
-	.align	2
-x:  .word 10
-y:  .word 20
+# See LICENSE for license details.
 
-	.text
-	.align	2
-	.globl	rv32mi_rem
-	.globl  _start
-_start:
-rv32mi_rem:
-    li  a0, 0x81234567
-    li  a1, 0x12345012
-    rem a2, a1, a0
-    li  a3, 0x01B514E9
-    li  a4, 0x00000007
-    .end
+#*****************************************************************************
+# rem.S
+#-----------------------------------------------------------------------------
+#
+# Test rem instruction.
+#
+
+#include "riscv_test.h"
+#include "test_macros.h"
+
+RVTEST_RV64U
+RVTEST_CODE_BEGIN
+
+  #-------------------------------------------------------------
+  # Arithmetic tests
+  #-------------------------------------------------------------
+
+  TEST_RR_OP( 2, rem,  2,  20,   6 );
+  TEST_RR_OP( 3, rem, -2, -20,   6 );
+  TEST_RR_OP( 4, rem,  2,  20,  -6 );
+  TEST_RR_OP( 5, rem, -2, -20,  -6 );
+
+  TEST_RR_OP( 6, rem,  0, -1<<63,  1 );
+  TEST_RR_OP( 7, rem,  0, -1<<63, -1 );
+
+  TEST_RR_OP( 8, rem, -1<<63, -1<<63, 0 );
+  TEST_RR_OP( 9, rem,      1,      1, 0 );
+  TEST_RR_OP(10, rem,      0,      0, 0 );
+
+  TEST_PASSFAIL
+
+RVTEST_CODE_END
+
+  .data
+RVTEST_DATA_BEGIN
+
+  TEST_DATA
+
+RVTEST_DATA_END

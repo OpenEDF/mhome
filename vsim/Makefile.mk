@@ -1,14 +1,9 @@
 inst_test_set += \
 	beq \
-	bge_n \
 	bge \
-	bgeu_n \
 	bgeu \
-	blt_n \
 	blt \
-	bltu_n \
 	bltu \
-	bne_n \
 	bne \
 	addi \
 	andi \

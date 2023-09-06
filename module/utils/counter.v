@@ -53,6 +53,7 @@ module counter
     input wire                  clear,
     input wire                  pre_load,
     input wire                  up_down,
+    input wire                  en_stop,
 
     // outputs
     output reg [DATA_WIDTH-1:0] count
@@ -66,10 +67,14 @@ always @(posedge clk or negedge rst_n) begin
         count <= 0;
     end else if (pre_load) begin
         count <= pre_data;
-    end else if (up_down) begin
-        count <= count + 1;
+    end else if (en_stop) begin
+        if (up_down) begin
+            count <= count + 1;
+        end else begin
+            count <= count - 1;
+        end
     end else begin
-        count <= count - 1;
+        count <= count;
     end
 end
 

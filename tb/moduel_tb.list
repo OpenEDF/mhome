@@ -18,6 +18,7 @@ src/dmi_intf.v
 src/debug_top.v
 src/sequ_multi.v
 src/sequ_div.v
+src/counter.v
 src/riscv_pipeline.v
 
 # testbech file

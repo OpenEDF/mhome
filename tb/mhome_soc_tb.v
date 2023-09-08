@@ -138,6 +138,8 @@ endtask
 //--------------------------------------------------------------------------
 initial begin
     integer fd;
+    string inst;
+    $value$plusargs("INST_NAME=%s", inst);
     /* init data memory */
     init_data_mem();
     /* load memory */
@@ -160,7 +162,7 @@ initial begin
         $display("~~~~~~~~~ #       #    #   ####    #### ~~~~~~~~~");
         $display("~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~");
         /* write the test report */
-        $fdisplay(fd, "mhome inst test: %s ... OK", `INST_NAME);
+        $fdisplay(fd, "mhome inst test: %s ... OK", inst);
     end else begin
         $display("~~~~~~~~~~~~~~~~~~~ TEST_FAIL ~~~~~~~~~~~~~~~~~~~~");
         $display("~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~");
@@ -173,7 +175,7 @@ initial begin
         $display("~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~");
         $display("test faild num: %d ", mhome_soc_top_u.riscv_pipeline_u.if_id_stage_u.register_file_u.rv32_register[3]);
         /* write the test report */
-        $fdisplay(fd, "mhome inst test: %s ... FAIL", `INST_NAME);
+        $fdisplay(fd, "mhome inst test: %s ... FAIL", inst);
     end
     /* dump rv32 register file */
     rv32_dump_register_file();

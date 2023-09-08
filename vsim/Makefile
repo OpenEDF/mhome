@@ -32,7 +32,7 @@ COV_NAME = -cm_name $(OUTPUT).cov
 COV_DIR = -cm_dir ./$(OUTPUT).vdb
 
 # Dve and Verdi Coverage command
-DVE_COV_CMD = dve -full64 -covdir $(OUTPUT).vdb &
+DVE_COV_CMD = dve -full64 -covdir $(OUTPUT)_merge.vdb &
 
 # vcs run case
 case := add
@@ -52,6 +52,7 @@ define INSTALL_COPY_CMD =
 	@mkdir -p ${PWD}/${VSIM_DIR}
 	make -C ${PWD}/../test/inst_test build
 	@cp ${PWD}/../module/core/*                 ${VSIM_DIR}/
+	@cp ${PWD}/../module/utils/*                ${VSIM_DIR}/
 	@cp ${PWD}/../module/config/*               ${VSIM_DIR}/
 	@cp ${PWD}/../module/soc/*                  ${VSIM_DIR}/
 	@cp ${PWD}/../module/memory/*               ${VSIM_DIR}/
@@ -124,7 +125,7 @@ com: install
 
 # VCS -R FLAG will start simv sutomatic
 sim:
-	./$(OUTPUT) $(SIM_FLAGS)
+	./$(OUTPUT) $(COV_NAME) $(SIM_FLAGS)
 
 # coverage the verilog module
 cov:
@@ -138,20 +139,24 @@ wave:
 spy:
 	spyglass $(SPY_FLAGS) &
 
-# show coverage by html
-html:
-	urg -dir $(OUTPUT).vdb -dbname merge &
+# merging coverage for regressions
+merge:
+	urg -full64 -dir $(OUTPUT).vdb -dbname $(OUTPUT)_merge/merged
+
+# show coverage through verdi
+vcov:
+	verdi -cov -covdir $(OUTPUT)_merge.vdb &
 
 # run case
-run: install $(run_cases)
+run: com $(run_cases)
 	@echo instruction test finish, case: $(run_cases)
 	@cat mhome_inst_test.rpt
+	urg -full64 -dir $(OUTPUT).vdb -dbname $(OUTPUT)_merge/merged
 
 define execute-command =
 $(1):
 	cp ${PWD}/../test/inst_test/rv32mi_$(strip $(1)).verilog ${PWD}/inst_test.verilog
-	vcs $(VCS_FLAGS) +define+INST_NAME=\"$(strip $(1))\"
-	./$(OUTPUT) $(SIM_FLAGS)
+	./$(OUTPUT) -cm_name $(strip $(1)).cov $(SIM_FLAGS) +INST_NAME=$(strip $(1))
 	@echo instruction test case:$(1)
 endef
 $(foreach prog, $(run_cases), $(eval $(call execute-command, $(prog))))
@@ -178,9 +183,10 @@ help:
 	@echo "make all    : execute the compile simluation and open verdi debug."
 	@echo "make com    : only execute compile the verilog module."
 	@echo "make sim    : only execute simulation the model."
-	@echo "make cov    : only execute coverage."
+	@echo "make cov    : show coverage report through dve"
 	@echo "make wave   : start the verdi and execute debug the waveform."
-	@echo "make html   : view coverage report by html file."
+	@echo "make merge  : merge the all test coverage."
+	@echo "make vcov   : show coverage report thorough verdi."
 	@echo "make run case=xxx  : execute instruction test."
 	@echo "make help   : print the all command and use method."
 	@echo --------------------------------- Help  ---------------------------------

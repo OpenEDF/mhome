@@ -19,5 +19,9 @@ andi   slli   srli   srai   add    sub    sll    sltu   srl    sra
 or     and    fence  ebreak csrrw  csrrs  csrrwi csrrsi csrrci mul
 mulh   mulhsu mulhu  div    divu   rem    remu
 ```
+### inst:
+```shell
+mcycle mcycleh
+```
 ### debug:
 ![ifidstage](https://github.com/OpenEDF/mhome/blob/main/doc/pic/ifidstage.png)

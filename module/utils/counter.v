@@ -40,7 +40,7 @@
 //--------------------------------------------------------------------------
 module counter 
 #(
-    parameter DATA_WIDTH = 32
+    parameter DATA_WIDTH = 64
 )
 //--------------------------------------------------------------------------
 // Ports
@@ -50,7 +50,6 @@ module counter
     input wire                  clk,
     input wire                  rst_n,
     input wire [DATA_WIDTH-1:0] pre_data,
-    input wire                  clear,
     input wire                  pre_load,
     input wire                  up_down,
     input wire                  en_stop,
@@ -63,8 +62,8 @@ module counter
 // Design: counter
 //--------------------------------------------------------------------------
 always @(posedge clk or negedge rst_n) begin
-    if (!rst_n || clear) begin
-        count <= 0;
+    if (!rst_n) begin
+        count <= 64'h0000_0000_0000_0000;
     end else if (pre_load) begin
         count <= pre_data;
     end else if (en_stop) begin

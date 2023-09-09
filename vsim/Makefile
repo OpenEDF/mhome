@@ -92,7 +92,7 @@ SIM_FLAGS = +fsdb+autoflush              \
             -l $(SIM_LOG_FILE).log
 
 # Debug command and flags
-DEBUG_FLAGS = -f $(MODULE_FLIES)         \
+DEBUG_FLAGS = -sv -f $(MODULE_FLIES)     \
 		      +incdir+${PWD}/src         \
               -top $(TOP_MODULE)         \
               -ssf $(WAVEFORM)           \

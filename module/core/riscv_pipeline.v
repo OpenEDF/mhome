@@ -69,6 +69,7 @@ wire [31:0] if_instruction_id_w;            /* instruction */
 wire [31:0] if_pc_plus4_pc_gen_w;           /* pc pluse 4 to pc gen*/
 wire [31:0] if_pc_plus4_id_w;               /* PC plus 4 to next stage */
 wire [31:0] if_current_pc_id_w;             /* current stage PC */
+wire [63:0] if_minstret_count_id_w;         /* machine instructions-retired counter for if */
 
 // decoder stage
 wire [31:0]  id_cycle_count_ex_w;           /* ID/EX stage register to EX/MEM stage */
@@ -96,6 +97,7 @@ wire [31:0]  id_rs1_uimm_ex_w;              /* csr immediated operand extend dat
 wire         id_csr_write_en_hazard_w;      /* csr write enable signal to hazard */
 wire         id_csr_write_done_hazard_w;    /* csr write done siganl to hazard */
 wire         id_mul_div_pp_stall_ex_w;      /* multiplier and divider hazard control signal */
+wire [63:0]  id_minstret_count_ex_w;        /* machine instructions-retired counter for id */
 wire [8*3:1] id_inst_debug_str_ex_w;        /* riscv instruction debug string name */
 
 // execute stage
@@ -116,30 +118,33 @@ wire         ex_write_csr_en_id_w;                 /* write csr enable */
 wire [11:0]  ex_write_csr_addr_id_w;               /* write csr address */
 wire [31:0]  ex_write_csr_data_id_w;               /* write csr data */
 wire         ex_mul_div_pp_stall_hazard_w;         /* hazards signal for multipiler and divider */
+wire [63:0]  ex_minstret_count_mem_w;              /* machine instructions-retired counter for ex */
 wire [8*3:1] ex_inst_debug_str_mem_w;              /* riscv instruction debug string name */
 
 // access memory stage
-wire [31:0]  mem_cycle_count_wb_w;          /* MEM/WB to other  */
-wire [31:0]  mem_pc_plus4_wb_w;             /* pc plus 4 to next stage */
-wire [4:0]   mem_write_dest_register_index_wb_w; /* write register file index */
-wire         mem_write_register_en_wb_w;         /* write register enable */
-wire [31:0]  mem_read_mem_data_wb_w;             /* access memory read data to write back */
-wire [31:0]  mem_alu_result_direct_wb_w;         /* excute stage direct send data to wb stage */
+wire [31:0]  mem_cycle_count_wb_w;                   /* MEM/WB to other  */
+wire [31:0]  mem_pc_plus4_wb_w;                      /* pc plus 4 to next stage */
+wire [4:0]   mem_write_dest_register_index_wb_w;     /* write register file index */
+wire         mem_write_register_en_wb_w;             /* write register enable */
+wire [31:0]  mem_read_mem_data_wb_w;                 /* access memory read data to write back */
+wire [31:0]  mem_alu_result_direct_wb_w;             /* excute stage direct send data to wb stage */
 wire [1:0]   mem_wb_result_src_wb_w;                 /* wb stage select data write to register */
 wire [31:0]  mem_alu_addr_calcul_result_mem_ex_w;    /* data hazard connect result to execute */
 wire [4:0]   mem_write_dest_register_index_hazard_w; /* data hazard connect register index to hazard */
 wire         mem_write_register_en_hazard_w;         /* data hazard connect register write enable to hazard */
+wire [63:0]  mem_minstret_count_wb_w;                /* machine instructions-retired counter for mem */
 wire [8*3:1] mem_inst_debug_str_wb_w;                /* riscv instruction debug string nane */
 
 // write back stage
-wire [31:0]  mem_cycle_count_end_check_w;   /* MEM/WB output pc check */
-wire [8*3:1] mem_instruction_name_check_w;  /* MEM/WB output inst name check */
-wire [4:0]   wb_write_dest_register_index_id_w;  /* write register file index */
-wire         wb_write_register_en_id_w;          /* enable write register file */
-wire [31:0]  wb_sel_result_to_register_id_w;     /* write the data to register file*/
-wire [31:0]  wb_sel_result_to_register_ex_w;     /* data hazard connect regsiter data to execute */
+wire [31:0]  mem_cycle_count_end_check_w;           /* MEM/WB output pc check */
+wire [8*3:1] mem_instruction_name_check_w;          /* MEM/WB output inst name check */
+wire [4:0]   wb_write_dest_register_index_id_w;     /* write register file index */
+wire         wb_write_register_en_id_w;             /* enable write register file */
+wire [31:0]  wb_sel_result_to_register_id_w;        /* write the data to register file*/
+wire [31:0]  wb_sel_result_to_register_ex_w;        /* data hazard connect regsiter data to execute */
 wire [4:0]   wb_write_dest_register_index_hazard_w; /* data hazard connect register index to hazard */
 wire         wb_write_register_en_hazard_w;         /* data hazard connect rd enable to hazard */
+wire [63:0]  wb_minstret_count_if_w;                /* machine instructions-retired counter for wb */
 
 // hazard unit
 wire         hazard_flush_pc_if_reg_w;      /* hazard flush pc if stage register */
@@ -197,7 +202,8 @@ pc_if_stage pc_if_stage_u(
     .if_instruction_id            (if_instruction_id_w),
     .if_pc_plus4_pc_gen           (if_pc_plus4_pc_gen_w),
     .if_pc_plus4_id               (if_pc_plus4_id_w),
-    .if_current_pc_id             (if_current_pc_id_w)
+    .if_current_pc_id             (if_current_pc_id_w),
+    .if_minstret_count_id         (if_minstret_count_id_w)  //O
 );
 
 //--------------------------------------------------------------------------
@@ -206,9 +212,9 @@ pc_if_stage pc_if_stage_u(
 if_id_stage if_id_stage_u(
     .clk       (sys_clk),
     .rst_n     (sys_rst_n),
-    .if_cycle_count_id     (if_cycle_count_id_w),
-    .if_instruction_id     (if_instruction_id_w),
-    .if_pc_plus4_id        (if_pc_plus4_id_w),
+    .if_cycle_count_id           (if_cycle_count_id_w),
+    .if_instruction_id           (if_instruction_id_w),
+    .if_pc_plus4_id              (if_pc_plus4_id_w),
     .wb_write_register_dest_id   (wb_write_dest_register_index_id_w),
     .wb_write_register_data_id   (wb_sel_result_to_register_id_w),
     .wb_write_register_en_id     (wb_write_register_en_id_w),
@@ -221,6 +227,8 @@ if_id_stage if_id_stage_u(
     .ex_write_csr_addr_id        (ex_write_csr_addr_id_w),
     .ex_write_csr_data_id        (ex_write_csr_data_id_w),
     .hazard_stall_id_ex_reg      (hazard_stall_id_ex_reg_w),
+    .if_minstret_count_id        (if_minstret_count_id_w),  //I
+    .wb_minstret_count_if        (wb_minstret_count_if_w),  //I
 
     .id_cycle_count_ex     (id_cycle_count_ex_w),
     .id_pc_plus4_ex        (id_pc_plus4_ex_w),
@@ -248,6 +256,7 @@ if_id_stage if_id_stage_u(
     .id_csr_write_en_hazard    (id_csr_write_en_hazard_w),
     .id_csr_write_done_hazard  (id_csr_write_done_hazard_w),
     .id_mul_div_pp_stall_ex    (id_mul_div_pp_stall_ex_w),
+    .id_minstret_count_ex      (id_minstret_count_ex_w),  //O
     .id_inst_debug_str_ex      (id_inst_debug_str_ex_w)
 
 );
@@ -287,6 +296,7 @@ id_ex_stage id_ex_stage_u(
     .id_mul_div_pp_stall_ex            (id_mul_div_pp_stall_ex_w),
     .hazard_flush_ex_mem_reg           (hazard_flush_ex_mem_reg_w),
     .hazard_stall_ex_mem_reg           (hazard_stall_ex_mem_reg_w),
+    .id_minstret_count_ex              (id_minstret_count_ex_w),  //I
 
     .id_inst_debug_str_ex      (id_inst_debug_str_ex_w),
 
@@ -307,6 +317,7 @@ id_ex_stage id_ex_stage_u(
     .ex_write_csr_addr_id                (ex_write_csr_addr_id_w),
     .ex_write_csr_data_id                (ex_write_csr_data_id_w),
     .ex_mul_div_pp_stall_hazard          (ex_mul_div_pp_stall_hazard_w),
+    .ex_minstret_count_mem               (ex_minstret_count_mem_w),  //O
 
     .ex_inst_debug_str_mem               (ex_inst_debug_str_mem_w)
 
@@ -329,6 +340,7 @@ ex_mem_stage ex_mem_stage_u(
     .ex_wb_result_src_mem              (ex_wb_result_src_mem_w),
     .hazard_stall_mem_wb_reg           (hazard_stall_mem_wb_reg_w),
     .hazard_flush_mem_wb_reg           (hazard_flush_mem_wb_reg_w),
+    .ex_minstret_count_mem             (ex_minstret_count_mem_w),  //I
 
     .ex_inst_debug_str_mem             (ex_inst_debug_str_mem_w),
 
@@ -342,6 +354,7 @@ ex_mem_stage ex_mem_stage_u(
     .mem_alu_addr_calcul_result_mem_ex    (mem_alu_addr_calcul_result_mem_ex_w),
     .mem_write_dest_register_index_hazard (mem_write_dest_register_index_hazard_w),
     .mem_write_register_en_hazard         (mem_write_register_en_hazard_w),
+    .mem_minstret_count_wb            (mem_minstret_count_wb_w),  //O
     .mem_inst_debug_str_wb            (mem_inst_debug_str_wb_w)
 );
 
@@ -358,6 +371,7 @@ mem_wb_stage mem_wb_stage_u(
     .mem_read_mem_data_wb                (mem_read_mem_data_wb_w),
     .mem_alu_result_direct_wb            (mem_alu_result_direct_wb_w),
     .mem_wb_result_src_wb                (mem_wb_result_src_wb_w),
+    .mem_minstret_count_wb               (mem_minstret_count_wb_w),  //I
     .mem_inst_debug_str_wb               (mem_inst_debug_str_wb_w),
 
     .wb_cycle_count_end     (mem_cycle_count_end_check_w),
@@ -367,6 +381,7 @@ mem_wb_stage mem_wb_stage_u(
     .wb_sel_result_to_register_ex        (wb_sel_result_to_register_ex_w),
     .wb_write_dest_register_index_hazard (wb_write_dest_register_index_hazard_w),
     .wb_write_register_en_hazard         (wb_write_register_en_hazard_w),
+    .wb_minstret_count_if                (wb_minstret_count_if_w),  //O
     .wb_inst_debug_str_finish            (mem_instruction_name_check_w)
 );
 

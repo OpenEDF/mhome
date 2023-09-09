@@ -54,6 +54,7 @@ module mem_wb_stage
     input wire [31:0]  mem_read_mem_data_wb,
     input wire [31:0]  mem_alu_result_direct_wb,
     input wire [1:0]   mem_wb_result_src_wb,
+    input wire [63:0]  mem_minstret_count_wb,
     input wire [8*3:1] mem_inst_debug_str_wb,
 
     // outputs
@@ -64,6 +65,7 @@ module mem_wb_stage
     output wire [31:0]  wb_sel_result_to_register_ex,
     output wire [4:0]   wb_write_dest_register_index_hazard,
     output wire         wb_write_register_en_hazard,
+    output reg  [63:0]  wb_minstret_count_if,
     output reg  [8*3:1] wb_inst_debug_str_finish
 );
 
@@ -119,8 +121,10 @@ end
 //--------------------------------------------------------------------------
 always @(posedge clk or negedge rst_n) begin
     if (!rst_n) begin
+        wb_minstret_count_if     <= 64'h0000_0000_0000_0000;
         wb_inst_debug_str_finish <= "adi";
     end else begin
+        wb_minstret_count_if     <= mem_minstret_count_wb;
         wb_inst_debug_str_finish <= mem_inst_debug_str_wb;
     end
 end

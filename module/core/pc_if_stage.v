@@ -57,7 +57,8 @@ module pc_if_stage
     output reg  [31:0]  if_instruction_id,
     output wire [31:0]  if_pc_plus4_pc_gen,
     output reg  [31:0]  if_pc_plus4_id,
-    output reg  [31:0]  if_current_pc_id
+    output reg  [31:0]  if_current_pc_id,
+    output reg  [63:0]  if_minstret_count_id
 );
 
 //--------------------------------------------------------------------------
@@ -67,6 +68,9 @@ wire [31:0] if_instruction_id_w;
 wire [31:0] if_pc_plus4_id_w;
 assign if_pc_plus4_id_w = pc_source_pc_gen_if + 4;
 assign if_pc_plus4_pc_gen = if_pc_plus4_id_w;
+reg [63:0] minstret_count;
+wire       if_stage_stall_or_flush;
+assign if_stage_stall_or_flush = hazard_flush_if_id_reg | hazard_stall_if_id_reg;
 
 //--------------------------------------------------------------------------
 // Design: pipeline cycle counter logic
@@ -76,6 +80,21 @@ always @(posedge clk or negedge rst_n) begin
         if_cycle_count_id <= `CYCLE_COUNT_RST;
     end else begin
         if_cycle_count_id <= pc_gen_start_cycle_count_if;
+    end
+end
+
+//--------------------------------------------------------------------------
+// Design: pipeline instret counter
+//--------------------------------------------------------------------------
+always @(posedge clk or negedge rst_n) begin
+    if (!rst_n) begin
+        minstret_count <= 64'h0000_0000_0000_0000;
+    end else begin
+        if (if_stage_stall_or_flush) begin
+            minstret_count <= minstret_count;
+        end else begin
+            minstret_count <= minstret_count + 1;
+        end
     end
 end
 
@@ -102,6 +121,7 @@ always @(posedge clk or negedge rst_n) begin
         if_instruction_id <= `RV32I_NOP;
         if_pc_plus4_id    <= 32'h0000_0000;
         if_current_pc_id  <= `MHOME_START_PC;
+        if_minstret_count_id <= 64'h0000_0000_0000_0000;
     end else begin
         if (hazard_flush_if_id_reg) begin
             if_instruction_id <= `RV32I_NOP;
@@ -111,10 +131,12 @@ always @(posedge clk or negedge rst_n) begin
             if_instruction_id <= if_instruction_id;
             if_pc_plus4_id    <= if_pc_plus4_id;
             if_current_pc_id  <= if_current_pc_id;
+            if_minstret_count_id <= if_minstret_count_id;
         end else begin
             if_instruction_id <= if_instruction_id_w;
             if_pc_plus4_id    <= if_pc_plus4_id_w;
             if_current_pc_id  <= pc_source_pc_gen_if;
+            if_minstret_count_id <= minstret_count;
         end
     end
 end

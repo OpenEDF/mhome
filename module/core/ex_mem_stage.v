@@ -58,6 +58,7 @@ module ex_mem_stage
     input wire [1:0]   ex_wb_result_src_mem,
     input wire         hazard_stall_mem_wb_reg,
     input wire         hazard_flush_mem_wb_reg,
+    input wire [63:0]  ex_minstret_count_mem,
     input wire [8*3:1] ex_inst_debug_str_mem,
 
     // outputs
@@ -71,6 +72,7 @@ module ex_mem_stage
     output wire [31:0]  mem_alu_addr_calcul_result_mem_ex,
     output wire [4:0]   mem_write_dest_register_index_hazard,
     output wire         mem_write_register_en_hazard,
+    output reg  [63:0]  mem_minstret_count_wb,
     output reg  [8*3:1] mem_inst_debug_str_wb
 );
 
@@ -124,6 +126,7 @@ always @(posedge clk or negedge rst_n) begin
         mem_write_register_en_wb <= `PP_WRITE_DEST_REG_ENABLE;
         mem_alu_result_direct_wb <= 32'h00000000;
         mem_wb_result_src_wb <= `WB_SEL_ALU_RESULT;
+        mem_minstret_count_wb <= 64'h0000_0000_0000_0000;
         mem_inst_debug_str_wb <= "adi";
     end else begin
         if (hazard_flush_mem_wb_reg) begin
@@ -141,6 +144,7 @@ always @(posedge clk or negedge rst_n) begin
             mem_write_register_en_wb <= mem_write_register_en_wb;
             mem_alu_result_direct_wb <= mem_alu_result_direct_wb;
             mem_wb_result_src_wb <= mem_wb_result_src_wb;
+            mem_minstret_count_wb <= mem_minstret_count_wb;
             mem_inst_debug_str_wb <= mem_inst_debug_str_wb;
         end else begin
             mem_pc_plus4_wb <= ex_pc_plus4_mem;
@@ -149,6 +153,7 @@ always @(posedge clk or negedge rst_n) begin
             mem_write_register_en_wb <= ex_write_register_en_mem;
             mem_alu_result_direct_wb <= ex_alu_addr_calcul_result_mem;
             mem_wb_result_src_wb <= ex_wb_result_src_mem;
+            mem_minstret_count_wb <= ex_minstret_count_mem;
             mem_inst_debug_str_wb <= ex_inst_debug_str_mem;
         end
     end

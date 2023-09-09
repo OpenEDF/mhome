@@ -62,6 +62,8 @@ module if_id_stage
     input wire [11:0]  ex_write_csr_addr_id,
     input wire [31:0]  ex_write_csr_data_id,
     input wire         hazard_stall_id_ex_reg,
+    input wire [63:0]  if_minstret_count_id,
+    input wire [63:0]  wb_minstret_count_if,
 
     // outputs
     output reg [31:0]  id_cycle_count_ex,
@@ -90,6 +92,7 @@ module if_id_stage
     output wire        id_csr_write_en_hazard,
     output wire        id_csr_write_done_hazard,
     output reg         id_mul_div_pp_stall_ex,
+    output reg [63:0]  id_minstret_count_ex,
     output reg [8*3:1] id_inst_debug_str_ex
 );
 
@@ -311,6 +314,8 @@ rv_csrs rv_csrs_u(
     .id_write_csr_addr_csrs      (ex_write_csr_addr_id),
     .id_write_en_csrs            (ex_write_csr_en_id),
     .id_write_data_csrs          (ex_write_csr_data_id),
+    .wb_pp_minstret_csrs         (wb_minstret_count_if[31:0]),
+    .wb_pp_minstrethh_csrs       (wb_minstret_count_if[63:32]),
 
     .csrs_read_csr_data          (csrs_read_csr_data_w), // O
     .csr_write_done              (id_csr_write_done_hazard_w)
@@ -365,6 +370,7 @@ always @(posedge clk or negedge rst_n) begin
         id_csr_write_en_ex  <= `PP_WRITE_CSR_DISABLE;
         id_rs1_uimm_ex      <= 32'h0000_0000;
         id_mul_div_pp_stall_ex <= `INST_MUL_DIV_PP_STALL_DISABLE;
+        id_minstret_count_ex   <= 64'h0000_0000_0000_0000;
         id_inst_debug_str_ex <= "adi";
     end else begin
         if (hazard_flush_id_ex_reg) begin
@@ -414,6 +420,7 @@ always @(posedge clk or negedge rst_n) begin
             id_csr_write_en_ex        <= id_csr_write_en_ex;
             id_rs1_uimm_ex            <= id_rs1_uimm_ex;
             id_mul_div_pp_stall_ex    <= id_mul_div_pp_stall_ex;
+            id_minstret_count_ex      <= id_minstret_count_ex;
             id_inst_debug_str_ex      <= id_inst_debug_str_ex;
         end else begin
             id_pc_plus4_ex <= if_pc_plus4_id;
@@ -438,6 +445,7 @@ always @(posedge clk or negedge rst_n) begin
             id_csr_write_en_ex   <= id_csr_write_en_w;
             id_rs1_uimm_ex       <= id_rs1_uimm_ex_r;
             id_mul_div_pp_stall_ex <= id_mul_div_pp_stall_w;
+            id_minstret_count_ex   <= if_minstret_count_id;
             id_inst_debug_str_ex <= id_inst_debug_str_r;
         end
     end

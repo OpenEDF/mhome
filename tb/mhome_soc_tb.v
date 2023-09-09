@@ -136,7 +136,7 @@ endtask
 //--------------------------------------------------------------------------
 // Design: system run and check
 //--------------------------------------------------------------------------
-initial begin
+initial begin: report
     integer fd;
     string inst;
     $value$plusargs("INST_NAME=%s", inst);
@@ -147,7 +147,7 @@ initial begin
     $display("[mhome OK]: start running...");
     #10
     sys_rst_n = 1'b1;
-    #100000
+    #50000
     $display("[mhome OK]: end running...");
     /* open the test report */
     fd = $fopen("mhome_inst_test.rpt", "a+b");

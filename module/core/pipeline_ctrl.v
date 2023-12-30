@@ -291,9 +291,20 @@ always @(id_instruction_ctrl
             endcase
         end
         `OPCODE_FENCE_I: begin
-            id_imm_src_ctrl <= `I_TYPE_INST;
-            id_write_register_en <= `PP_WRITE_DEST_REG_ENABLE;
-            id_inst_encoding <= `RV32_BASE_INST_FENCE;
+            id_imm_src_ctrl        <= `I_TYPE_INST;
+            id_write_register_en   <= `PP_WRITE_DEST_REG_ENABLE;
+            id_wb_result_src       <= `WB_SEL_ALU_RESULT;
+            id_sel_imm_rs2data_alu <= `ALU_SEL_IMM_INPUT;
+            case (inst_funct3)
+                3'b000: begin
+                    id_inst_encoding  <= `RV32_BASE_INST_FENCE;
+                end
+                3'b001: begin
+                    id_inst_encoding  <= `RRV32_ZIFEN_STAND_INST_FENCE_I;
+                end
+                default: begin 
+                    id_inst_encoding  <= `RV32_ILLEGAL_INST;
+                end
         end
         /* system operation: TODO: design redundancy */
         `OPCODE_SYS_I: begin
@@ -307,7 +318,8 @@ always @(id_instruction_ctrl
                 3'b000: begin
                     id_write_register_en <= `PP_WRITE_DEST_REG_DISABLE;
                     if (inst_20bit_exten) begin
-                        id_inst_encoding <= `RV32_BASE_INST_FENCE;
+                        id_inst_encoding <= `RV32_BASE_INST_ECALL;
+                        /* TODO: connect branch */
                     end else begin
                         id_inst_encoding <= `RV32_BASE_INST_EBREAK;
                     end

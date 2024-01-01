@@ -73,8 +73,6 @@ VCS_FLAGS = -f $(MODULE_FLIES) -sverilog \
             -debug_access+all            \
             -debug_acc+dmptf             \
             -debug_region+cell+encrypt   \
-            -cpp g++-4.8                 \
-            -cc  gcc-4.8 			     \
             -LDFLAGS -Wl,--no-as-needed  \
             -P $(VERDI_HOME)/share/PLI/VCS/LINUX64/novas.tab                         \
             $(VERDI_HOME)/share/PLI/VCS/LINUX64/pli.a -load libnovas.so:FSDBDumpCmd  \

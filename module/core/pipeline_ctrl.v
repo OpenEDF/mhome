@@ -300,11 +300,12 @@ always @(id_instruction_ctrl
                     id_inst_encoding  <= `RV32_BASE_INST_FENCE;
                 end
                 3'b001: begin
-                    id_inst_encoding  <= `RRV32_ZIFEN_STAND_INST_FENCE_I;
+                    id_inst_encoding  <= `RV32_ZIFEN_STAND_INST_FENCE_I;
                 end
                 default: begin 
                     id_inst_encoding  <= `RV32_ILLEGAL_INST;
                 end
+            endcase
         end
         /* system operation: TODO: design redundancy */
         `OPCODE_SYS_I: begin
